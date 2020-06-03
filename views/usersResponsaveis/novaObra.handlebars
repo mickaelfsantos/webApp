@@ -1,0 +1,25 @@
+<h2>Nova obra</h2>
+<div class="card">
+    <div class="card-body">
+        <form action="/userResponsavel/obras/add" method="POST">
+            <label for="nome">Nome: </label>
+            <input type="text" id="nome" name="nome" placeholder="Nome da obra" class="form-control mb-4">
+
+            <label for="descricao">Descrição</label>
+            <textarea class="form-control mb-4" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra"></textarea>
+
+            <label for="selecionarFuncionarios">Associar funcionários</label>
+            <select multiple class="form-control mb-4" id="exampleFormControlSelect2">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+            </select>
+
+            <label for="dataPrevistaInicio">Data prevista para inicio: </label>
+            <input type="date" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+            <button type="submit" class="btn btn-dark">Concluir</button>
+        </form>
+    </div>
+</div>

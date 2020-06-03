@@ -4,7 +4,9 @@
     const bodyParser = require('body-parser')
     const app = express()
     const user = require('./routes/user')
-    //const mongoose = require('mongoose')
+    const userResponsavel = require('./routes/userResponsavel')
+    const path = require('path')
+    const mongoose = require('mongoose')
 
 //Configurações
 
@@ -16,11 +18,20 @@
     app.engine('handlebars', handlebars({defaultLayout: 'main'}))
     app.set('view engine', 'handlebars');
 
+    //Public
+    app.use(express.static(path.join(__dirname, "public")))
+    
     //Mongoose
-        //Em breve
+        mongoose.Promise = global.Promise
+        mongoose.connect("mongodb://localhost/webApp", {useNewUrlParser:true, useUnifiedTopology: true}).then(function(){
+            console.log("MongoDB: conectado");
+        }).catch(function(erro){
+            console.log("MongoDB: erro - "+erro);
+        })
 
 //Rotas
     app.use('', user)
+    app.use('', userResponsavel)
 
 
 //Outros
