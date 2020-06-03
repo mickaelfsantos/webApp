@@ -6,7 +6,7 @@ router.get('/dashboard', function(req, res){
 })
 
 router.get('/obras', function(req, res){
-    res.send("Página de obras")
+    res.send("Página de obras2")
 })
 
 
