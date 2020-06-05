@@ -1,9 +1,10 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
-const Obra = new Schema({
+const Obra = new Schema({    
     nome: {
         type: String,
+        unique: true,
         required: true
     },
 
@@ -12,8 +13,14 @@ const Obra = new Schema({
         required: true
     },
 
+    tarefas: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Tarefa"
+    }],
+
     dataPrevistaDeInicio: {
-        type: Date
+        type: Date,
+        default: Date.now
     },
 
     dataPrevistaDeFim: {
@@ -28,9 +35,10 @@ const Obra = new Schema({
         type: Date
     },
 
-    estado: { //0- a calcular datas e valor final, 1- à espera da resposta do cliente, 2- cliente confirma, está à espera da data de incio, 3-em execução, 4-finalizada
-        type: Number,
-        default: 0
+    estado: {
+        type: String,
+        enum: ['preOrcamento', 'aAguardarResposta', 'preProducao', 'producao', 'finalizada' ],
+        default: 'preOrcamento'
     },
 
     orcamento: {
