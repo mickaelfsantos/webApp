@@ -1,0 +1,142 @@
+<h2>Obra</h2>
+<hr>
+ {{#each obra}}
+    {{#if nome}}
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Nome</h6>
+            </div>
+
+            <div class="col-6">
+                <h6 class="blockquote">Data prevista de inicio</h6>
+            </div>
+        </div>
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                <label for="nome" id="nomeObra">{{nome}}</label>
+            </div>
+
+            <div class="col-6">
+                <label for="DataPrevistaInicio" id="DataPrevistaInicio"></label>
+            </div>
+        </div>
+
+
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Estado</h6>
+            </div>
+            
+            <div class="col-6 text-center">
+                <h6 class="blockquote">Data prevista de fim</h6>
+            </div>
+        </div>
+
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                {{#ifCond estado "preOrcamento"}}
+                    <p>Pré-Orçamento</p>
+                    {{else}}
+                        {{#ifCond estado "aAguardar"}}
+                            <p>A aguardar resposta do cliente</p>
+                        {{/ifCond}}
+                {{/ifCond}}
+            </div>
+
+            <div class="col-6">
+                {{#if dataPrevistaFim}}
+                    <label for="DataPrevistaFim" id="DataPrevistaFim"></label>
+                    {{else}}
+                    <label for="DataPrevistaFim">Não definido</label>
+                {{/if}}
+            </div>
+        </div>
+
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Data de início</h6>
+            </div>
+            
+            <div class="col-6 text-center">
+                <h6 class="blockquote">Data de fim</h6>
+            </div>
+        </div>
+
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                {{#if dataInicio}}
+                    <label for="DataInicio" id="DataInicio"></label>
+                    {{else}}
+                    <label for="DataInicio">Não definido</label>
+                {{/if}}
+            </div>
+
+            <div class="col-6">
+                {{#if dataFim}}
+                    <label for="DataFim" id="DataFim"></label>
+                    {{else}}
+                    <label for="DataFim">Não defenido</label>
+                {{/if}}
+            </div>
+        </div>
+
+        <div class="row mt-5 text-center">
+            <div class="col-12">
+                <h6 class="blockquote">Tarefas</h6>
+            </div>
+        </div>
+
+        {{#if tarefas}}
+            <div class="row text-center mt-4">
+                <div class="col-2 font-weight-bold">Nome</div>
+                <div class="col-3 font-weight-bold">Data prevista de inicio</div>
+                <div class="col-3 font-weight-bold">Data prevista de fim</div>
+                <div class="col-2 font-weight-bold">Data de inicio</div>
+                <div class="col-2 font-weight-bold">Data de fim</div>
+            </div>
+
+            {{#each tarefas}}
+                <div class="row mt-5 text-center" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
+                <div class="col-4">{{nome}}</div>
+                <div class="col-2">{{DataPrevistaInicio}}</div>
+                <div class="col-2">{{DataPrevistaFim}}</div>
+                <div class="col-2">{{DataInicio}}</div>
+                <div class="col-2">{{DataFim}}</div>
+                <hr class="style16">
+                {{else}}
+
+            {{/each}}
+            {{else}}
+            <div class="row text-center mt-4">
+                <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
+            </div>
+        {{/if}}
+        
+        <div class="row mt-5 col-12 text-right">
+            <div class="mt-5 col-12">
+                <button class="btn btn-dark" >Editar</button>
+                <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
+                <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
+            </div>
+        </div>
+    {{/if}}
+ {{/each}}
+   
+   <script>
+       document.getElementById("DataPrevistaInicio").innerHTML = "{{dataPrevistaInicio}}"
+       document.getElementById("DataPrevistaFim").innerHTML = "{{dataPrevistaFim}}"
+       document.getElementById("DataInicio").innerHTML = "{{dataInicio}}"
+       document.getElementById("DataFim").innerHTML = "{{dataFim}}"
+
+        function saltaParaObras() {
+            window.location.href = "/obras";
+        }
+
+        function saltaParaAddTarefa(){
+            obra = document.getElementById('nomeObra').textContent;
+            window.location.href = "/obras/"+obra+"/addTarefa";
+        }
+   </script>

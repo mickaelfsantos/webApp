@@ -17,12 +17,12 @@
 
 <hr class="style16">
 {{#each obras}}
-    <div class="row mt-5" data-name="{{nome}}" onclick="saltaPoCrl(this)">
+    <div class="row mt-5" style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaObra(this)">
         <div class="col-3">{{nome}}</div>
         <div class="col-2">{{dataDeInicio}}</div>
         <div class="col-2">{{dataDeFim}}</div>
         {{#ifCond estado "preOrcamento"}}
-            <div class="col-3">Pre Orçamento</div>
+            <div class="col-3">Pré-orçamento</div>
         {{else}}
             {{#ifCond estado "aAguardar"}}
                 <div class="col-3">A aguardar</div>
@@ -36,7 +36,7 @@
 {{/each}}
 
 <script>
-    function saltaPoCrl(handle) {
-        window.location.href = "/obras/"+handle.dataset.name;
+    function saltaParaObra(handle) {
+        window.location.href = "/obra/"+handle.dataset.name;
     } 
 </script>

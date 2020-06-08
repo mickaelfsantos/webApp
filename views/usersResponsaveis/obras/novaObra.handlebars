@@ -26,24 +26,9 @@
             <label for="descricao">Descrição</label>
             <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra"></textarea>
 
-            <label for="selecionarFuncionarios">Associar funcionários</label>
-            <select multiple class="form-control mb-4" id="funcionarios" name="funcionarios">
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-            </select>
-
             <label for="dataPrevistaInicio">Data prevista para inicio</label>
             <input type="date" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4" min="0">
             <button type="submit" class="btn btn-dark">Concluir</button>
         </form>
     </div>
 </div>
-
-<script>
-$("#dataPrevistaInicio").change( function() {    
-   $( ".date_picker_hotel_to" ).datepicker("option", "minDate", $("#dataPrevistaInicio").val());   
- });
-</script>

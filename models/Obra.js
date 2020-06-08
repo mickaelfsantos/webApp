@@ -18,21 +18,24 @@ const Obra = new Schema({
         ref: "Tarefa"
     }],
 
-    dataPrevistaDeInicio: {
+    dataPrevistaInicio: {
         type: Date,
         default: Date.now
     },
 
-    dataPrevistaDeFim: {
-        type: Date
+    dataPrevistaFim: {
+        type: Date,
+        default:null
     },
 
     dataDeInicio: {
-        type: Date
+        type: Date,
+        default:null
     },
 
     dataDeFim: {
-        type: Date
+        type: Date,
+        default:null
     },
 
     estado: {

@@ -1,0 +1,40 @@
+<h2>Lista de tarefas</h2>
+<hr>
+
+<div class="btn-group mt-4" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary active">Lista</button>
+  <button type="button" class="btn btn-secondary">Calendário</button>
+  <button type="button" class="btn btn-secondary">Gantt</button>
+</div>
+
+<div class="row mt-5">
+    <div class="col-3 font-weight-bold">Nome</div>
+    <div class="col-3 font-weight-bold">Data de inicio</div>
+    <div class="col-3 font-weight-bold">Data de fim</div>
+    <div class="col-3 font-weight-bold">Estado</div>
+</div>
+
+<hr class="style16">
+{{#each tarefas}}
+    <div class="row mt-5" style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
+        <div class="col-3">{{nome}}</div>
+        <div class="col-3">{{dataDeInicio}}</div>
+        <div class="col-3">{{dataDeFim}}</div>
+        {{#ifCond estado "porAceitar"}}
+            <div class="col-3">Por aceitar. Deve preencher a tarefa para que o responsável a valide.</div>
+        {{else}}
+            {{#ifCond estado "aceite"}}
+                <div class="col-3">Aceite. A aguardar inicio da obra</div>
+            {{/ifCond}}
+        {{/ifCond}}
+    </div>
+<hr class="style16">
+{{else}}
+
+{{/each}}
+
+<script>
+    function saltaParaTarefa(handle) {
+        window.location.href = "/tarefa/"+handle.dataset.name;
+    } 
+</script>

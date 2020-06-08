@@ -13,34 +13,39 @@ const Tarefa = new Schema({
         required: true
     },
 
-    tarefas: {
+    funcionarios: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Tarefa"
-    },
+        ref: "Funcionario"
+    }],
 
-    dataPrevistaDeInicio: {
+    dataPrevistaInicio: {
         type: Date,
-        required: true,
         default: Date.now
     },
 
-    dataPrevistaDeFim: {
+    dataPrevistaFim: {
         type: Date,
-        required: true
+        default: null
     },
 
     dataDeInicio: {
-        type: Date
+        type: Date,
+        default: null
     },
 
     dataDeFim: {
-        type: Date
+        type: Date,
+        default: null
     },
 
     estado: { //0- a calcular datas e valor final, 1- à espera da resposta do cliente, 2- cliente confirma, está à espera da data de incio, 3-em execução, 4-finalizada
         type: String,
-        enum: ['preExecucao', 'aExecutar', 'finalizada'],
-        default: 'preExecucao'
+        enum: ['porAceitar', 'aceite', 'recusada', 'emExecucao', 'finalizada'],
+        default: 'porAceitar'
+    },
+
+    justificacao: {
+        type: String
     },
 
     duracao: {
@@ -54,7 +59,8 @@ const Tarefa = new Schema({
 
     obra: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Obra"
+        ref: "Obra",
+        required: true
     }
 })
 
