@@ -115,7 +115,7 @@ router.post('/obras/:nome/addTarefa', function(req, res){
             new Tarefa(novaTarefa).save().then(function(){
                 var mensagem = []
                 mensagem.push({texto:"Tarefa criada com sucesso"});
-                res.render("usersResponsaveis/tarefas/novaTarefa", {mensagem: mensagem})
+                res.render("users/obras/obraDetail", {obra:obra, mensagem: mensagem})
             }).catch(function(erro){
                 console.log("Erro: "+erro)
                 var erro=[]
