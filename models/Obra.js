@@ -44,6 +44,11 @@ const Obra = new Schema({
         default: 'preOrcamento'
     },
 
+    estadoToString: {
+        type: String,
+        default: "Pré-Orçamento"
+    },
+
     orcamento: {
         type: Number
     },

@@ -10,17 +10,11 @@
 
 {{/each}}
 
-{{#each erro}}
-    <div class="alert alert-danger">{{texto}}</div>
-{{else}}
-
-{{/each}}
-
 <h2>Nova tarefa</h2>
 <h5 id="nomeObra">Obra {{nome}}</h5>
 <div class="card mt-5">
     <div class="card-body">
-        <form action="/" name="getObra" method="POST" function="chgAction()">
+        <form action="/obras/"+palavras[1]+"/addTarefa" name="getObra" method="POST" function="chgAction()">
             <label for="nome">Nome</label>
             <input type="text" id="nome" name="nome" placeholder="Nome da tarefa" class="form-control mb-4">
 

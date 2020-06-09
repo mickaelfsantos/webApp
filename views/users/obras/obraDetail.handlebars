@@ -1,15 +1,35 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+{{#each mensagem}}
+    <div class="alert alert-success">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+{{#each erro}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
 <h2>Obra</h2>
 <hr>
+
+
  {{#each obra}}
     {{#if nome}}
         <div class="row mt-5 col-12 text-center">
             <div class="col-6">
                 <h6 class="blockquote">Nome</h6>
             </div>
-
             <div class="col-6">
-                <h6 class="blockquote">Data prevista de inicio</h6>
+                <h6 class="blockquote">Estado</h6>
             </div>
+            
         </div>
 
         <div class="row col-12 text-center">
@@ -17,17 +37,31 @@
                 <label for="nome" id="nomeObra">{{nome}}</label>
             </div>
 
+            
             <div class="col-6">
-                <label for="DataPrevistaInicio" id="DataPrevistaInicio"></label>
+                <label for="estado" id="estado">{{estadoToString}}</label>
+            </div>
+        </div>
+
+        <div class="row col-12 text-center">
+            <div class="col-12">
+                <h6 class="blockquote">Descrição</h6>
+            </div>
+        </div>
+
+        <div class="row col-12 text-center">
+            <div class="col-12">
+                <label for="descricao" id="descricao">{{descricao}}</label>
             </div>
         </div>
 
 
         <div class="row mt-5 col-12 text-center">
-            <div class="col-6">
-                <h6 class="blockquote">Estado</h6>
-            </div>
             
+            <div class="col-6">
+                <h6 class="blockquote">Data prevista de inicio</h6>
+            </div>
+
             <div class="col-6 text-center">
                 <h6 class="blockquote">Data prevista de fim</h6>
             </div>
@@ -36,13 +70,7 @@
 
         <div class="row col-12 text-center">
             <div class="col-6">
-                {{#ifCond estado "preOrcamento"}}
-                    <p>Pré-Orçamento</p>
-                    {{else}}
-                        {{#ifCond estado "aAguardar"}}
-                            <p>A aguardar resposta do cliente</p>
-                        {{/ifCond}}
-                {{/ifCond}}
+                <label for="DataPrevistaInicio" id="DataPrevistaInicio"></label>
             </div>
 
             <div class="col-6">
@@ -90,40 +118,48 @@
         </div>
 
         {{#if tarefas}}
-            <div class="row text-center mt-4">
+            <div class="row mt-4">
                 <div class="col-2 font-weight-bold">Nome</div>
                 <div class="col-3 font-weight-bold">Data prevista de inicio</div>
                 <div class="col-3 font-weight-bold">Data prevista de fim</div>
                 <div class="col-2 font-weight-bold">Data de inicio</div>
                 <div class="col-2 font-weight-bold">Data de fim</div>
             </div>
-
-            {{#each tarefas}}
-                <div class="row mt-5 text-center" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
-                <div class="col-4">{{nome}}</div>
-                <div class="col-2">{{DataPrevistaInicio}}</div>
-                <div class="col-2">{{DataPrevistaFim}}</div>
-                <div class="col-2">{{DataInicio}}</div>
-                <div class="col-2">{{DataFim}}</div>
-                <hr class="style16">
-                {{else}}
-
-            {{/each}}
+            <hr class="style16">
             {{else}}
             <div class="row text-center mt-4">
                 <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
             </div>
         {{/if}}
         
-        <div class="row mt-5 col-12 text-right">
-            <div class="mt-5 col-12">
-                <button class="btn btn-dark" >Editar</button>
-                <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
-                <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
-            </div>
-        </div>
     {{/if}}
  {{/each}}
+ {{#each tarefasA}}
+    <div class="col-2">{{nome}}</div>
+    <hr class="style16">
+{{else}}
+{{/each}}
+
+
+{{#each tarefas}}
+<div class="row mt-4">
+    <div class="col-2">{{nome}}</div>
+    <div class="col-3">{{dataPrevistaInicio}}</div>
+    <div class="col-3">{{dataPrevistaFim}}</div>
+    <div class="col-2">{{dataInicio}}</div>
+    <div class="col-2">{{dataFim}}</div>
+</div>    
+<hr class="style16">
+{{else}}
+{{/each}}
+
+<div class="row text-right">
+    <div class="mt-5 mb-5 col-12">
+        <button class="btn btn-dark" >Editar</button>
+        <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
+        <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
+    </div>
+</div>
    
    <script>
        document.getElementById("DataPrevistaInicio").innerHTML = "{{dataPrevistaInicio}}"
