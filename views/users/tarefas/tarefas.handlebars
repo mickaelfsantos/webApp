@@ -1,3 +1,9 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
 <h2>Lista de tarefas</h2>
 <hr>
 
@@ -37,4 +43,8 @@
     function saltaParaTarefa(handle) {
         window.location.href = "/tarefa/"+handle.dataset.name;
     } 
+
+    window.onload = function() {
+        history.replaceState({}, null, "/tarefas")
+    };
 </script>

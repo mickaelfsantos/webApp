@@ -39,7 +39,7 @@
 
             
             <div class="col-6">
-                <label for="estado" id="estado">{{estadoToString}}</label>
+                <label for="estado" id="estado">{{estadoToString estado}}</label>
             </div>
         </div>
 
@@ -70,15 +70,11 @@
 
         <div class="row col-12 text-center">
             <div class="col-6">
-                <label for="DataPrevistaInicio" id="DataPrevistaInicio"></label>
+                {{dateToString dataPrevistaInicio}}
             </div>
 
             <div class="col-6">
-                {{#if dataPrevistaFim}}
-                    <label for="DataPrevistaFim" id="DataPrevistaFim"></label>
-                    {{else}}
-                    <label for="DataPrevistaFim">Não definido</label>
-                {{/if}}
+                {{dateToString dataPrevistaFim}}
             </div>
         </div>
 
@@ -95,19 +91,11 @@
 
         <div class="row col-12 text-center">
             <div class="col-6">
-                {{#if dataInicio}}
-                    <label for="DataInicio" id="DataInicio"></label>
-                    {{else}}
-                    <label for="DataInicio">Não definido</label>
-                {{/if}}
+                {{dateToString dataInicio}}
             </div>
 
             <div class="col-6">
-                {{#if dataFim}}
-                    <label for="DataFim" id="DataFim"></label>
-                    {{else}}
-                    <label for="DataFim">Não defenido</label>
-                {{/if}}
+                {{dateToString dataFim}}
             </div>
         </div>
 
@@ -144,10 +132,10 @@
 {{#each tarefas}}
 <div class="row mt-4">
     <div class="col-2">{{nome}}</div>
-    <div class="col-3">{{dataPrevistaInicio}}</div>
-    <div class="col-3">{{dataPrevistaFim}}</div>
-    <div class="col-2">{{dataInicio}}</div>
-    <div class="col-2">{{dataFim}}</div>
+    <div class="col-3">{{dateToString dataPrevistaInicio}}</div>
+    <div class="col-3">{{dateToString dataPrevistaFim}}</div>
+    <div class="col-2">{{dateToString dataInicio}}</div>
+    <div class="col-2">{{dateToString dataFim}}</div>
 </div>    
 <hr class="style16">
 {{else}}
@@ -162,11 +150,6 @@
 </div>
    
    <script>
-       document.getElementById("DataPrevistaInicio").innerHTML = "{{dataPrevistaInicio}}"
-       document.getElementById("DataPrevistaFim").innerHTML = "{{dataPrevistaFim}}"
-       document.getElementById("DataInicio").innerHTML = "{{dataInicio}}"
-       document.getElementById("DataFim").innerHTML = "{{dataFim}}"
-
         function saltaParaObras() {
             window.location.href = "/obras";
         }
@@ -174,5 +157,10 @@
         function saltaParaAddTarefa(){
             obra = document.getElementById('nomeObra').textContent;
             window.location.href = "/obras/"+obra+"/addTarefa";
+        }
+
+        window.onload = function(){
+            obra = document.getElementById('nomeObra').textContent
+            history.replaceState({}, null, '/obra/'+obra)
         }
    </script>

@@ -9,6 +9,7 @@
     const mongoose = require('mongoose')
     const session = require('express-session')
     const flash = require('connect-flash')
+    const moment = require('moment')
 
 //Configurações
 
@@ -43,6 +44,30 @@
                     return options.fn(this);
                 }
                 return options.inverse(this);
+            },
+
+            dateToString: function(data){
+                var d = moment(data).format("DD/MM/YYYY");
+                if(d == "Invalid date" || typeof data == undefined)
+                    return "Não definido"
+                return d;
+            },
+
+            estadoToString: function(estado){
+                switch (estado){
+                    case "preOrcamento":
+                        return "Pré-orçamento";
+                    case "aAguardarResposta": 
+                        return "A aguardar resposta";
+                    case "preProducao":
+                        return "Pré-produção";
+                    case "producao":
+                        return "Produção";
+                    case "finalizada":
+                        return "Finalizada";
+                    default:
+                        return "Erro";
+                }
             }
         }
     })

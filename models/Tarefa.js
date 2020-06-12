@@ -20,6 +20,7 @@ const Tarefa = new Schema({
 
     dataPrevistaInicio: {
         type: Date,
+        format: "DD/MM/YYYY",
         default: Date.now
     },
 
@@ -28,12 +29,12 @@ const Tarefa = new Schema({
         default: null
     },
 
-    dataDeInicio: {
+    dataInicio: {
         type: Date,
         default: null
     },
 
-    dataDeFim: {
+    dataFim: {
         type: Date,
         default: null
     },

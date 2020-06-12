@@ -44,32 +44,35 @@ router.get('/obras', function(req, res){
 
 router.get('/obra/:nome', function(req, res){
     Obra.findOne({nome:req.params.nome}).then(function(obra){
-        var dataPrevistaInicio = moment(obra.dataPrevistaInicio).format('DD/MM/yyyy')
-        var dataPrevistaFim = moment(obra.dataPrevistaFim).format('DD/MM/yyyy')
-        var dataInicio = moment(obra.dataInicio).format('DD/MM/yyyy')
-        var dataFim = moment(obra.dataFim).format('DD/MM/yyyy')
-
-        var passedVariable = req.query.valid;
-        if(passedVariable != undefined){
-            if(passedVariable == "Tarefa criada com sucesso"){
-                var mensagem = []
-                mensagem.push({texto: passedVariable})
+        if(obra != null){
+            var passedVariable = req.query.valid;
+            if(passedVariable != undefined){
+                if(passedVariable == "Tarefa criada com sucesso"){
+                    var mensagem = []
+                    mensagem.push({texto: passedVariable})
+                }
+                else{
+                    var erros = []
+                    erros.push({texto: passedVariable})
+                }
+                async function secondFunction(){
+                    var tarefas = await myFunction(obra.tarefas)
+                    res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, mensagem:mensagem, erros:erros})
+                };
+                secondFunction(); 
             }
             else{
-                var erros = []
-                erros.push({texto: passedVariable})
+                async function secondFunction(){
+                    var tarefas = await myFunction(obra.tarefas)
+                    res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas})
+                };
+                secondFunction();       
             }
-            res.render("users/obras/obraDetail", {obra:obra, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, 
-                dataInicio:dataInicio, dataFim:dataFim, mensagem:mensagem, erros:erros})
         }
         else{
-            async function secondFunction(){
-                var tarefas = await myFunction(obra.tarefas)
-                res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim})
-            };
-            secondFunction();       
-        }
-        
+            var string = encodeURI('Obra não encontrada');
+            res.redirect('/obras/?valid=' + string);
+        }        
     }).catch(function(erro){
         var string = encodeURI('Obra não encontrada');
         res.redirect('/obras/?valid=' + string);
@@ -78,9 +81,34 @@ router.get('/obra/:nome', function(req, res){
 
 router.get('/tarefas', function(req, res){
     Tarefa.find().lean().then(function(tarefas){
-        res.render("users/tarefas/tarefas", {tarefas: tarefas})
+        var passedVariable = req.query.valid;
+        if(passedVariable != undefined){
+            var erros = []
+            erros.push({texto: passedVariable})
+            console.log(req.url)
+            res.render("users/tarefas/tarefas", {tarefas: tarefas, erros:erros})
+        }
+        else{
+            res.render("users/tarefas/tarefas", {tarefas: tarefas})
+        }
     }).catch(function(erro){
         res.send("Erro: "+ erro)
+    })
+})
+
+router.get('/tarefa/:nome', function(req, res){
+    Tarefa.findOne({nome:req.params.nome}).then(function(tarefa){
+        if(tarefa != null){
+            res.render("users/tarefas/tarefaDetail", {tarefa: tarefa})
+        }
+        else{
+            var string = encodeURI('Tarefa não encontrada');
+            console.log(string)
+            res.redirect('/tarefas/?valid=' + string);
+        }
+    }).catch(function(erro){
+        var string = encodeURI('Tarefa não encontrada');
+        res.redirect('/tarefas/?valid=' + string);
     })
 })
 

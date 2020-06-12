@@ -110,11 +110,21 @@ router.post('/obras/:nome/addTarefa', function asyncFunction(req, res){
     }
     else{
         Obra.findOne({"nome":req.params.nome}).then(function(obra){
-            const novaTarefa = {
-                nome: req.body.nome,
-                descricao: req.body.descricao,
-                dataPrevistaInicio: req.body.dataPrevistaInicio,
-                obra: obra._id
+            var novaTarefa;
+            if(req.body.dataPrevistaInicio){
+                novaTarefa = {
+                    nome: req.body.nome,
+                    descricao: req.body.descricao,
+                    dataPrevistaInicio: req.body.dataPrevistaInicio,
+                    obra: obra._id
+                }
+            }
+            else{
+                novaTarefa = { 
+                    nome: req.body.nome,
+                    descricao: req.body.descricao,
+                    obra: obra._id
+                }
             }
         
             new Tarefa(novaTarefa).save().then(function(){

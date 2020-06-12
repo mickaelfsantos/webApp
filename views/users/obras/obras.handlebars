@@ -31,9 +31,9 @@
 {{#each obras}}
     <div class="row mt-5" style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaObra(this)">
         <div class="col-3">{{nome}}</div>
-        <div class="col-2">{{dataDeInicio}}</div>
-        <div class="col-2">{{dataDeFim}}</div>
-        <div class="col-3">{{estadoToString}}</div>
+        <div class="col-2">{{dateToString dataInicio}}</div>
+        <div class="col-2">{{dateToString dataFim}}</div>
+        <div class="col-3">{{estadoToString estado}}</div>
     </div>
 <hr class="style16">
 {{else}}
@@ -43,5 +43,9 @@
 <script>
     function saltaParaObra(handle) {
         window.location.href = "/obra/"+handle.dataset.name;
-    } 
+    }
+
+    window.onload = function(){
+        history.replaceState({}, null, '/obras')
+    }
 </script>

@@ -28,25 +28,20 @@ const Obra = new Schema({
         default:null
     },
 
-    dataDeInicio: {
+    dataInicio: {
         type: Date,
         default:null
     },
 
-    dataDeFim: {
+    dataFim: {
         type: Date,
         default:null
     },
 
     estado: {
         type: String,
-        enum: ['preOrcamento', 'aAguardarResposta', 'preProducao', 'producao', 'finalizada' ],
+        enum: ['preOrcamento', 'aAguardarResposta', 'preProducao', '', 'finalizada' ],
         default: 'preOrcamento'
-    },
-
-    estadoToString: {
-        type: String,
-        default: "Pré-Orçamento"
     },
 
     orcamento: {
