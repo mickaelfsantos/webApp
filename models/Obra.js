@@ -20,7 +20,7 @@ const Obra = new Schema({
 
     dataPrevistaInicio: {
         type: Date,
-        default: Date.now
+        default: Date.now()
     },
 
     dataPrevistaFim: {
@@ -45,11 +45,13 @@ const Obra = new Schema({
     },
 
     orcamento: {
-        type: Number
+        type: Number,
+        default: 0
     },
 
     custoFinal: {
-        type: Number
+        type: Number,
+        default: 0
     }
 })
 

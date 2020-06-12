@@ -46,7 +46,7 @@ router.post('/obras/add', function asyncFunction(req, res){
         res.render("usersResponsaveis/obras/novaObra", {erros: erros})
     }
     else{
-        var novaObra
+        var novaObra;
         if(req.body.dataPrevistaInicio){
             novaObra = {
                 nome: req.body.nome,

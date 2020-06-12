@@ -39,13 +39,7 @@
 
         //helpers
         helpers: {
-            ifCond: function(v1, v2, options){
-                if(v1 === v2) {
-                    return options.fn(this);
-                }
-                return options.inverse(this);
-            },
-
+            
             dateToString: function(data){
                 var d = moment(data).format("DD/MM/YYYY");
                 if(d == "Invalid date" || typeof data == undefined)
@@ -56,18 +50,36 @@
             estadoToString: function(estado){
                 switch (estado){
                     case "preOrcamento":
-                        return "Pré-orçamento";
+                        return "Pré-orçamento. A calcular orçamento e data final.";
                     case "aAguardarResposta": 
-                        return "A aguardar resposta";
+                        return "A aguardar resposta do cliente.";
                     case "preProducao":
-                        return "Pré-produção";
+                        return "Pré-produção. O cliente aceitou o orçamento.";
                     case "producao":
-                        return "Produção";
+                        return "Produção.";
                     case "finalizada":
-                        return "Finalizada";
+                        return "Finalizada.";
+                    case "associada":
+                        return "Esta tarefa foi associada a si. Preencha-a.";
+                    case "porAceitar":
+                        return "Por aceitar. À espera da aceitação de um superior.";
+                    case "aceite":
+                        return "Foi aceite pelo superior. A aguardar data de inicio";
+                    case "recusada":
+                        return "Recusava. Volte a estimar o tempo que demora na realização da tarefa";
+                    case "emExecucao":
+                        return "Em execução."
+                    case "finalizada":
+                        return "Finalizada."
                     default:
                         return "Erro";
                 }
+            },
+
+            precoToString: function(numero){
+                if(numero == 0)
+                    return "Por definir";
+                return numero;
             }
         }
     })

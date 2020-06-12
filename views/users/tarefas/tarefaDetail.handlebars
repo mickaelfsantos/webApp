@@ -1,0 +1,100 @@
+<h2>Tarefa</h2>
+<hr>
+
+{{#each obra}}
+    <h5>Obra {{nome}}</h5>
+{{/each}}
+ {{#each tarefa}}
+    {{#if nome}}
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Nome</h6>
+            </div>
+            <div class="col-6">
+                <h6 class="blockquote">Estado</h6>
+            </div>
+            
+        </div>
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                <label for="nome" id="nomeTarefa">{{nome}}</label>
+            </div>
+
+            
+            <div class="col-6">
+                <label for="estado" id="estado">{{estadoToString estado}}</label>
+            </div>
+        </div>
+
+
+
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Descrição</h6>
+            </div>
+
+            <div class="col-6">
+                <h6 class="blockquote">Funcionários</h6>
+            </div>
+        </div>
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                <label for="descricao" id="descricao">{{descricao}}</label>
+            </div>
+        </div>
+
+
+        <div class="row mt-5 col-12 text-center">
+            
+            <div class="col-6">
+                <h6 class="blockquote">Data prevista de inicio</h6>
+            </div>
+
+            <div class="col-6 text-center">
+                <h6 class="blockquote">Data prevista de fim</h6>
+            </div>
+        </div>
+
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                {{dateToString dataPrevistaInicio}}
+            </div>
+
+            <div class="col-6">
+                {{dateToString dataPrevistaFim}}
+            </div>
+        </div>
+
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Data de início</h6>
+            </div>
+            
+            <div class="col-6 text-center">
+                <h6 class="blockquote">Data de fim</h6>
+            </div>
+        </div>
+
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                {{dateToString dataInicio}}
+            </div>
+
+            <div class="col-6">
+                {{dateToString dataFim}}
+            </div>
+        </div>
+        
+    {{/if}}
+ {{/each}}
+
+<div class="row text-right">
+    <div class="mt-5 mb-5 col-12">
+        <button class="btn btn-dark" >Editar</button>
+    </div>
+</div>
+ 

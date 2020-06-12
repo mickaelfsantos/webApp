@@ -38,6 +38,6 @@
 
 <script>    
     var obra = document.getElementById('nomeObra').textContent;
-    var palavras = obra.split(" ");
-    document.getObra.action = "/obras/"+palavras[1]+"/addTarefa";
+    var newStr = obra.split(' ').slice(1).join(' ')
+    document.getObra.action = "/obras/"+newStr+"/addTarefa";
 </script>

@@ -41,8 +41,8 @@ const Tarefa = new Schema({
 
     estado: { //0- a calcular datas e valor final, 1- à espera da resposta do cliente, 2- cliente confirma, está à espera da data de incio, 3-em execução, 4-finalizada
         type: String,
-        enum: ['porAceitar', 'aceite', 'recusada', 'emExecucao', 'finalizada'],
-        default: 'porAceitar'
+        enum: ['associada', 'porAceitar', 'aceite', 'recusada', 'emExecucao', 'finalizada'],
+        default: 'associada'
     },
 
     justificacao: {

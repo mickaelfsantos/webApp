@@ -45,6 +45,7 @@ router.get('/obras', function(req, res){
 router.get('/obra/:nome', function(req, res){
     Obra.findOne({nome:req.params.nome}).then(function(obra){
         if(obra != null){
+            console.log(obra)
             var passedVariable = req.query.valid;
             if(passedVariable != undefined){
                 if(passedVariable == "Tarefa criada com sucesso"){
@@ -99,11 +100,14 @@ router.get('/tarefas', function(req, res){
 router.get('/tarefa/:nome', function(req, res){
     Tarefa.findOne({nome:req.params.nome}).then(function(tarefa){
         if(tarefa != null){
-            res.render("users/tarefas/tarefaDetail", {tarefa: tarefa})
+            async function secondFunction(){
+                var obraS = await myFunctionObra(tarefa.obra)
+                res.render("users/tarefas/tarefaDetail", {obra:obraS, tarefa:tarefa})
+            };
+            secondFunction(); 
         }
         else{
             var string = encodeURI('Tarefa não encontrada');
-            console.log(string)
             res.redirect('/tarefas/?valid=' + string);
         }
     }).catch(function(erro){
@@ -119,6 +123,15 @@ async function myFunction(tarefas){
             a.push(tarefa)
         }).lean()
     }
+    return a;
+}
+
+async function myFunctionObra(obra){
+    var a=[]
+    
+    await Obra.findById(obra, function(err, tarefa) {
+        a.push(tarefa)
+    }).lean()
     return a;
 }
 

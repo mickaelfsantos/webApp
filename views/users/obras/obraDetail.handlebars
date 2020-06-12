@@ -43,6 +43,28 @@
             </div>
         </div>
 
+
+        <div class="row mt-5 col-12 text-center">
+            <div class="col-6">
+                <h6 class="blockquote">Orçamento</h6>
+            </div>
+            <div class="col-6">
+                <h6 class="blockquote">Custo final</h6>
+            </div>
+            
+        </div>
+
+        <div class="row col-12 text-center">
+            <div class="col-6">
+                <label for="nome" id="nomeObra">{{precoToString orcamento}}</label>
+            </div>
+
+            
+            <div class="col-6">
+                <label for="estado" id="estado">{{precoToString custoFinal}}</label>
+            </div>
+        </div>
+
         <div class="row col-12 text-center">
             <div class="col-12">
                 <h6 class="blockquote">Descrição</h6>
@@ -122,15 +144,9 @@
         
     {{/if}}
  {{/each}}
- {{#each tarefasA}}
-    <div class="col-2">{{nome}}</div>
-    <hr class="style16">
-{{else}}
-{{/each}}
-
-
+ 
 {{#each tarefas}}
-<div class="row mt-4">
+<div class="row mt-4" style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
     <div class="col-2">{{nome}}</div>
     <div class="col-3">{{dateToString dataPrevistaInicio}}</div>
     <div class="col-3">{{dateToString dataPrevistaFim}}</div>
@@ -156,7 +172,12 @@
 
         function saltaParaAddTarefa(){
             obra = document.getElementById('nomeObra').textContent;
+            console.log(obra);
             window.location.href = "/obras/"+obra+"/addTarefa";
+        }
+
+        function saltaParaTarefa(handle) {
+            window.location.href = "/tarefa/"+handle.dataset.name;
         }
 
         window.onload = function(){
