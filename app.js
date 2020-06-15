@@ -8,8 +8,10 @@
     const path = require('path')
     const mongoose = require('mongoose')
     const session = require('express-session')
-    const flash = require('connect-flash')
+    const flash = require('connect-flash');
     const moment = require('moment')
+    const passport = require('passport')
+    require('./config/auth')(passport)
 
 //Configurações
 
@@ -20,12 +22,17 @@
             saveUninitialized: true,
             cookie: {secure:true}
         }))
-        app.use(flash())
+
+        app.use(passport.initialize())
+        app.use(passport.session())
+        app.use(flash());
+        
 
     //Middleware
         app.use(function(req, res, next){
-            res.locals.success_msg = req.flash("success_msg")
-            res.locals.error_msg = req.flash("error_msg")
+            res.locals.message = req.flash();
+            res.locals.error_messages  = req.flash("error_messages")
+            res.locals.error = req.flash("error")
             next()
         })
 

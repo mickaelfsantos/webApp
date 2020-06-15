@@ -1,0 +1,40 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+{{/each}}
+
+<div class="text-center mt-5">
+    <h2>Registo</h2>
+</div>
+<div class="card mt-5 mb-5">
+    <div class="card-body">
+        <form action="/registo" method="POST">
+            <label for="nome">Nome </label>
+            <input type="nome" name="nome" class="form-control">
+            <label class="mt-4" for="funcao">Função na empresa </label>
+            <input type="funcao" class="form-control" name="funcao">
+            <label class="mt-4" for="departamento">Departamento </label>
+            <input type="departamento" class="form-control" name="departamento">
+            <label class="mt-4" for="equipa">Equipa </label>
+            <input type="equipa" class="form-control" name="equipa">
+            <label class="mt-4" for="email">Email </label>
+            <input type="email" class="form-control" name="email" required>
+            <label class="mt-4" for="password">Password </label>
+            <input type="password" class="form-control" name="password" required>
+            <label class="mt-4" for="password2">Repita a password </label>
+            <input type="password" class="form-control" name="password2" required>
+            <div class="mt-5 mb-5 col-12 text-center">
+                <button class="btn btn-info col-5" type="submit">Criar conta</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function saltaParaRegisto(){
+        window.location.href = "/registo";
+    }
+    window.onload = function(){
+        history.replaceState({}, null, '/registo')
+    }
+</script>

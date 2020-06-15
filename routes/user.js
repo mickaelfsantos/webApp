@@ -3,13 +3,139 @@ const router = express.Router()
 const mongoose = require('mongoose')
 const moment = require('moment')
 moment().format();
-const queryString = require('querystring')
+const bcrypt = require('bcryptjs')
+const passport = require('passport')
+const flash = require('connect-flash')
 
 //models
     require("../models/Obra")
     require("../models/Tarefa")
+    require("../models/Funcionario")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
+    const Funcionario = mongoose.model("funcionarios")
+
+
+router.get('/login', function(req, res){
+    var passedVariable = req.query.valid;
+    if(passedVariable != undefined){
+        if(passedVariable == "Registo concluído com sucesso"){
+            
+            var mensagem = []
+            mensagem.push({texto: passedVariable})
+            res.render("users/login", {mensagem:mensagem})
+        }
+        else{
+            var erros = []
+            erros.push({texto: passedVariable})
+            res.render("users/login", {erros:erros})
+        }
+    }else{
+        res.render("users/login")
+    }
+})
+
+router.post('/login', function(req, res, next){
+    passport.authenticate("local", {
+        successRedirect: "/",
+        failureRedirect: "/login",
+        failureFlash: true
+    })(req, res, next)
+})
+
+router.get('/registo', function(req, res){
+    var passedVariable = req.query.valid;
+    if(passedVariable != undefined){
+        var erros = []
+        erros.push({texto: passedVariable})
+        res.render("users/registo", {erros:erros})
+    }
+    res.render("users/registo")
+})
+
+router.post('/registo', function(req, res){
+    var erros = []
+
+    if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){
+        erros.push({texto: "Nome obrigatório"})
+    }
+
+    if(!req.body.funcao || typeof req.body.funcao === undefined || req.body.funcao === null){
+        erros.push({texto: "Função na empresa obrigatório"})
+    }
+    
+    if(!req.body.departamento || typeof req.body.departamento === undefined || req.body.departamento === null){
+        erros.push({texto: "Departamento obrigatório"})
+    }
+    
+    if(!req.body.equipa || typeof req.body.equipa === undefined || req.body.equipa === null){
+        erros.push({texto: "Equipa obrigatório"})
+    }
+
+    if(!req.body.password || typeof req.body.password === undefined || req.body.password === null){
+        erros.push({texto: "Password obrigatório"})
+    }
+    else{
+        if(req.body.password.length < 4){
+            erros.push({texto: "Password curta. Mínimo 5 caracteres"})
+        }
+        
+        if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
+            erros.push({texto: "Confirmação obrigatório"})
+        }
+        else{
+            if(req.body.password != req.body.password2){
+                erros.push({texto: "As passwords não correspondem"})
+            }
+        }        
+    } 
+
+    
+    
+    if(erros.length > 0){
+        res.render("users/registo", {erros: erros})
+    }
+    else{
+        Funcionario.findOne({email:req.body.email}).then(function(funcionario){
+            if(funcionario){
+                erros.push({texto: "Já existe uma conta com este email"})
+                res.render("users/registo", {erros: erros})
+            }
+            else{
+                const novoFunc = new Funcionario({
+                    nome: req.body.nome,
+                    funcao: req.body.funcao,
+                    departamento: req.body.departamento,
+                    equipa: req.body.equipa,
+                    email: req.body.email,
+                    password: req.body.password
+                })
+
+                bcrypt.genSalt(10, function(erro, salt){
+                    bcrypt.hash(novoFunc.password, salt, function(erro, hash){
+                        if(erro){
+                            var string = encodeURI('Erro interno ao registar. Tente novamente.');
+                            res.redirect('/registo/?valid=' + string);
+                        }
+
+                        novoFunc.password = hash
+                        novoFunc.save().then(function(){
+                            var string = encodeURI('Registo concluído com sucesso');
+                            res.redirect('/login/?valid=' + string);
+                        }).catch(function(erro){
+                            var string = encodeURI('Erro interno ao registar. Tente novamente.');
+                            res.redirect('/registo/?valid=' + string);
+                        })
+                    })
+                })
+            }
+        }).catch(function(erro){
+            var string = encodeURI('Erro interno ao registar. Tente novamente.');
+            res.redirect('/registo/?valid=' + string);
+        })
+    }
+
+})
 
 router.get('/', function(req, res){
     res.redirect("/dashboard")
@@ -17,6 +143,7 @@ router.get('/', function(req, res){
 
 
 router.get('/dashboard', function(req, res){
+    req.flash('success_messages', 'Registration successfully');
     res.render("users/dashboard")
 })
 
@@ -45,7 +172,6 @@ router.get('/obras', function(req, res){
 router.get('/obra/:nome', function(req, res){
     Obra.findOne({nome:req.params.nome}).then(function(obra){
         if(obra != null){
-            console.log(obra)
             var passedVariable = req.query.valid;
             if(passedVariable != undefined){
                 if(passedVariable == "Tarefa criada com sucesso"){
