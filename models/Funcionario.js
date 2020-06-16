@@ -45,7 +45,7 @@ const Funcionario = new Schema({
 
     role: {
         type: String,
-        enum: ['user', 'userResponsável', 'admin'],
+        enum: ['user', 'userResponsavel', 'admin'],
         default: 'user'
     }
 })

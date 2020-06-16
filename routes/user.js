@@ -6,6 +6,8 @@ moment().format();
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
 
+const {authenticated} = require('../helpers/userRole')
+
 //models
     require("../models/Obra")
     require("../models/Tarefa")
@@ -115,16 +117,26 @@ router.post('/registo', function(req, res){
 
 })
 
+router.get("/logout", authenticated, function(req, res){
+    req.logout()
+    res.redirect("/login")
+})
+
 router.get('/', function(req, res){
-    res.redirect("/dashboard")
+    if(req.user != undefined){
+        res.redirect("/dashboard")
+    }
+    else{
+        res.redirect("/login")
+    }
 })
 
 
-router.get('/dashboard', function(req, res){
+router.get('/dashboard', authenticated, function(req, res){
     res.render("users/dashboard")
 })
 
-router.get('/obras', function(req, res){
+router.get('/obras', authenticated, function(req, res){
     Obra.find().lean().then(function(obras){
         res.render("users/obras/obras", {obras: obras})
     }).catch(function(erro){
@@ -133,7 +145,7 @@ router.get('/obras', function(req, res){
     })
 })
 
-router.get('/obra/:nome', function(req, res){
+router.get('/obra/:nome', authenticated, function(req, res){
     Obra.findOne({nome:req.params.nome}).then(function(obra){
         if(obra != null){    
             async function secondFunction(){
@@ -152,7 +164,7 @@ router.get('/obra/:nome', function(req, res){
     })
 })
 
-router.get('/tarefas', function(req, res){
+router.get('/tarefas', authenticated, function(req, res){
     Tarefa.find().lean().then(function(tarefas){
         res.render("users/tarefas/tarefas", {tarefas: tarefas})
     }).catch(function(erro){
@@ -161,7 +173,7 @@ router.get('/tarefas', function(req, res){
     })
 })
 
-router.get('/tarefa/:nome', function(req, res){
+router.get('/tarefa/:nome', authenticated, function(req, res){
     Tarefa.findOne({nome:req.params.nome}).then(function(tarefa){
         if(tarefa != null){
             async function secondFunction(){

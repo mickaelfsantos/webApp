@@ -32,6 +32,11 @@
             res.locals.success_msg = req.flash("success_msg")
             res.locals.error_msg = req.flash("error_msg")
             res.locals.error = req.flash("error")
+            res.locals.user = req.user
+            if(req.user != undefined){
+                res.locals.nome = req.user.nome;
+                res.locals.role = req.user.role
+            }
             next();
         })
 
@@ -45,14 +50,13 @@
 
         //helpers
         helpers: {
-            
             dateToString: function(data){
                 var d = moment(data).format("DD/MM/YYYY");
                 if(d == "Invalid date" || typeof data == undefined)
                     return "Não definido"
                 return d;
             },
-
+        
             estadoToString: function(estado){
                 switch (estado){
                     case "preOrcamento":
@@ -81,11 +85,25 @@
                         return "Erro";
                 }
             },
-
+        
             precoToString: function(numero){
                 if(numero == 0)
                     return "Por definir";
                 return numero;
+            },
+
+            ifUR: function(user, options){
+                if(user.role === "admin" || user.role == "userResponsavel") {
+                    return options.fn(this);
+                }
+                return options.inverse(this);
+            },
+
+            ifAdmin: function(user, options){
+                if(user.role === "admin") {
+                    return options.fn(this);
+                }
+                return options.inverse(this);
             }
         }
     })

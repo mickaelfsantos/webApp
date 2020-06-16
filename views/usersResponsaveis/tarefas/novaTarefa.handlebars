@@ -23,9 +23,10 @@
 
             <div class="form-group">
                 <label for="funcionarios">Funcionarios a associar</label>
-                <select multiple class="form-control" id="funcionarios">
-                <option>1</option>
-                <option>2</option>
+                <select multiple class="form-control" id="funcionarios" name="funcionarios">
+                    {{#each funcionarios}}
+                        <option value="{{nome}}">{{nome}}</option>
+                    {{/each}}
                 </select>
             </div>
 

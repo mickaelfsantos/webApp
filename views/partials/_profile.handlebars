@@ -1,0 +1,21 @@
+{{#if user}}
+<div class="collapse navbar-collapse flex-grow-0" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-fw fa-user"></i>
+          {{nome}}
+        </a>
+        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="">Editar perfil</a>
+          <a class="dropdown-item" href="/logout">Sair</a>
+          {{#ifAdmin user}}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Editar funcionários</a>
+            {{else}}
+          {{/ifAdmin}}
+        </div>
+      </li>
+    </ul>
+  </div>
+{{/if}}
