@@ -5,7 +5,6 @@ const moment = require('moment')
 moment().format();
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
-const flash = require('connect-flash')
 
 //models
     require("../models/Obra")
@@ -17,22 +16,7 @@ const flash = require('connect-flash')
 
 
 router.get('/login', function(req, res){
-    var passedVariable = req.query.valid;
-    if(passedVariable != undefined){
-        if(passedVariable == "Registo concluído com sucesso"){
-            
-            var mensagem = []
-            mensagem.push({texto: passedVariable})
-            res.render("users/login", {mensagem:mensagem})
-        }
-        else{
-            var erros = []
-            erros.push({texto: passedVariable})
-            res.render("users/login", {erros:erros})
-        }
-    }else{
-        res.render("users/login")
-    }
+    res.render("users/login")
 })
 
 router.post('/login', function(req, res, next){
@@ -44,12 +28,6 @@ router.post('/login', function(req, res, next){
 })
 
 router.get('/registo', function(req, res){
-    var passedVariable = req.query.valid;
-    if(passedVariable != undefined){
-        var erros = []
-        erros.push({texto: passedVariable})
-        res.render("users/registo", {erros:erros})
-    }
     res.render("users/registo")
 })
 
@@ -114,24 +92,24 @@ router.post('/registo', function(req, res){
                 bcrypt.genSalt(10, function(erro, salt){
                     bcrypt.hash(novoFunc.password, salt, function(erro, hash){
                         if(erro){
-                            var string = encodeURI('Erro interno ao registar. Tente novamente.');
-                            res.redirect('/registo/?valid=' + string);
+                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
+                            res.redirect("/registo");
                         }
 
                         novoFunc.password = hash
                         novoFunc.save().then(function(){
-                            var string = encodeURI('Registo concluído com sucesso');
-                            res.redirect('/login/?valid=' + string);
+                            req.flash("success_msg", "Registo concluído com sucesso")
+                            res.redirect("/login");
                         }).catch(function(erro){
-                            var string = encodeURI('Erro interno ao registar. Tente novamente.');
-                            res.redirect('/registo/?valid=' + string);
+                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
+                            res.redirect("/registo");
                         })
                     })
                 })
             }
         }).catch(function(erro){
-            var string = encodeURI('Erro interno ao registar. Tente novamente.');
-            res.redirect('/registo/?valid=' + string);
+            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
+            res.redirect("/registo");
         })
     }
 
@@ -143,83 +121,43 @@ router.get('/', function(req, res){
 
 
 router.get('/dashboard', function(req, res){
-    req.flash('success_messages', 'Registration successfully');
     res.render("users/dashboard")
 })
 
 router.get('/obras', function(req, res){
     Obra.find().lean().then(function(obras){
-        var passedVariable = req.query.valid;
-        if(passedVariable != undefined){
-            if(passedVariable == "Obra criada com sucesso"){
-                var mensagem = []
-                mensagem.push({texto: passedVariable})
-            }
-            else{
-                var erros = []
-                erros.push({texto: passedVariable})
-            }
-            res.render("users/obras/obras", {obras: obras, mensagem:mensagem, erros:erros})
-        }
-        else{
-            res.render("users/obras/obras", {obras: obras})
-        }
+        res.render("users/obras/obras", {obras: obras})
     }).catch(function(erro){
-        res.send("Erro: "+ erro)
+        req.flash("error_msg", "Erro ao fazer o GET das obras")
+        res.redirect("/");
     })
 })
 
 router.get('/obra/:nome', function(req, res){
     Obra.findOne({nome:req.params.nome}).then(function(obra){
-        if(obra != null){
-            var passedVariable = req.query.valid;
-            if(passedVariable != undefined){
-                if(passedVariable == "Tarefa criada com sucesso"){
-                    var mensagem = []
-                    mensagem.push({texto: passedVariable})
-                }
-                else{
-                    var erros = []
-                    erros.push({texto: passedVariable})
-                }
-                async function secondFunction(){
-                    var tarefas = await myFunction(obra.tarefas)
-                    res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, mensagem:mensagem, erros:erros})
-                };
-                secondFunction(); 
-            }
-            else{
-                async function secondFunction(){
-                    var tarefas = await myFunction(obra.tarefas)
-                    res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas})
-                };
-                secondFunction();       
-            }
+        if(obra != null){    
+            async function secondFunction(){
+                var tarefas = await myFunction(obra.tarefas)
+                res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas})
+            };
+            secondFunction();       
         }
         else{
-            var string = encodeURI('Obra não encontrada');
-            res.redirect('/obras/?valid=' + string);
+            req.flash("error_msg", "Obra não encontrada")
+            res.redirect("/obras");
         }        
     }).catch(function(erro){
-        var string = encodeURI('Obra não encontrada');
-        res.redirect('/obras/?valid=' + string);
+        req.flash("error_msg", "Obra não encontrada")
+        res.redirect("/obras");
     })
 })
 
 router.get('/tarefas', function(req, res){
     Tarefa.find().lean().then(function(tarefas){
-        var passedVariable = req.query.valid;
-        if(passedVariable != undefined){
-            var erros = []
-            erros.push({texto: passedVariable})
-            console.log(req.url)
-            res.render("users/tarefas/tarefas", {tarefas: tarefas, erros:erros})
-        }
-        else{
-            res.render("users/tarefas/tarefas", {tarefas: tarefas})
-        }
+        res.render("users/tarefas/tarefas", {tarefas: tarefas})
     }).catch(function(erro){
-        res.send("Erro: "+ erro)
+        req.flash("error_msg", "Erro ao fazer o GET das tarefas")
+        res.redirect("/tarefas");
     })
 })
 
@@ -233,12 +171,12 @@ router.get('/tarefa/:nome', function(req, res){
             secondFunction(); 
         }
         else{
-            var string = encodeURI('Tarefa não encontrada');
-            res.redirect('/tarefas/?valid=' + string);
+            req.flash("error_msg", "Tarefa não encontrada")
+            res.redirect("/tarefas");
         }
     }).catch(function(erro){
-        var string = encodeURI('Tarefa não encontrada');
-        res.redirect('/tarefas/?valid=' + string);
+        req.flash("error_msg", "Tarefa não encontrada")
+        res.redirect("/tarefas");
     })
 })
 

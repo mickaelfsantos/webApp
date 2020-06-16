@@ -9,10 +9,6 @@
 <body>
     {{>_navbar}}
     <div class="container mt-4">
-        {{#if locals.message}}
-            <div class="alert alert-danger">{{message.success_messages}}</div>
-        {{else}}
-        {{/if}}
         {{>_msg}}
         {{{body}}}
     </div>

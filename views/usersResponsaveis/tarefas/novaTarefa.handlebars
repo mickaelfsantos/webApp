@@ -14,7 +14,7 @@
 <h5 id="nomeObra">Obra {{nome}}</h5>
 <div class="card mt-5">
     <div class="card-body">
-        <form action="/obras/"+palavras[1]+"/addTarefa" name="getObra" method="POST" function="chgAction()">
+        <form action="" name="getObra" method="POST">
             <label for="nome">Nome</label>
             <input type="text" id="nome" name="nome" placeholder="Nome da tarefa" class="form-control mb-4">
 
@@ -39,5 +39,5 @@
 <script>    
     var obra = document.getElementById('nomeObra').textContent;
     var newStr = obra.split(' ').slice(1).join(' ')
-    document.getObra.action = "/obras/"+newStr+"/addTarefa";
+    document.getObra.action = "/obra/"+newStr+"/addTarefa";
 </script>

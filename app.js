@@ -19,8 +19,7 @@
         app.use(session({
             secret: "webApp",
             resave: true,
-            saveUninitialized: true,
-            cookie: {secure:true}
+            saveUninitialized: true
         }))
 
         app.use(passport.initialize())
@@ -30,10 +29,9 @@
 
     //Middleware
         app.use(function(req, res, next){
-            res.locals.message = req.flash();
-            res.locals.error_messages  = req.flash("error_messages")
-            res.locals.error = req.flash("error")
-            next()
+            res.locals.success_msg = req.flash("success_msg")
+            res.locals.error_msg = req.flash("error_msg")
+            next();
         })
 
     //Body Parser

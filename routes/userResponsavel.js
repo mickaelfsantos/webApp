@@ -63,22 +63,24 @@ router.post('/obras/add', function asyncFunction(req, res){
         
     
         new Obra(novaObra).save().then(function(){
-            var string = encodeURI('Obra criada com sucesso');
-            res.redirect('/obras/?valid=' + string);
+            req.flash("success_msg", "Obra criada com sucesso")
+            res.redirect("/obras");
         }).catch(function(erro){
-            erros.push({texto:"Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente."})
-            res.render("usersResponsaveis/obras/novaObra", {erros: erros})
+            req.flash("error_msg", "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente.")
+            res.redirect("/obras/add");
+            //erros.push({texto:"Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente."})
+            //res.render("usersResponsaveis/obras/novaObra", {erros: erros})
         })
     
     }
 })
 
 
-router.get('/obras/:nome/addTarefa', function(req, res){
+router.get('/obra/:nome/addTarefa', function(req, res){
     res.render("usersResponsaveis/tarefas/novaTarefa", {nome:req.params.nome})
 })
 
-router.post('/obras/:nome/addTarefa', function asyncFunction(req, res){
+router.post('/obra/:nome/addTarefa', function asyncFunction(req, res){
     
     var erros = []
 
@@ -133,22 +135,27 @@ router.post('/obras/:nome/addTarefa', function asyncFunction(req, res){
                         {"nome":obra.nome},
                         {$push: {tarefas : tarefa._id}}
                     ).then(function(){
-                        var string = encodeURI('Tarefa criada com sucesso');
-                        res.redirect('/obra/'+obra.nome+'/?valid=' + string);
+                        req.flash("success_msg", "Tarefa criada com sucesso")
+                        res.redirect('/obra/'+obra.nome);
                     }).catch(function(erro){
-                        console.log(erro)
+                        req.flash("error_msg", "Erro ao atualizar a obra")
+                        res.redirect('/obras/');
                     })
                 }).catch(function(erro){
-                    console.log(erro)
+                    req.flash("error_msg", "Erro ao encontrar a tarefa")
+                    res.redirect('/obra/'+obra.nome);
                 })
                   
             }).catch(function(erro){
-                console.log(erro)
-                erros.push({texto:"Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."})
-                res.render("usersResponsaveis/tarefas/novaTarefa", {nome: obra.nome, obra: obra, erros: erros})
+                console.log("entrou")
+                req.flash("error_msg", "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente.")
+                res.redirect("/obra/"+obra.nome+"/addTarefa");
+                //erros.push({texto:"Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."})
+                //res.render("usersResponsaveis/tarefas/novaTarefa", {nome: obra.nome, obra: obra, erros: erros})
             })
         }).catch(function(erro){
-            res.send("Erro: "+ erro)
+            req.flash("error_msg", "Erro interno ao adicionar a tarefa")
+            res.redirect('/tarefas/');
         })
         
     }
