@@ -12,7 +12,7 @@ module.exports = function(passport){
         Funcionario.findOne({email: email}).then(function(funcionario){
             if(!funcionario){
                 
-                return done(null, false, {message: "Funcionário não está registado"})
+                return done(null, false, {message: "Funcionário não está registado."})
             }
 
             bcrypt.compare(password, funcionario.password, function(error, equals){
@@ -20,7 +20,7 @@ module.exports = function(passport){
                 if(equals){
                     return done(null, funcionario)
                 }
-                return done(null, false, {message: "Palavra-passe incorreta"})
+                return done(null, false, {message: "Palavra-passe incorreta."})
             })
         })
     }))

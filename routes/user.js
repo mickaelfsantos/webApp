@@ -35,35 +35,35 @@ router.post('/registo', function(req, res){
     var erros = []
 
     if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){
-        erros.push({texto: "Nome obrigatório"})
+        erros.push({texto: "Nome obrigatório."})
     }
 
     if(!req.body.funcao || typeof req.body.funcao === undefined || req.body.funcao === null){
-        erros.push({texto: "Função na empresa obrigatório"})
+        erros.push({texto: "Função na empresa obrigatório."})
     }
     
     if(!req.body.departamento || typeof req.body.departamento === undefined || req.body.departamento === null){
-        erros.push({texto: "Departamento obrigatório"})
+        erros.push({texto: "Departamento obrigatório."})
     }
     
     if(!req.body.equipa || typeof req.body.equipa === undefined || req.body.equipa === null){
-        erros.push({texto: "Equipa obrigatório"})
+        erros.push({texto: "Equipa obrigatório."})
     }
 
     if(!req.body.password || typeof req.body.password === undefined || req.body.password === null){
-        erros.push({texto: "Password obrigatório"})
+        erros.push({texto: "Password obrigatório."})
     }
     else{
         if(req.body.password.length < 4){
-            erros.push({texto: "Password curta. Mínimo 5 caracteres"})
+            erros.push({texto: "Password curta. Mínimo 5 caracteres."})
         }
         
         if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
-            erros.push({texto: "Confirmação obrigatório"})
+            erros.push({texto: "Confirmação obrigatório."})
         }
         else{
             if(req.body.password != req.body.password2){
-                erros.push({texto: "As passwords não correspondem"})
+                erros.push({texto: "As passwords não correspondem."})
             }
         }        
     } 
@@ -76,7 +76,7 @@ router.post('/registo', function(req, res){
     else{
         Funcionario.findOne({email:req.body.email}).then(function(funcionario){
             if(funcionario){
-                erros.push({texto: "Já existe uma conta com este email"})
+                erros.push({texto: "Já existe uma conta com este email."})
                 res.render("users/registo", {erros: erros})
             }
             else{
@@ -98,7 +98,7 @@ router.post('/registo', function(req, res){
 
                         novoFunc.password = hash
                         novoFunc.save().then(function(){
-                            req.flash("success_msg", "Registo concluído com sucesso")
+                            req.flash("success_msg", "Registo concluído com sucesso.")
                             res.redirect("/login");
                         }).catch(function(erro){
                             req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
@@ -128,7 +128,7 @@ router.get('/obras', function(req, res){
     Obra.find().lean().then(function(obras){
         res.render("users/obras/obras", {obras: obras})
     }).catch(function(erro){
-        req.flash("error_msg", "Erro ao fazer o GET das obras")
+        req.flash("error_msg", "Erro ao fazer o GET das obras.")
         res.redirect("/");
     })
 })
@@ -143,11 +143,11 @@ router.get('/obra/:nome', function(req, res){
             secondFunction();       
         }
         else{
-            req.flash("error_msg", "Obra não encontrada")
+            req.flash("error_msg", "Obra não encontrada.")
             res.redirect("/obras");
         }        
     }).catch(function(erro){
-        req.flash("error_msg", "Obra não encontrada")
+        req.flash("error_msg", "Obra não encontrada.")
         res.redirect("/obras");
     })
 })
@@ -156,7 +156,7 @@ router.get('/tarefas', function(req, res){
     Tarefa.find().lean().then(function(tarefas){
         res.render("users/tarefas/tarefas", {tarefas: tarefas})
     }).catch(function(erro){
-        req.flash("error_msg", "Erro ao fazer o GET das tarefas")
+        req.flash("error_msg", "Erro ao fazer o GET das tarefas.")
         res.redirect("/tarefas");
     })
 })
@@ -171,11 +171,11 @@ router.get('/tarefa/:nome', function(req, res){
             secondFunction(); 
         }
         else{
-            req.flash("error_msg", "Tarefa não encontrada")
+            req.flash("error_msg", "Tarefa não encontrada.")
             res.redirect("/tarefas");
         }
     }).catch(function(erro){
-        req.flash("error_msg", "Tarefa não encontrada")
+        req.flash("error_msg", "Tarefa não encontrada.")
         res.redirect("/tarefas");
     })
 })

@@ -68,8 +68,6 @@ router.post('/obras/add', function asyncFunction(req, res){
         }).catch(function(erro){
             req.flash("error_msg", "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente.")
             res.redirect("/obras/add");
-            //erros.push({texto:"Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente."})
-            //res.render("usersResponsaveis/obras/novaObra", {erros: erros})
         })
     
     }
@@ -85,14 +83,14 @@ router.post('/obra/:nome/addTarefa', function asyncFunction(req, res){
     var erros = []
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido"});
+        erros.push({texto: "Nome inválido."});
     }
 
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-        erros.push({texto: "Descrição inválida"});
+        erros.push({texto: "Descrição inválida."});
     } else{
         if(req.body.descricao.length < 5){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres!"});
+            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres."});
         }
     }
 
@@ -135,14 +133,14 @@ router.post('/obra/:nome/addTarefa', function asyncFunction(req, res){
                         {"nome":obra.nome},
                         {$push: {tarefas : tarefa._id}}
                     ).then(function(){
-                        req.flash("success_msg", "Tarefa criada com sucesso")
+                        req.flash("success_msg", "Tarefa criada com sucesso.")
                         res.redirect('/obra/'+obra.nome);
                     }).catch(function(erro){
-                        req.flash("error_msg", "Erro ao atualizar a obra")
+                        req.flash("error_msg", "Erro ao atualizar a obra.")
                         res.redirect('/obras/');
                     })
                 }).catch(function(erro){
-                    req.flash("error_msg", "Erro ao encontrar a tarefa")
+                    req.flash("error_msg", "Erro ao encontrar a tarefa.")
                     res.redirect('/obra/'+obra.nome);
                 })
                   
@@ -150,11 +148,9 @@ router.post('/obra/:nome/addTarefa', function asyncFunction(req, res){
                 console.log("entrou")
                 req.flash("error_msg", "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente.")
                 res.redirect("/obra/"+obra.nome+"/addTarefa");
-                //erros.push({texto:"Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."})
-                //res.render("usersResponsaveis/tarefas/novaTarefa", {nome: obra.nome, obra: obra, erros: erros})
             })
         }).catch(function(erro){
-            req.flash("error_msg", "Erro interno ao adicionar a tarefa")
+            req.flash("error_msg", "Erro interno ao adicionar a tarefa.")
             res.redirect('/tarefas/');
         })
         
