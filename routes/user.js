@@ -138,10 +138,11 @@ router.get('/dashboard', authenticated, function(req, res){
 
 router.get('/obras', authenticated, function(req, res){
     Obra.find().lean().then(function(obras){
-        res.render("users/obras/obras", {obras: obras})
+        var o = JSON.stringify(obras);
+        res.render("users/obras/obras", {obras: obras, obrasS : o})
     }).catch(function(erro){
         req.flash("error_msg", "Erro ao fazer o GET das obras.")
-        res.redirect("/");
+        res.redirect("/dashboard");
     })
 })
 
@@ -165,22 +166,43 @@ router.get('/obra/:nome', authenticated, function(req, res){
 })
 
 router.get('/tarefas', authenticated, function(req, res){
-    Tarefa.find().lean().then(function(tarefas){
+    Tarefa.find( { $or: [{ funcionarios: req.user.id}, {funcionarioResponsavel : req.user.id }]}).lean().then(function(tarefas){
         res.render("users/tarefas/tarefas", {tarefas: tarefas})
     }).catch(function(erro){
+        console.log(erro)
         req.flash("error_msg", "Erro ao fazer o GET das tarefas.")
-        res.redirect("/tarefas");
+        res.redirect("/dashboard");
     })
 })
 
 router.get('/tarefa/:nome', authenticated, function(req, res){
     Tarefa.findOne({nome:req.params.nome}).then(function(tarefa){
+        var encontrou = false;
         if(tarefa != null){
-            async function secondFunction(){
-                var obraS = await myFunctionObra(tarefa.obra)
-                res.render("users/tarefas/tarefaDetail", {obra:obraS, tarefa:tarefa})
-            };
-            secondFunction(); 
+            if(tarefa.funcionarioResponsavel._id == req.user.id){
+                encontrou=true;
+            }
+            else{
+                for(var i=0; i<tarefa.funcionarios.length; i++){
+                    if(tarefa.funcionarios[i]._id == req.user.id){
+                        encontrou=true;
+                        break;
+                    }
+                }
+            }
+            
+            if(encontrou){
+                async function secondFunction(){
+                    var obraS = await getObraInfo(tarefa.obra)
+                    var funcionarios = await getFuncionariosInfo(tarefa.funcionarios)
+                    res.render("users/tarefas/tarefaDetail", {obra:obraS, tarefa:tarefa, funcionarios:funcionarios})
+                };
+                secondFunction(); 
+            }
+            else{
+                req.flash("error_msg", "Não pode aceder a esta tarefa uma vez que não foi associada a ela.")
+                res.redirect("/tarefas");
+            }
         }
         else{
             req.flash("error_msg", "Tarefa não encontrada.")
@@ -202,12 +224,24 @@ async function myFunction(tarefas){
     return a;
 }
 
-async function myFunctionObra(obra){
+async function getObraInfo(obra){
     var a=[]
     
     await Obra.findById(obra, function(err, tarefa) {
         a.push(tarefa)
     }).lean()
+
+    return a;
+}
+
+async function getFuncionariosInfo(funcionarios){    
+    var a=[]
+    for(var i=0; i<funcionarios.length; i++){
+        await Funcionario.findById(funcionarios[i]).lean().then(function(funcionario) {
+            a.push(funcionario)
+        });
+    }
+    
     return a;
 }
 

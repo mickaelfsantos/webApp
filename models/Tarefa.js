@@ -18,6 +18,11 @@ const Tarefa = new Schema({
         ref: "Funcionario"
     }],
 
+    funcionarioResponsavel : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Funcionario"
+    },
+
     dataPrevistaInicio: {
         type: Date,
         format: "DD/MM/YYYY",
@@ -56,6 +61,19 @@ const Tarefa = new Schema({
     validada: {
         type:Boolean,
         default: false
+    },
+
+    importancia: {
+        type:String,
+        enum:["baixa", "media", "alta"],
+        default:"baixa"
+    },
+
+    progresso: {
+        type:Number,
+        max:100,
+        min:0,
+        default: 0
     },
 
     obra: {

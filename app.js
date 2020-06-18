@@ -11,10 +11,11 @@
     const flash = require('connect-flash');
     const moment = require('moment')
     const passport = require('passport')
+const { use } = require('passport')
     require('./config/auth')(passport)
 
 //Configurações
-
+    var u;
     //Session
         app.use(session({
             secret: "webApp",
@@ -36,6 +37,7 @@
             if(req.user != undefined){
                 res.locals.nome = req.user.nome;
                 res.locals.role = req.user.role
+                u=res.locals.user;
             }
             next();
         })
@@ -76,7 +78,7 @@
                     case "aceite":
                         return "Foi aceite pelo superior. A aguardar data de inicio";
                     case "recusada":
-                        return "Recusava. Volte a estimar o tempo que demora na realização da tarefa";
+                        return "Recusada. Volte a estimar o tempo que demora na realização da tarefa";
                     case "emExecucao":
                         return "Em execução."
                     case "finalizada":
@@ -86,6 +88,25 @@
                 }
             },
         
+            estadoToStringOD: function(estado){
+                switch (estado){
+                    case "associada":
+                        return "Por preencher";
+                    case "porAceitar":
+                        return "Por aprovar";
+                    case "aceite":
+                        return "Aceite";
+                    case "recusada":
+                        return "Recusada";
+                    case "emExecucao":
+                        return "Em execução"
+                    case "finalizada":
+                        return "Finalizada"
+                    default:
+                        return "Erro";
+                }
+            },
+
             precoToString: function(numero){
                 if(numero == 0)
                     return "Por definir";
@@ -101,6 +122,13 @@
 
             ifAdmin: function(user, options){
                 if(user.role === "admin") {
+                    return options.fn(this);
+                }
+                return options.inverse(this);
+            },
+
+            ifEstado: function(estado, options){
+                if(estado === "associada") {
                     return options.fn(this);
                 }
                 return options.inverse(this);

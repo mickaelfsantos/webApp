@@ -28,12 +28,18 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
         erros.push({texto: "Nome inválido"});
     }
+    else{
+        if(req.body.nome.trim().length < 2){
+            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+        }
+    }
+    
 
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
         erros.push({texto: "Descrição inválida"});
     } else{
-        if(req.body.descricao.length < 5){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres!"});
+        if(req.body.descricao.trim().length < 3){
+            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
         }
     }
 
@@ -55,15 +61,15 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
         var novaObra;
         if(req.body.dataPrevistaInicio){
             novaObra = {
-                nome: req.body.nome,
-                descricao: req.body.descricao,
+                nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                 dataPrevistaInicio: req.body.dataPrevistaInicio
             }
         }
         else{
             novaObra = {
-                nome: req.body.nome,
-                descricao: req.body.descricao
+                nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'')
             }
         }
         
@@ -99,12 +105,17 @@ router.post('/obra/:nome/addTarefa', authenticated, userResponsavel, function as
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
         erros.push({texto: "Nome inválido."});
     }
+    else{
+        if(req.body.nome.trim().length < 2){   
+            erros.push({texto: "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+        }
+    }
 
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
         erros.push({texto: "Descrição inválida."});
     } else{
-        if(req.body.descricao.length < 5){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres."});
+        if(req.body.descricao.trim() < 3){
+            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
         }
     }
 
@@ -124,35 +135,54 @@ router.post('/obra/:nome/addTarefa', authenticated, userResponsavel, function as
     
 
     if(erros.length > 0){
-        res.render("usersResponsaveis/tarefas/novaTarefa", {nome: req.params.nome, erros: erros})
+        Funcionario.find({}).then(function(funcionarios){
+            if(funcionarios){
+                res.render("usersResponsaveis/tarefas/novaTarefa", {nome:req.params.nome, erros: erros, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
+            }
+        }).catch(function(err){
+            req.flash("error_msg", "Erro interno no GET dos funcionários.")
+            res.redirect('/obra/'+req.params.nome);
+        })
     }
     else{
         async function secondFunction(){
             var f = req.body.funcionarios
             var funcionarios = await getFuncionarios(f)
-
             Obra.findOne({"nome":req.params.nome}).then(function(obra){
                 var novaTarefa;
                 if(req.body.dataPrevistaInicio){
                     novaTarefa = {
-                        nome: req.body.nome,
-                        descricao: req.body.descricao,
+                        nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                        descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                         dataPrevistaInicio: req.body.dataPrevistaInicio,
                         obra: obra._id,
-                        funcionarios: funcionarios
+                        funcionarios: funcionarios,
+                        importancia: req.body.importancia.toLowerCase(),
+                        funcionarioResponsavel : req.user.id
                     }
                 }
                 else{
                     novaTarefa = { 
-                        nome: req.body.nome,
-                        descricao: req.body.descricao,
+                        nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                        descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                         obra: obra._id,
-                        funcionarios: funcionarios
+                        funcionarios: funcionarios,
+                        importancia: req.body.importancia.toLowerCase(),
+                        funcionarioResponsavel : req.user.id
                     }
                 }
             
                 new Tarefa(novaTarefa).save().then(function(){
                     Tarefa.findOne({"nome":novaTarefa.nome}).then(function(tarefa){
+                        for(var i=0; i<funcionarios.length; i++){
+                            Funcionario.updateOne(
+                                {"nome":funcionarios[i].nome},
+                                {$push: {tarefas : tarefa._id}}
+                            ).then().catch(function(erro){
+                                req.flash("error_msg", "Erro ao inserir as tarefas nos funcionários.")
+                                res.redirect('/obra/'+req.params.nome);
+                            })
+                        }
                         Obra.updateOne(
                             {"nome":obra.nome},
                             {$push: {tarefas : tarefa._id}}
@@ -169,7 +199,6 @@ router.post('/obra/:nome/addTarefa', authenticated, userResponsavel, function as
                     })
                       
                 }).catch(function(erro){
-                    console.log("entrou")
                     req.flash("error_msg", "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente.")
                     res.redirect("/obra/"+obra.nome+"/addTarefa");
                 })
@@ -179,26 +208,29 @@ router.post('/obra/:nome/addTarefa', authenticated, userResponsavel, function as
             })
         };
         secondFunction()
-        
     }
 })
 
 
 async function getFuncionarios(funcionarios){
     var a=[]
-    var j = 0
-    await Funcionario.find().lean().then(function(funcionario) {
-        for(var i=0; i<funcionarios.length; i++){
-            for(var j=0; j<funcionario.length; j++){
-                if(funcionario[i] == funcionarios[j].nome){
-                    a.push(funcionarios[j])
-                    break;
+    if(funcionarios[0].length == 1){
+        await Funcionario.findOne({nome : funcionarios}).lean().then(function(funcionario){
+            a.push(funcionario);
+        })
+    }
+    else{
+        await Funcionario.find().lean().then(function(funcionario) {
+            for(var i=0; i<funcionarios.length; i++){
+                for(var j=0; j<funcionario.length; j++){
+                    if(funcionarios[i] == funcionario[j].nome){
+                        a.push(funcionario[j])
+                        break;
+                    }
                 }
             }
-        }
-    }).catch(function(erro){
-
-    })
+        })
+    }
     return a;
 }
 

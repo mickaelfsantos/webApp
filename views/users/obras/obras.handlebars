@@ -1,40 +1,118 @@
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
 <h2>Lista de obras</h2>
 <hr>
 
-<div class="btn-group mt-4" role="group" aria-label="Basic example">
-  <button type="button" class="btn btn-secondary active">Lista</button>
-  <button type="button" class="btn btn-secondary">Calendário</button>
-  <button type="button" class="btn btn-secondary">Gantt</button>
-</div>
 
-<div class="row mt-5">
-    <div class="col-3 font-weight-bold">Nome</div>
-    <div class="col-2 font-weight-bold">Data de inicio</div>
-    <div class="col-2 font-weight-bold">Data de fim</div>
-    <div class="col-3 font-weight-bold">Estado</div>
-    <div class="col-2 font-weight-bold">Orçamento</div>
-</div>
-
-<hr class="style16">
-{{#each obras}}
-    <div class="row mt-5" style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaObra(this)">
-        <div class="col-3">{{nome}}</div>
-        <div class="col-2">{{dateToString dataInicio}}</div>
-        <div class="col-2">{{dateToString dataFim}}</div>
-        <div class="col-3">{{estadoToString estado}}</div>
-        <div class="col-2">{{precoToString orcamento}}</div>
+<div class="row">
+    <div class="col-6">
+      <div class="btn-group mt-4" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-secondary active">Lista</button>
+        <button type="button" class="btn btn-secondary">Calendário</button>
+        <button type="button" class="btn btn-secondary">Gantt</button>
+      </div>
     </div>
-<hr class="style16">
+    <div class="col-6 mt-4 text-right">
+        <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
+    </div>
+</div>
+
+{{#if obras}}
+  <table class="mt-5" id="myTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
+        <th onclick="sortTable(1)">Data de inicio <i class="fa fa-sort"> </i></th>
+        <th onclick="sortTable(2)">Data de fim <i class="fa fa-sort"> </i></th>
+        <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
+        <th onclick="sortTable(4)">Orçamento <i class="fa fa-sort"> </i>
+        </th>
+      </tr>
+    </thead>
+    
+    <tbody id="filtro">
+      {{#each obras}}
+        <tr style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaObra(this)">
+            <td>{{nome}}</td>
+            <td>{{dateToString dataInicio}}</td>
+            <td>{{dateToString dataFim}}</td>
+            <td>{{estadoToString estado}}</td>
+            <td>{{precoToString orcamento}}</td>
+        </tr>
+      {{else}}
+
+      {{/each}}
+    </tbody>
+  </table>
 {{else}}
 
-{{/each}}
+{{/if}}
+
+
+
 
 <script>
-    function saltaParaObra(handle) {
-        window.location.href = "/obra/"+handle.dataset.name;
-    }
+  $(document).ready(function(){
+  $("#inputFiltro").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#filtro tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
 
-    window.onload = function(){
-        history.replaceState({}, null, '/obras')
+  function saltaParaObra(handle) {
+    window.location.href = "/obra/"+handle.dataset.name;
+  }
+
+  window.onload = function(){
+    history.replaceState({}, null, '/obras')
+  }
+
+  function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+  
+    dir = "asc"; 
+   
+    while (switching) {
+      
+      switching = false;
+      rows = table.rows;
+     
+      for (i = 1; i < (rows.length - 1); i++) {
+        
+        shouldSwitch = false;
+        
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch= true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount ++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
     }
+  }
+
+  
 </script>

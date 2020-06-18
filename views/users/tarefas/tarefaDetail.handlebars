@@ -26,10 +26,8 @@
                 <label for="estado" id="estado">{{estadoToString estado}}</label>
             </div>
         </div>
-
-
-
-        <div class="row mt-5 col-12 text-center">
+        
+         <div class="row mt-5 col-12 text-center">
             <div class="col-6">
                 <h6 class="blockquote">Descrição</h6>
             </div>
@@ -43,7 +41,17 @@
             <div class="col-6">
                 <label for="descricao" id="descricao">{{descricao}}</label>
             </div>
+    {{/if}}
+{{/each}}
+            <div class="col-6">
+                {{#each funcionarios}}
+                    <label for="funcionarios" id="funcionarios">{{nome}}</label><br>
+                {{else}}
+                {{/each}}    
+            </div>
         </div>
+{{#each tarefa}}
+   {{#if nome}}
 
 
         <div class="row mt-5 col-12 text-center">
@@ -89,12 +97,26 @@
             </div>
         </div>
         
+        <div class="row text-right">
+            <div class="mt-5 mb-5 col-12">
+                <button class="btn btn-dark" onclick="saltaParaEditar()">Editar</button>
+                <button class="btn btn-dark" onclick="saltaParaTras()" >Voltar</button>
+            </div>
+        </div>
     {{/if}}
  {{/each}}
 
-<div class="row text-right">
-    <div class="mt-5 mb-5 col-12">
-        <button class="btn btn-dark" >Editar</button>
-    </div>
-</div>
+
+
+<script>
+
+    function saltaParaTras() {
+        window.location.href = document.referrer;
+    }
+    
+    function saltaParaEditar() {
+        tarefa = document.getElementById('nomeTarefa').textContent;
+        window.location.href = "/tarefa/"+tarefa+"/edit";
+    }
+</script>
  

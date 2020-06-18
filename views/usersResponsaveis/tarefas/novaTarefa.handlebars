@@ -12,7 +12,7 @@
 
 <h2>Nova tarefa</h2>
 <h5 id="nomeObra">Obra {{nome}}</h5>
-<div class="card mt-5">
+<div class="card mt-5 mb-5">
     <div class="card-body">
         <form action="" name="getObra" method="POST">
             <label for="nome">Nome</label>
@@ -32,7 +32,17 @@
 
             <label for="dataPrevistaInicio">Data prevista para inicio</label>
             <input type="date" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4" min="0">
-            <button type="submit" class="btn btn-dark">Concluir</button>
+
+            <div class="form-group">
+                <label for="importancia">Importância da tarefa</label>
+                <select class="form-control" id="importancia" name="importancia">
+                    <option>Baixa</option>
+                    <option>Média</option>
+                    <option>Alta</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-dark mt-2">Concluir</button>
         </form>
     </div>
 </div>

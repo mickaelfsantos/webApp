@@ -1,0 +1,40 @@
+#row:hover{
+    background-color: #DCDCDC;
+}
+
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_asc_disabled:after,
+table.dataTable thead .sorting_asc_disabled:before,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting_desc:before,
+table.dataTable thead .sorting_desc_disabled:after,
+table.dataTable thead .sorting_desc_disabled:before {
+bottom: .5em;
+}
+
+table {
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th {
+  cursor: pointer;
+}
+tbody > tr:hover{
+  background-color: #45a8ac;
+  color:white;
+}
+
+th, td {
+  text-align: left;
+  padding: 16px;
+}
+
+progress#progressBar:hover:after {
+  display: block;
+  content: attr(value);
+}

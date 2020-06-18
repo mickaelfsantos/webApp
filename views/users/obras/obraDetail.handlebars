@@ -1,6 +1,14 @@
-<h2>Obra</h2>
+<div class="row">
+    <div class="col-6">
+        <h2>Obra</h2>
+    </div>
+    <div class="col-6 text-right">
+        <button class="btn btn-dark" onclick="saltaParaEdit()" >Editar</button>
+        <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
+        <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
+    </div>
+</div>
 <hr>
-
 
  {{#each obra}}
     {{#if nome}}
@@ -109,44 +117,45 @@
             </div>
         </div>
 
+    {{/if}}
+ {{/each}}
         {{#if tarefas}}
-            <div class="row mt-4">
-                <div class="col-2 font-weight-bold">Nome</div>
-                <div class="col-3 font-weight-bold">Data prevista de inicio</div>
-                <div class="col-3 font-weight-bold">Data prevista de fim</div>
-                <div class="col-2 font-weight-bold">Data de inicio</div>
-                <div class="col-2 font-weight-bold">Data de fim</div>
-            </div>
-            <hr class="style16">
+            <table class="mt-5" id="myTable">
+                <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
+                    <th onclick="sortTable(1)">Data prevista de inicio <i class="fa fa-sort"> </i></th>
+                    <th onclick="sortTable(2)">Data prevista de fim <i class="fa fa-sort"> </i></th>
+                    <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
+                    <th onclick="sortTable2(4)">Progresso <i class="fa fa-sort"> </i>
+                    </th>
+                </tr>
+                </thead>
+        
+                <tbody id="filtro">
+                    {{#each tarefas}}
+                        <tr style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
+                            <td>{{nome}}</td>
+                            <td>{{dateToString dataPrevistaInicio}}</td>
+                            <td>{{dateToString dataPrevistaFim}}</td>
+                            <td>{{estadoToStringOD estado}}</td>
+                            <td>
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id ="{{progresso}}" role="progressbar" style="width: {{progresso}}%;" aria-valuenow="{{progresso}}" aria-valuemin="0" aria-valuemax="100" value="{{progresso}}">{{progresso}}%</div>
+                                </div>
+                            </td>
+                        </tr>
+                    {{else}}
+
+                    {{/each}}
+                </tbody>
+            </table>
             {{else}}
             <div class="row text-center mt-4">
                 <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
             </div>
         {{/if}}
         
-    {{/if}}
- {{/each}}
- 
-{{#each tarefas}}
-<div class="row mt-4" style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
-    <div class="col-2">{{nome}}</div>
-    <div class="col-3">{{dateToString dataPrevistaInicio}}</div>
-    <div class="col-3">{{dateToString dataPrevistaFim}}</div>
-    <div class="col-2">{{dateToString dataInicio}}</div>
-    <div class="col-2">{{dateToString dataFim}}</div>
-</div>    
-<hr class="style16">
-{{else}}
-{{/each}}
-
-<div class="row text-right">
-    <div class="mt-5 mb-5 col-12">
-        <button class="btn btn-dark" >Editar</button>
-        <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
-        <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
-    </div>
-</div>
-   
    <script>
         function saltaParaObras() {
             window.location.href = "/obras";
@@ -154,7 +163,6 @@
 
         function saltaParaAddTarefa(){
             obra = document.getElementById('nomeObra').textContent;
-            console.log(obra);
             window.location.href = "/obra/"+obra+"/addTarefa";
         }
 
@@ -162,8 +170,101 @@
             window.location.href = "/tarefa/"+handle.dataset.name;
         }
 
+        function saltaParaEdit() {
+            obra = document.getElementById('nomeObra').textContent;
+            window.location.href = "/obra/"+obra+"/edit";
+        }
         window.onload = function(){
             obra = document.getElementById('nomeObra').textContent
             history.replaceState({}, null, '/obra/'+obra)
         }
+        
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("myTable");
+            switching = true;
+        
+            dir = "asc"; 
+        
+            while (switching) {
+            
+            switching = false;
+            rows = table.rows;
+            
+            for (i = 1; i < (rows.length - 1); i++) {
+                
+                shouldSwitch = false;
+                
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                
+                if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch= true;
+                    break;
+                }
+                } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount ++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+                }
+            }
+            }
+        } 
+
+        function sortTable2(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("myTable");
+            switching = true;
+        
+            dir = "asc"; 
+        
+            while (switching) {
+            
+            switching = false;
+            rows = table.rows;
+            
+            for (i = 1; i < (rows.length - 1); i++) {
+                
+                shouldSwitch = false;
+                
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                var xN = parseInt(x.getElementsByTagName("div")[1].getAttribute("id"))
+                var yN = parseInt(y.getElementsByTagName("div")[1].getAttribute("id"))
+                if (dir == "asc") {
+                if (xN > yN) {
+                    shouldSwitch= true;
+                    break;
+                }
+                } else if (dir == "desc") {
+                if (xN < yN) {
+                    shouldSwitch = true;
+                    break;
+                }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount ++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+                }
+            }
+            }
+        } 
    </script>
