@@ -21,7 +21,7 @@ router.get('/login', function(req, res){
     res.render("users/login")
 })
 
-router.post('/login', function(req, res, next){
+router.post('/login', function asyncFunction(req, res, next){
     passport.authenticate("local", {
         successRedirect: "/",
         failureRedirect: "/login",
@@ -33,7 +33,7 @@ router.get('/registo', function(req, res){
     res.render("users/registo")
 })
 
-router.post('/registo', function(req, res){
+router.post('/registo', function asyncFunction(req, res){
     var erros = []
 
     if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){

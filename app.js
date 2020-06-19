@@ -11,7 +11,7 @@
     const flash = require('connect-flash');
     const moment = require('moment')
     const passport = require('passport')
-const { use } = require('passport')
+    const { use } = require('passport')
     require('./config/auth')(passport)
 
 //Configurações
@@ -26,7 +26,6 @@ const { use } = require('passport')
         app.use(passport.initialize())
         app.use(passport.session())
         app.use(flash());
-        
 
     //Middleware
         app.use(function(req, res, next){

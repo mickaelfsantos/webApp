@@ -24,7 +24,7 @@ table {
 th {
   cursor: pointer;
 }
-tbody > tr:hover{
+tbody > #row:hover{
   background-color: #45a8ac;
   color:white;
 }
@@ -37,4 +37,9 @@ th, td {
 progress#progressBar:hover:after {
   display: block;
   content: attr(value);
+}
+
+#calendar {
+  max-width: 900px;
+  margin: 40px auto;
 }

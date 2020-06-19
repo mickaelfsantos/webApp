@@ -1,6 +1,50 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+   <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
+    <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery.min.js'></script>
+    <script src="http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery-ui.custom.min.js"></script>
+    <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/fullcalendar.min.js'></script>
+    
+    <link href='fullcalendar-4.4.2/packages/core/main.css' rel='stylesheet' />
+    <link href='fullcalendar-4.4.2/packages/daygrid/main.css' rel='stylesheet' />
+    <link href='fullcalendar-4.4.2/packages/bootstrap/main.css' rel='stylesheet' />
 
+    <script src='fullcalendar-4.4.2/packages/core/main.js'></script>
+    <script src='fullcalendar-4.4.2/packages/daygrid/main.js'></script>
+    <script src='fullcalendar-4.4.2/packages/bootstrap/main.js'></script>
+
+    <script>
+
+      document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var e = {{{obrasS}}};
+        var eventos = [];
+        for(var i=0; i<e.length; i++){
+          eventos[i] = e[i];
+        }
+        for(var i=0; i<e.length; i++){
+          eventos[i].title = eventos[i].nome;
+          eventos[i].start = eventos[i].dataPrevistaInicio;
+          eventos[i].end = eventos[i].dataPrevistaFim;
+        }
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          plugins: [ 'dayGrid' ],
+          locale: 'pt',
+          displayEventTime: false,
+          events: eventos,
+          eventBackgroundColor: '#45a8ac',
+          eventBorderColor: '#45a8ac',
+          eventTextColor: 'white'
+        });
+
+
+        calendar.render();
+        calendarEl.style.display = "none";
+      });
+
+    </script>
+</style>
 <h2>Lista de obras</h2>
 <hr>
 
@@ -8,9 +52,9 @@
 <div class="row">
     <div class="col-6">
       <div class="btn-group mt-4" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary active">Lista</button>
-        <button type="button" class="btn btn-secondary">Calendário</button>
-        <button type="button" class="btn btn-secondary">Gantt</button>
+        <button type="button" id="btnLista" class="btn btn-secondary active" onclick="lista()">Lista</button>
+        <button type="button" id="btnCalendario" class="btn btn-secondary" onclick="calendario()">Calendário</button>
+        <button type="button" id="btnGantt" class="btn btn-secondary">Gantt</button>
       </div>
     </div>
     <div class="col-6 mt-4 text-right">
@@ -18,39 +62,42 @@
     </div>
 </div>
 
-{{#if obras}}
-  <table class="mt-5" id="myTable">
-    <thead>
-      <tr>
-        <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
-        <th onclick="sortTable(1)">Data de inicio <i class="fa fa-sort"> </i></th>
-        <th onclick="sortTable(2)">Data de fim <i class="fa fa-sort"> </i></th>
-        <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
-        <th onclick="sortTable(4)">Orçamento <i class="fa fa-sort"> </i>
-        </th>
-      </tr>
-    </thead>
-    
-    <tbody id="filtro">
-      {{#each obras}}
-        <tr style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaObra(this)">
-            <td>{{nome}}</td>
-            <td>{{dateToString dataInicio}}</td>
-            <td>{{dateToString dataFim}}</td>
-            <td>{{estadoToString estado}}</td>
-            <td>{{precoToString orcamento}}</td>
+<div id="lista">
+
+  {{#if obras}}
+    <table class="mt-5" id="myTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
+          <th onclick="sortTable(1)">Data de inicio <i class="fa fa-sort"> </i></th>
+          <th onclick="sortTable(2)">Data de fim <i class="fa fa-sort"> </i></th>
+          <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
+          <th onclick="sortTable(4)">Orçamento <i class="fa fa-sort"> </i>
+          </th>
         </tr>
-      {{else}}
+      </thead>
+      
+      <tbody id="filtro">
+        {{#each obras}}
+          <tr style="cursor: pointer;" id="row" data-name="{{nome}}" onclick="saltaParaObra(this)">
+              <td>{{nome}}</td>
+              <td>{{dateToString dataInicio}}</td>
+              <td>{{dateToString dataFim}}</td>
+              <td>{{estadoToString estado}}</td>
+              <td>{{precoToString orcamento}}</td>
+          </tr>
+        {{else}}
 
-      {{/each}}
-    </tbody>
-  </table>
-{{else}}
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
 
-{{/if}}
+  {{/if}}
+</div>
 
 
-
+<div id='calendar'></div>
 
 <script>
   $(document).ready(function(){
@@ -68,6 +115,28 @@
 
   window.onload = function(){
     history.replaceState({}, null, '/obras')
+  }
+
+  function lista() {
+    var x = document.getElementById("lista");
+    var y = document.getElementById("calendar");
+    var k = document.getElementById("inputFiltro");
+    x.style.display = "block";
+    k.style.display = "block";
+    document.getElementById("btnLista").setAttribute("class", "btn btn-secondary active");
+    y.style.display = "none";
+    document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary");
+  }
+
+  function calendario() {
+    var x = document.getElementById("lista");
+    var y = document.getElementById("calendar");
+    var k = document.getElementById("inputFiltro");
+    x.style.display = "none";
+    k.style.display = "none";
+    document.getElementById("btnLista").setAttribute("class", "btn btn-secondary");
+    y.style.display = "block";
+    document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary active");
   }
 
   function sortTable(n) {
@@ -114,5 +183,4 @@
     }
   }
 
-  
 </script>

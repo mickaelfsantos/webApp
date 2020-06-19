@@ -134,7 +134,7 @@
         
                 <tbody id="filtro">
                     {{#each tarefas}}
-                        <tr style="cursor: pointer;" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
+                        <tr style="cursor: pointer;" id="row" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
                             <td>{{nome}}</td>
                             <td>{{dateToString dataPrevistaInicio}}</td>
                             <td>{{dateToString dataPrevistaFim}}</td>
