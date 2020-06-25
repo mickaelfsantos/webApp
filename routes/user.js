@@ -137,7 +137,7 @@ router.get('/dashboard', authenticated, function(req, res){
 })
 
 router.get('/obras', authenticated, function(req, res){
-    Obra.find().lean().then(function(obras){
+    Obra.find({ funcionariosAssociados: req.user.id}).lean().then(function(obras){
         var o = JSON.stringify(obras);
         res.render("users/obras/obras", {obras: obras, obrasS : o})
     }).catch(function(erro){
@@ -147,11 +147,11 @@ router.get('/obras', authenticated, function(req, res){
 })
 
 router.get('/obra/:nome', authenticated, function(req, res){
-    Obra.findOne({nome:req.params.nome}).then(function(obra){
+    Obra.findOne({ $and: [{nome:req.params.nome}, {funcionariosAssociados : req.user.id}]}).then(function(obra){
         if(obra != null){    
             async function secondFunction(){
                 var tarefas = await myFunction(obra.tarefas)
-                res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas})
+                res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, user:req.user})
             };
             secondFunction();       
         }
@@ -166,7 +166,7 @@ router.get('/obra/:nome', authenticated, function(req, res){
 })
 
 router.get('/tarefas', authenticated, function(req, res){
-    Tarefa.find( { $or: [{ funcionarios: req.user.id}, {funcionarioResponsavel : req.user.id }]}).lean().then(function(tarefas){
+    Tarefa.find( { $or: [{ funcionarios: req.user.id}, {funcionarioCriador : req.user.id }]}).lean().then(function(tarefas){
         res.render("users/tarefas/tarefas", {tarefas: tarefas})
     }).catch(function(erro){
         console.log(erro)
@@ -176,33 +176,14 @@ router.get('/tarefas', authenticated, function(req, res){
 })
 
 router.get('/tarefa/:nome', authenticated, function(req, res){
-    Tarefa.findOne({nome:req.params.nome}).then(function(tarefa){
-        var encontrou = false;
-        if(tarefa != null){
-            if(tarefa.funcionarioResponsavel._id == req.user.id){
-                encontrou=true;
-            }
-            else{
-                for(var i=0; i<tarefa.funcionarios.length; i++){
-                    if(tarefa.funcionarios[i]._id == req.user.id){
-                        encontrou=true;
-                        break;
-                    }
-                }
-            }
-            
-            if(encontrou){
-                async function secondFunction(){
-                    var obraS = await getObraInfo(tarefa.obra)
-                    var funcionarios = await getFuncionariosInfo(tarefa.funcionarios)
-                    res.render("users/tarefas/tarefaDetail", {obra:obraS, tarefa:tarefa, funcionarios:funcionarios})
-                };
-                secondFunction(); 
-            }
-            else{
-                req.flash("error_msg", "Não pode aceder a esta tarefa uma vez que não foi associada a ela.")
-                res.redirect("/tarefas");
-            }
+    Tarefa.findOne({ $and: [{nome:req.params.nome}, { $or: [{funcionarios:req.user.id}, {funcionarioCriador : req.user.id}]}]}).then(function(tarefa){
+        if(tarefa != null){    
+            async function secondFunction(){
+                var obraS = await getObraInfo(tarefa.obra)
+                var funcionarios = await getFuncionariosInfo(tarefa.funcionarios)
+                res.render("users/tarefas/tarefaDetail", {obra:obraS, tarefa:tarefa, funcionarios:funcionarios})
+            };
+            secondFunction(); 
         }
         else{
             req.flash("error_msg", "Tarefa não encontrada.")

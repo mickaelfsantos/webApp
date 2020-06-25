@@ -18,6 +18,11 @@ const Obra = new Schema({
         ref: "Tarefa"
     }],
 
+    funcionariosAssociados: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Funcionario"
+    }],
+
     dataPrevistaInicio: {
         type: Date,
         default: Date.now()
@@ -52,6 +57,12 @@ const Obra = new Schema({
     custoFinal: {
         type: Number,
         default: 0
+    },
+
+    percentagemLucro: {
+        type:Number,
+        default: 25,
+        min: 0
     }
 })
 

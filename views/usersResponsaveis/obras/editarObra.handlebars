@@ -1,0 +1,46 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+<div class="row">
+    <div class="col-12">
+        <h2 id="nomeObra">Editar obra {{nomeO}}</h2>
+    </div>
+</div>
+
+ {{#each obra}}
+    {{#if nome}}        
+        <div class="card">
+            <div class="card-body">
+                <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+                <form action="" name="getObra" method="POST">
+                    <label for="nome">Nome*</label>
+                    <input type="text" id="nome" name="nome" value="{{nome}}" class="form-control mb-4">
+
+                    <label for="descricao">Descrição*</label>
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3">{{descricao}}</textarea>
+
+    {{/if}}
+ {{/each}}
+                    <div class="form-group">
+                        <label for="funcionarios">Dar permissão de intervir na obra</label>
+                        <select multiple class="form-control" id="funcionarios" name="funcionarios">
+                            {{#each funcionarios}}
+                                <option value="{{nome}}">{{nome}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark mt-3">Concluir</button>
+                </form>
+            </div>
+        </div>
+
+<script>
+    var obra = document.getElementById('nomeObra').textContent;
+    var newStr = obra.split(' ').slice(2).join(' ')
+    console.log(newStr)
+    document.getObra.action = "/obra/"+newStr+"/edit";
+</script>

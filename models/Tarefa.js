@@ -18,7 +18,7 @@ const Tarefa = new Schema({
         ref: "Funcionario"
     }],
 
-    funcionarioResponsavel : {
+    funcionarioCriador : {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Funcionario"
     },

@@ -1,10 +1,14 @@
+
+
 <div class="row">
     <div class="col-6">
         <h2>Obra</h2>
     </div>
     <div class="col-6 text-right">
-        <button class="btn btn-dark" onclick="saltaParaEdit()" >Editar</button>
-        <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
+        {{#ifUR user}}
+            <button class="btn btn-dark" onclick="saltaParaEdit()" >Editar</button>
+            <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
+        {{/ifUR}}
         <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
     </div>
 </div>
@@ -12,102 +16,72 @@
 
  {{#each obra}}
     {{#if nome}}
-        <div class="row mt-5 col-12 text-center">
-            <div class="col-6">
-                <h6 class="blockquote">Nome</h6>
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
+                <h6 class="blockquote" id="texto">Nome</h6>
             </div>
-            <div class="col-6">
-                <h6 class="blockquote">Estado</h6>
-            </div>
-            
-        </div>
-
-        <div class="row col-12 text-center">
-            <div class="col-6">
+            <div class="col-9 mt-2" id="texto">
                 <label for="nome" id="nomeObra">{{nome}}</label>
             </div>
+        </div>
 
-            
-            <div class="col-6">
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left" id="texto">
+                <h6 class="blockquote">Estado</h6>
+            </div>
+            <div class="col-9 mt-2" id="texto">
                 <label for="estado" id="estado">{{estadoToString estado}}</label>
             </div>
         </div>
 
 
-        <div class="row mt-5 col-12 text-center">
-            <div class="col-6">
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote">Orçamento</h6>
             </div>
-            <div class="col-6">
-                <h6 class="blockquote">Custo final</h6>
-            </div>
             
-        </div>
-
-        <div class="row col-12 text-center">
-            <div class="col-6">
+            <div class="col-9 mt-2">
                 <label for="nome" id="nomeObra">{{precoToString orcamento}}</label>
             </div>
+        </div>
 
-            
-            <div class="col-6">
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
+                <h6 class="blockquote">Custo final</h6>
+            </div>
+
+            <div class="col-9 mt-2">
                 <label for="estado" id="estado">{{precoToString custoFinal}}</label>
             </div>
         </div>
 
-        <div class="row col-12 text-center">
-            <div class="col-12">
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote">Descrição</h6>
             </div>
-        </div>
-
-        <div class="row col-12 text-center">
-            <div class="col-12">
+            <div class="col-9 mt-2">
                 <label for="descricao" id="descricao">{{descricao}}</label>
             </div>
         </div>
 
-
-        <div class="row mt-5 col-12 text-center">
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             
-            <div class="col-6">
-                <h6 class="blockquote">Data prevista de inicio</h6>
-            </div>
-
-            <div class="col-6 text-center">
-                <h6 class="blockquote">Data prevista de fim</h6>
-            </div>
-        </div>
-
-
-        <div class="row col-12 text-center">
-            <div class="col-6">
-                {{dateToString dataPrevistaInicio}}
-            </div>
-
-            <div class="col-6">
-                {{dateToString dataPrevistaFim}}
-            </div>
-        </div>
-
-        <div class="row mt-5 col-12 text-center">
-            <div class="col-6">
-                <h6 class="blockquote">Data de início</h6>
+            <div class="col-3 mt-2 text-left">
+                <h6 class="blockquote">Datas previstas</h6>
             </div>
             
-            <div class="col-6 text-center">
-                <h6 class="blockquote">Data de fim</h6>
+            <div class="col-9 mt-2">
+                {{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}
             </div>
         </div>
 
 
-        <div class="row col-12 text-center">
-            <div class="col-6">
-                {{dateToString dataInicio}}
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
+                <h6 class="blockquote">Datas</h6>
             </div>
-
-            <div class="col-6">
-                {{dateToString dataFim}}
+            <div class="col-9 mt-2">
+                {{dateToString dataInicio}} - {{dateToString dataFim}}
             </div>
         </div>
 
@@ -157,6 +131,15 @@
         {{/if}}
         
    <script>
+       function setColor(handle){
+           handle.style.backgroundColor = "rgb(95, 158, 160, 0.3)";
+       }
+
+       function setColor2(handle){
+           handle.style.backgroundColor = "white";
+       }
+
+
         function saltaParaObras() {
             window.location.href = "/obras";
         }

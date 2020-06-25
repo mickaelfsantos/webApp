@@ -43,6 +43,11 @@ const Funcionario = new Schema({
         ref: "Tarefa"
     }],
 
+    obras: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Obra"
+    }],
+
     role: {
         type: String,
         enum: ['user', 'userResponsavel', 'admin'],
