@@ -15,5 +15,14 @@ module.exports = {
 
         req.flash("error_msg", "Acesso negado.")
         res.redirect("/dashboard")
+    }, 
+
+    admin: function(req, res, next){
+        if(req.user.role == "admin"){
+            return next();
+        }
+
+        req.flash("error_msg", "Acesso negado.")
+        res.redirect("/dashboard")
     }
 }

@@ -16,6 +16,7 @@
 
  {{#each obra}}
     {{#if nome}}
+        <input type="hidden" id="id" name="id" value="{{_id}}">
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote" id="texto">Nome</h6>
@@ -34,27 +35,29 @@
             </div>
         </div>
 
-
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Orçamento</h6>
-            </div>
-            
-            <div class="col-9 mt-2">
-                <label for="nome" id="nomeObra">{{precoToString orcamento}}</label>
-            </div>
-        </div>
-
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Custo final</h6>
+        {{#ifImAdmin}}
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 mt-2 text-left">
+                    <h6 class="blockquote">Orçamento</h6>
+                </div>
+                
+                <div class="col-9 mt-2">
+                    <label for="nome" id="nomeObra">{{precoToString orcamento}}</label>
+                </div>
             </div>
 
-            <div class="col-9 mt-2">
-                <label for="estado" id="estado">{{precoToString custoFinal}}</label>
-            </div>
-        </div>
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 mt-2 text-left">
+                    <h6 class="blockquote">Custo final</h6>
+                </div>
 
+                <div class="col-9 mt-2">
+                    <label for="estado" id="estado">{{precoToString custoFinal}}</label>
+                </div>
+            </div>
+        {{else}}
+        {{/ifImAdmin}}
+        
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote">Descrição</h6>
@@ -94,7 +97,7 @@
     {{/if}}
  {{/each}}
         {{#if tarefas}}
-            <table class="mt-5" id="myTable">
+            <table class="mt-5 mb-5" id="myTable">
                 <thead>
                 <tr>
                     <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
@@ -108,7 +111,7 @@
         
                 <tbody id="filtro">
                     {{#each tarefas}}
-                        <tr style="cursor: pointer;" id="row" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
+                        <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
                             <td>{{nome}}</td>
                             <td>{{dateToString dataPrevistaInicio}}</td>
                             <td>{{dateToString dataPrevistaFim}}</td>
@@ -125,7 +128,7 @@
                 </tbody>
             </table>
             {{else}}
-            <div class="row text-center mt-4">
+            <div class="row text-center mt-4 mb-5">
                 <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
             </div>
         {{/if}}
@@ -145,7 +148,7 @@
         }
 
         function saltaParaAddTarefa(){
-            obra = document.getElementById('nomeObra').textContent;
+            obra = document.getElementById('id').getAttribute("value");
             window.location.href = "/obra/"+obra+"/addTarefa";
         }
 
@@ -154,12 +157,8 @@
         }
 
         function saltaParaEdit() {
-            obra = document.getElementById('nomeObra').textContent;
+            obra = document.getElementById('id').getAttribute("value");
             window.location.href = "/obra/"+obra+"/edit";
-        }
-        window.onload = function(){
-            obra = document.getElementById('nomeObra').textContent
-            history.replaceState({}, null, '/obra/'+obra)
         }
         
         function sortTable(n) {

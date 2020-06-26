@@ -16,6 +16,7 @@
     <div class="card-body">
         <label style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
         <form action="" name="getObra" method="POST">
+            <input type="hidden" name="id" id="id" value="{{id}}"> 
             <label for="nome">Nome*</label>
             <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4" required>
 
@@ -52,8 +53,9 @@
     </div>
 </div>
 
-<script>    
-    var obra = document.getElementById('nomeObra').textContent;
-    var newStr = obra.split(' ').slice(1).join(' ')
-    document.getObra.action = "/obra/"+newStr+"/addTarefa";
+<script>  
+    window.onload = function() {
+        var obra = document.getElementById('id').getAttribute("value");
+        document.getObra.action = "/obra/"+obra+"/addTarefa";
+    };  
 </script>

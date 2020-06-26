@@ -4,43 +4,61 @@
 
 {{/each}}
 
-<div class="row">
-    <div class="col-12">
-        <h2 id="nomeObra">Editar obra {{nomeO}}</h2>
-    </div>
-</div>
-
+<h2 id="nomeObra">Editar obra {{nomeO}}</h2>
+ 
  {{#each obra}}
     {{#if nome}}        
-        <div class="card">
+        <div class="card mt-4">
             <div class="card-body">
                 <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
                 <form action="" name="getObra" method="POST">
+                    <input type="hidden" id="id" value="{{_id}}">
                     <label for="nome">Nome*</label>
                     <input type="text" id="nome" name="nome" value="{{nome}}" class="form-control mb-4">
 
                     <label for="descricao">Descrição*</label>
                     <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3">{{descricao}}</textarea>
 
+
     {{/if}}
  {{/each}}
-                    <div class="form-group">
-                        <label for="funcionarios">Dar permissão de intervir na obra</label>
-                        <select multiple class="form-control" id="funcionarios" name="funcionarios">
-                            {{#each funcionarios}}
-                                <option value="{{nome}}">{{nome}}</option>
-                            {{/each}}
-                        </select>
-                    </div>
+                        <div class="form-group">
+                            <label for="funcionarios">Dar permissão de intervir na obra</label>
+                            <select multiple class="form-control" id="funcionarios" name="funcionarios">
+                                {{#each funcionarios}}
+                                    <option value="{{nome}}">{{nome}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        
+ {{#each obra}}
+    {{#if nome}}  
+                    {{#ifImAdmin}}
+                        <label for="percentagem">Percentagem de lucro (%)</label>
+                        <input type="text" id="percentagem" name="percentagemLucro" value="{{percentagemLucro}}" class="form-control mb-4" onchange="calcula(this)">
+                        <label for="precoFinal" id="precoFinal">Preço final: {{custoFinal}}€</label>
+                        <br>
+                        {{else}}
+                    {{/ifImAdmin}}
 
                     <button type="submit" class="btn btn-dark mt-3">Concluir</button>
                 </form>
             </div>
         </div>
+    {{/if}}
+ {{/each}}
+                    
+ <script>
+     function calcula(handle){
+         var per = document.getElementById("percentagem").value;
+         var custo = {{{custo}}}
+         //var calculo = custo + custo*per;
+         calculo = 1;
+         document.getElementById('precoFinal').innerHTML = 'Preço final: '+calculo+'€';
+     }
 
-<script>
-    var obra = document.getElementById('nomeObra').textContent;
-    var newStr = obra.split(' ').slice(2).join(' ')
-    console.log(newStr)
+
+    var obra = document.getElementById('id').getAttribute("value");
     document.getObra.action = "/obra/"+newStr+"/edit";
-</script>
+
+ </script>

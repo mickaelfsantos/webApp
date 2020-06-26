@@ -56,7 +56,7 @@ router.post('/registo', function asyncFunction(req, res){
         erros.push({texto: "Password obrigatório."})
     }
     else{
-        if(req.body.password.length < 4){
+        if(req.body.password.length < 5){
             erros.push({texto: "Password curta. Mínimo 5 caracteres."})
         }
         
@@ -131,7 +131,6 @@ router.get('/', function(req, res){
     }
 })
 
-
 router.get('/dashboard', authenticated, function(req, res){
     res.render("users/dashboard")
 })
@@ -146,8 +145,8 @@ router.get('/obras', authenticated, function(req, res){
     })
 })
 
-router.get('/obra/:nome', authenticated, function(req, res){
-    Obra.findOne({ $and: [{nome:req.params.nome}, {funcionariosAssociados : req.user.id}]}).then(function(obra){
+router.get('/obra/:id', authenticated, function(req, res){
+    Obra.findOne({ $and: [{_id:req.params.id}, {funcionariosAssociados : req.user.id}]}).then(function(obra){
         if(obra != null){    
             async function secondFunction(){
                 var tarefas = await myFunction(obra.tarefas)
@@ -175,8 +174,8 @@ router.get('/tarefas', authenticated, function(req, res){
     })
 })
 
-router.get('/tarefa/:nome', authenticated, function(req, res){
-    Tarefa.findOne({ $and: [{nome:req.params.nome}, { $or: [{funcionarios:req.user.id}, {funcionarioCriador : req.user.id}]}]}).then(function(tarefa){
+router.get('/tarefa/:id', authenticated, function(req, res){
+    Tarefa.findOne({ $and: [{_id:req.params.id}, { $or: [{funcionarios:req.user.id}, {funcionarioCriador : req.user.id}]}]}).then(function(tarefa){
         if(tarefa != null){    
             async function secondFunction(){
                 var obraS = await getObraInfo(tarefa.obra)
@@ -193,6 +192,99 @@ router.get('/tarefa/:nome', authenticated, function(req, res){
         req.flash("error_msg", "Tarefa não encontrada.")
         res.redirect("/tarefas");
     })
+})
+
+router.get('/perfil', authenticated, function(req, res){
+    Funcionario.findOne({ _id: req.user.id}).lean().then(function(funcionario){
+        res.render("users/perfil/perfil", {funcionario:funcionario})
+    }).catch(function(erro){
+        req.flash("error_msg", "Erro ao fazer o GET do funcionário.")
+        res.redirect("/dashboard");
+    })
+})
+
+router.get('/perfil/edit', authenticated, function(req, res){
+    Funcionario.findOne({ _id: req.user.id}).lean().then(function(funcionario){
+        res.render("users/perfil/editarPerfil", {funcionario:funcionario})
+    }).catch(function(erro){
+        req.flash("error_msg", "Erro ao fazer o GET do funcionário.")
+        res.redirect("/dashboard");
+    })
+})
+
+router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
+    var erros = []
+
+    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+        erros.push({texto: "Nome inválido."});
+    }else{
+        if(req.body.nome.trim().length < 2){
+            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres."});
+        }
+    }
+
+    if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
+        erros.push({texto: "Email inválido."});
+    }
+    
+
+    if(req.body.password){
+        if(req.body.password.length < 5){
+            erros.push({texto: "Password curta. Mínimo 5 caracteres."})
+        }
+            
+        if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
+            erros.push({texto: "Uma vez que pretende alterar a palavra-pass, a confirmação é obrigatório."})
+        }
+        else{
+            if(req.body.password != req.body.password2){
+                erros.push({texto: "As passwords não correspondem."})
+            }
+        }         
+    }
+
+    if(erros.length > 0){
+        Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+            res.render("users/perfil/editarPerfil", {erros:erros, funcionario:funcionario})
+        }).catch(function(error){
+            req.flash("error_msg", "Erro ao fazer o GET do funcionário.")
+            res.redirect("/perfil");
+        })
+    }
+    else{
+        Funcionario.findOneAndUpdate({_id:req.user.id},
+            {"$set": {
+                "nome": req.body.nome.replace(/\s\s+/g, ' '),
+                "email": req.body.email
+                }}, {useFindAndModify: false}).lean().then(function(funcionario){
+                if(req.body.password){
+                    funcionario.password = req.body.password;
+                    bcrypt.genSalt(10, function(erro, salt){
+                         bcrypt.hash(funcionario.password, salt, function(erro, hash){
+                            if(erro){
+                                req.flash("error_msg", "Erro ao alterar a palavra passe.")
+                                res.redirect("/perfil/edit");
+                            }
+                            
+                            var password = hash
+                            Funcionario.updateOne(
+                                {"_id":funcionario._id},
+                                {$set: {password : password}},
+                                ).catch(function(erro){
+                                    req.flash("error_msg", "Erro ao atualizar o perfil.")
+                                    res.redirect('/obras/');
+                                });
+                        })
+                    })
+                }
+                        
+                req.flash("success_msg", "Perfil editado com sucesso.")
+                res.redirect("/perfil");
+        }).catch(function(error){
+            req.flash("error_msg", "Já existe um cliente com este email.")
+            res.redirect("/perfil");
+        })
+    }
 })
 
 async function myFunction(tarefas){

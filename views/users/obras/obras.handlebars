@@ -63,7 +63,6 @@
 </div>
 
 <div id="lista">
-
   {{#if obras}}
     <table class="mt-5" id="myTable">
       <thead>
@@ -79,7 +78,7 @@
       
       <tbody id="filtro">
         {{#each obras}}
-          <tr style="cursor: pointer;" id="row" data-name="{{nome}}" onclick="saltaParaObra(this)">
+          <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaObra(this)">
               <td>{{nome}}</td>
               <td>{{dateToString dataInicio}}</td>
               <td>{{dateToString dataFim}}</td>

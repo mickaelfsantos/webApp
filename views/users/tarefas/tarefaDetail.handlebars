@@ -22,13 +22,13 @@
 {{/each}}
  {{#each tarefa}}
     {{#if nome}}
-    
+        <input type="hidden" id="id" name="id" value="{{_id}}">
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote">Nome</h6>
             </div>
             <div class="col-9 mt-2">
-                <label for="nome" id="nomeObra">{{nome}}</label>
+                <label for="nome" id="nomeTarefa">{{nome}}</label>
             </div>
         </div>
 
@@ -112,7 +112,7 @@
     }
     
     function saltaParaEditar() {
-        tarefa = document.getElementById('nomeTarefa').textContent;
+        tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/edit";
     }
 </script>

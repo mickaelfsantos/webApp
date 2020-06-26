@@ -7,7 +7,7 @@
 {{/each}}
 
 
-<h2 onload="move()">Lista de tarefas</h2>
+<h2>Lista de tarefas</h2>
 <hr>
 
 
@@ -38,7 +38,7 @@
     
     <tbody id="filtro">
       {{#each tarefas}}
-        <tr style="cursor: pointer;"  id="row" data-name="{{nome}}" onclick="saltaParaTarefa(this)">
+        <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
             <td>{{nome}}</td>
             <td>{{dateToString dataInicio}}</td>
             <td>{{dateToString dataFim}}</td>

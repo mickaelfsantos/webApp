@@ -106,6 +106,19 @@
                 }
             },
 
+            cargoToString: function(role){
+                switch (role){
+                    case "user":
+                        return "Funcionário";
+                    case "userResponsavel":
+                        return "Chefe de equipa";
+                    case "admin":
+                        return "Administrador";
+                    default:
+                        return "Erro";
+                }
+            },
+
             precoToString: function(numero){
                 if(numero == 0)
                     return "Por definir";
@@ -128,6 +141,13 @@
 
             ifEstado: function(estado, options){
                 if(estado === "associada") {
+                    return options.fn(this);
+                }
+                return options.inverse(this);
+            },
+
+            ifImAdmin: function(options){
+                if(u.role === "admin") {
                     return options.fn(this);
                 }
                 return options.inverse(this);
