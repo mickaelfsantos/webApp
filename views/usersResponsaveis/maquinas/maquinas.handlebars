@@ -1,0 +1,106 @@
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+
+<h2>Lista de máquinas</h2>
+<hr>
+
+<div class="row">
+    <div class="col-6 mt-4" style="float:none;margin:auto;">
+        <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
+    </div>
+</div>
+
+{{#if maquinas}}
+  <table class="mt-5" id="myTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Nome</th>
+        <th onclick="sortTable(1)">Departamento</th>
+      </tr>
+    </thead>
+    
+    <tbody id="filtro">
+      {{#each maquinas}}
+        <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaMaquina(this)">
+            <td>{{nome}}</td>
+            <td>{{departamento}}</td>
+        </tr>
+      {{else}}
+
+      {{/each}}
+    </tbody>
+  </table>
+{{else}}
+{{/if}}
+
+
+<script>
+  $(document).ready(function(){
+  $("#inputFiltro").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#filtro tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+  
+});
+
+
+  function saltaParaMaquina(handle) {
+        window.location.href = "/maquina/"+handle.dataset.name;
+    } 
+
+    window.onload = function() {
+        history.replaceState({}, null, "/maquinas")
+    };
+
+  function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+  
+    dir = "asc"; 
+   
+    while (switching) {
+      
+      switching = false;
+      rows = table.rows;
+     
+      for (i = 1; i < (rows.length - 1); i++) {
+        
+        shouldSwitch = false;
+        
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch= true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount ++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  } 
+</script>

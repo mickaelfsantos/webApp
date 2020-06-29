@@ -125,15 +125,17 @@
                 return numero;
             },
 
-            ifUR: function(user, options){
-                if(user.role === "admin" || user.role == "userResponsavel") {
-                    return options.fn(this);
+            ifUR: function(options){
+                if(u){
+                    if(u.role === "admin" || u.role === "userResponsavel") {
+                        return options.fn(this);
+                    }
                 }
                 return options.inverse(this);
             },
 
-            ifAdmin: function(user, options){
-                if(user.role === "admin") {
+            ifImAdmin: function(options){
+                if(u.role === "admin") {
                     return options.fn(this);
                 }
                 return options.inverse(this);
@@ -144,14 +146,7 @@
                     return options.fn(this);
                 }
                 return options.inverse(this);
-            },
-
-            ifImAdmin: function(options){
-                if(u.role === "admin") {
-                    return options.fn(this);
-                }
-                return options.inverse(this);
-            }
+            }            
         }
     })
     app.engine('handlebars', hbs.engine)

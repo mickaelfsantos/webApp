@@ -12,9 +12,11 @@ const userRole = require('../helpers/userRole');
     require("../models/Obra")
     require("../models/Tarefa")
     require("../models/Funcionario")
+    require("../models/Maquina")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
     const Funcionario = mongoose.model("funcionarios")
+    const Maquina = mongoose.model("maquinas")
 
 
 router.get('/obras/add', authenticated, userResponsavel, function(req, res){
@@ -101,8 +103,8 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
             req.flash("success_msg", "Obra criada com sucesso")
             res.redirect("/obras");
         }).catch(function(erro){
-            req.flash("error_msg", "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente.")
-            res.redirect("/obras/add");
+            erros.push({texto: "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente."});
+            res.render("usersResponsaveis/obras/novaObra", {erros: erros, nomeO:nomeO, descricao:descricao, data:data})
         })
     
     }
@@ -112,12 +114,10 @@ router.get('/obra/:id/addTarefa', authenticated, userResponsavel, function(req, 
     Obra.findOne({_id:req.params.id}).then(function(obra){
         if(obra != null){
             Funcionario.find().then(function(funcionarios){
-                if(funcionarios){
-                    res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, id:obra._id, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
-                }
+                res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
             }).catch(function(err){
                 req.flash("error_msg", "Erro interno no GET dos funcionários.")
-                res.redirect('/obra/'+req.params.nome);
+                res.redirect('/obra/'+req.params.id);
             })
         }
         else{
@@ -292,8 +292,21 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
                     })
                       
                 }).catch(function(erro){
-                    req.flash("error_msg", "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente.")
-                    res.redirect("/obra/"+obra._id+"/addTarefa");
+                    erros.push({texto: "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."});
+                    Obra.findOne({_id:req.params.id}).then(function(obra){
+                        Funcionario.find({}).then(function(funcionarios){
+                            if(funcionarios){
+                                res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
+                                    funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
+                            }
+                        }).catch(function(err){
+                            req.flash("error_msg", "Erro interno no GET dos funcionários.")
+                            res.redirect('/obra/'+req.params.nome);
+                        })
+                    }).catch(function(error){
+                        req.flash("error_msg", "Obra não encontrada.");
+                        res.redirect("/obra/"+req.params.id);
+                    })
                 })
             }).catch(function(erro){
                 req.flash("error_msg", "Erro interno no GET da obra tarefa.")
@@ -393,8 +406,8 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
 
             Obra.findOneAndUpdate({_id:req.params.id}, 
                 {"$set": {
-                    "nome": req.body.nome,
-                    "descricao": req.body.descricao,
+                    "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    "descricao": req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                     "percentagemLucro": req.body.percentagemLucro
                   }}, {useFindAndModify: false}).then(function(obra){
                 
@@ -414,8 +427,8 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
                 res.redirect("/obra/"+req.params.id);
             }).catch(function (error){
                 console.log(error)
-                req.flash("error_msg", "Houve um erro ao encontrar a obra.")
-                res.redirect("/obra/"+req.params.id)
+                req.flash("error_msg", "Já existe uma obra com esse nome.")
+                res.redirect("/obra/"+req.params.id+"/edit")
             })
         }
         secondFunction()
@@ -435,8 +448,8 @@ router.get('/funcionario/:id', authenticated, admin, function(req, res){
     Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
         res.render("admin/funcionarioDetail", {funcionario:funcionario})
     }).catch(function(erro){
-        req.flash("error_msg", "Erro ao fazer o GET dos funcionários.")
-        res.redirect("/dashboard");
+        req.flash("error_msg", "Funcionário não encontrado")
+        res.redirect("/funcionarios");
     })
 })
 
@@ -444,8 +457,8 @@ router.get('/funcionario/:id/edit', authenticated, admin, function(req, res){
     Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
         res.render("admin/editarFuncionario", {funcionario:funcionario})
     }).catch(function(erro){
-        req.flash("error_msg", "Erro ao fazer o GET dos funcionários.")
-        res.redirect("/dashboard");
+        req.flash("error_msg", "Funcionario não encontrado")
+        res.redirect("/funcionarios");
     })
 })
 
@@ -497,11 +510,131 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
                 req.flash("success_msg", "Utilizador editado com sucesso")
                 res.redirect("/funcionarios");
         }).catch(function(error){
-            req.flash("error_msg", "Erro ao editar funcionário.")
+            req.flash("error_msg", "Funcionário não encontrado")
             res.redirect("/funcionarios");
         })
     }
 })
+
+router.get('/maquinas', authenticated, userResponsavel, function(req, res){
+    Maquina.find().lean().then(function(maquinas){
+        res.render("usersResponsaveis/maquinas/maquinas", {maquinas:maquinas})
+    }).catch(function(error){
+        req.flash("error_msg", "Máquinas não encontradas")
+        res.redirect("/dashboard")
+    })
+})
+
+router.get('/maquinas/add', authenticated, userResponsavel, function(req, res){
+    res.render("usersResponsaveis/maquinas/novaMaquina")
+})
+
+router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunction(req, res){
+    
+    var erros = []
+    var nomeO;
+    var departamento;
+
+    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+        erros.push({texto: "Nome inválido"});
+    }
+    else{
+        if(req.body.nome.trim().length < 2){
+            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+        }else{
+            nomeO = req.body.nome;
+        }
+    }
+    
+    if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
+        erros.push({texto: "Departamento inválida"});
+    } else{
+        departamento = req.body.departamento
+    }
+
+
+    if(erros.length > 0){
+        res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, departamento:departamento})
+    }
+    else{
+        var novaMaquina;
+        novaMaquina = {
+            nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+            departamento: req.body.departamento.replace(/\s\s+/g, ' ').replace(/\s*$/,'')
+        }        
+        new Maquina(novaMaquina).save().then(function(){ 
+            req.flash("success_msg", "Máquina criada com sucesso.")
+            res.redirect("/maquinas");
+        }).catch(function(erro){
+            erros.push({texto: "Já existe uma máquina com o mesmo nome ou houve um erro ao adicionar a máquina. Tente novamente."});
+            res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, departamento:departamento})
+        })
+    
+    }
+})
+
+router.get('/maquina/:id', authenticated, userResponsavel, function(req, res){
+    Maquina.findOne({_id: req.params.id}).lean().then(function(maquina){
+        res.render("usersResponsaveis/maquinas/maquinaDetail", {maquina:maquina})
+    }).catch(function(error){
+        req.flash("error_msg", "Máquina não encontrada.")
+        res.redirect("/maquinas")
+    })
+})
+
+router.get('/maquina/:id/edit', authenticated, userResponsavel, function(req, res){
+    Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
+        res.render("usersResponsaveis/maquinas/editarMaquina", {maquina:maquina})
+    }).catch(function(erro){
+        req.flash("error_msg", "Máquina não encontrada")
+        res.redirect("/maquinas");
+    })
+})
+
+router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){
+    
+    var erros = []
+
+    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+        erros.push({texto: "Nome inválido."});
+    }
+    else{
+        if(req.body.nome.trim().length < 2){   
+            erros.push({texto: "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+        }
+    }
+
+    if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
+        erros.push({texto: "Departamento inválido."});
+    }
+
+    if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null || req.body.custo < 0){
+        erros.push({texto: "Preço inválido."});
+    }
+
+    if(erros.length > 0){
+        Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
+            res.render("usersResponsaveis/maquinas/editarMaquina", {erros:erros, maquina:maquina})
+        }).catch(function(error){
+            req.flash("error_msg", "Máquina não encontrada.")
+            res.redirect("/maquinas")
+        })
+    }
+    else{
+        Maquina.findOneAndUpdate({_id:req.params.id},
+            {"$set": {
+                "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                "departamento": req.body.departamento
+              }}, {useFindAndModify: false}).then(function(){
+                req.flash("success_msg", "Máquina editada com sucesso")
+                res.redirect("/maquinas");
+        }).catch(function(error){
+            req.flash("error_msg", "Já existe uma máquina com o mesmo nome.")
+            res.redirect("/maquina/"+req.params.id+"/edit");
+        })
+    }
+})
+
 
 async function getFuncionarios(funcionarios, f){
     var a=[]

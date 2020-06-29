@@ -1,0 +1,36 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+<h2 id="nomeMaquina">Editar máquina {{maquina.nome}}</h2>
+ 
+<div class="card mt-4">
+    <div class="card-body">
+        <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+        <form action="" name="getMaquina" method="POST">
+            <input type="hidden" id="id" value="{{maquina._id}}">
+            <label for="nome">Nome*</label>
+            <input type="text" id="nome" name="nome" value="{{maquina.nome}}" class="form-control mb-4">
+
+            <label for="departamento">Departamento*</label>
+            <input type="text" id="departamento" name="departamento" value="{{maquina.departamento}}" class="form-control mb-4">
+
+            {{#ifImAdmin}}
+                <label for="custo">Custo por hora*</label>
+                <input type="text" id="custo" name="custo" value="{{maquina.custo}}" class="form-control mb-4">
+
+            {{else}}
+            {{/ifImAdmin}}
+            
+            <button type="submit" class="btn btn-dark mt-3">Concluir</button>
+        </form>
+    </div>
+</div>
+                    
+ <script>
+    var maquina = document.getElementById('id').getAttribute("value");
+    document.getMaquina.action = "/maquina/"+maquina+"/edit";
+
+ </script>

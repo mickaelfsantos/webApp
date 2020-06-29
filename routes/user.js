@@ -12,9 +12,11 @@ const {authenticated} = require('../helpers/userRole')
     require("../models/Obra")
     require("../models/Tarefa")
     require("../models/Funcionario")
+    require("../models/Requisicao")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
     const Funcionario = mongoose.model("funcionarios")
+    const Requicisao = mongoose.model("requisicoes")
 
 
 router.get('/login', function(req, res){
@@ -168,7 +170,6 @@ router.get('/tarefas', authenticated, function(req, res){
     Tarefa.find( { $or: [{ funcionarios: req.user.id}, {funcionarioCriador : req.user.id }]}).lean().then(function(tarefas){
         res.render("users/tarefas/tarefas", {tarefas: tarefas})
     }).catch(function(erro){
-        console.log(erro)
         req.flash("error_msg", "Erro ao fazer o GET das tarefas.")
         res.redirect("/dashboard");
     })
@@ -188,6 +189,43 @@ router.get('/tarefa/:id', authenticated, function(req, res){
             req.flash("error_msg", "Tarefa não encontrada.")
             res.redirect("/tarefas");
         }
+    }).catch(function(erro){
+        req.flash("error_msg", "Tarefa não encontrada.")
+        res.redirect("/tarefas");
+    })
+})
+
+router.get('/tarefa/:id/edit', authenticated, function(req, res){
+    Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).lean().then(function(tarefa){
+        if(tarefa == null){
+            req.flash("error_msg", "Tarefa não encontrada.")
+            res.redirect("/tarefas");
+        }
+        else{
+            Funcionario.find().lean().then(function(f){
+                var func = []
+                var encontrou = false;
+            
+                for(var i=0; i<f.length; i++){
+                    for(var j=0; j<tarefa.funcionarios.length; j++){
+                        if(f[i]._id.equals(tarefa.funcionarios[j])){
+                            encontrou=true;
+                        }
+                    }
+                    if(!encontrou){
+                        func.push(f[i]);
+                    }
+                    encontrou=false;
+                }
+
+                var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
+                var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD")
+                var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DD")
+                var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DD")
+                res.render("users/tarefas/editarTarefa", {tarefa:tarefa, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                     funcionarios : func})
+            })
+        }    
     }).catch(function(erro){
         req.flash("error_msg", "Tarefa não encontrada.")
         res.redirect("/tarefas");
@@ -254,7 +292,7 @@ router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
     else{
         Funcionario.findOneAndUpdate({_id:req.user.id},
             {"$set": {
-                "nome": req.body.nome.replace(/\s\s+/g, ' '),
+                "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                 "email": req.body.email
                 }}, {useFindAndModify: false}).lean().then(function(funcionario){
                 if(req.body.password){
@@ -282,10 +320,20 @@ router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
                 res.redirect("/perfil");
         }).catch(function(error){
             req.flash("error_msg", "Já existe um cliente com este email.")
-            res.redirect("/perfil");
+            res.redirect("/perfil/edit");
         })
     }
 })
+
+router.get('/requisicoes', authenticated, function(req, res){
+    Requicisao.find().lean.then(function(requisicoes){
+        res.render("users/requisicoes/requisicoes", {requisicoes:requisicoes})
+    }).catch(function(error){
+        req.flash("error_msg", "Requisições não encontradas.")
+        res.redirect('/dashboard')
+    })
+})
+
 
 async function myFunction(tarefas){
     var a=[]

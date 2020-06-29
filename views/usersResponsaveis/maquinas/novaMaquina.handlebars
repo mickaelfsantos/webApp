@@ -1,0 +1,29 @@
+{{#each erros}}
+    <div class="alert alert-danger">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+{{#each mensagem}}
+    <div class="alert alert-success">{{texto}}</div>
+{{else}}
+
+{{/each}}
+
+<h2>Nova máquina</h2>
+<div class="card mt-4">
+    <div class="card-body">
+        <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+        <form action="/maquinas/add" method="POST">
+            <label for="nome">Nome*</label>
+            <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control" required>
+            
+            <label for="departamento" class="mt-4">Departamento*</label>
+            <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control mb-4" required>
+            <button type="submit" class="btn btn-dark">Concluir</button>
+        </form>
+    </div>
+</div>
+
+<script>
+</script>

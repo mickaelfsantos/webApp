@@ -11,12 +11,12 @@
 {{/each}}
 
 <h2>Nova tarefa</h2>
-<h5 id="nomeObra">Obra {{nomeO}}</h5>
+<h5 id="nomeObra">Obra {{obra.nome}}</h5>
 <div class="card mt-4">
     <div class="card-body">
         <label style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-        <form action="" name="getObra" method="POST">
-            <input type="hidden" name="id" id="id" value="{{id}}"> 
+        <form action="" name="getTarefa" method="POST">
+            <input type="hidden" name="id" id="id" value="{{obra._id}}"> 
             <label for="nome">Nome*</label>
             <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4" required>
 
@@ -26,13 +26,9 @@
             <div class="form-group">
                 <label for="funcionarios">Funcionarios a associar*</label>
                 <select multiple class="form-control" id="funcionarios" name="funcionarios" required>
-                    {{#if funcionariosS}}
+                    {{#each funcionarios}}
                         <option value="{{nome}}">{{nome}}</option>
-                        {{else}}
-                            {{#each funcionarios}}
-                                <option value="{{nome}}">{{nome}}</option>
-                            {{/each}}
-                    {{/if}}
+                    {{/each}}
                 </select>
             </div>
 
@@ -41,10 +37,11 @@
 
             <div class="form-group">
                 <label for="importancia">Importância da tarefa</label>
+                <input type="hidden" id="importancia" value="{{tarefa.importancia}}">
                 <select class="form-control" id="importancia" name="importancia">
-                    <option>Baixa</option>
-                    <option>Média</option>
-                    <option>Alta</option>
+                    <option id="baixa">Baixa</option>
+                    <option id="media">Média</option>
+                    <option id="alta">Alta</option>
                 </select>
             </div>
             
@@ -55,7 +52,21 @@
 
 <script>  
     window.onload = function() {
-        var obra = document.getElementById('id').getAttribute("value");
-        document.getObra.action = "/obra/"+obra+"/addTarefa";
+        var tarefa = document.getElementById('id').getAttribute("value");
+        document.getTarefa.action = "/tarefa/"+tarefa+"/edit";
     };  
+
+    var imp = document.getElementById('importancia').getAttribute("value");
+    if(imp == "baixa"){
+        document.getElementById("baixa").setAttribute("selected", "selected")
+    }else{
+        if(imp == "media"){
+            document.getElementById("media").setAttribute("selected", "selected")
+        }
+        else{
+            if(imp == "alta"){    
+                document.getElementById("alta").setAttribute("selected", "selected")
+            }
+        }
+    }
 </script>

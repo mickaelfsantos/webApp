@@ -13,13 +13,11 @@
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="/obras">Obras</a>
-          {{#if user}}
-            {{#ifUR user}}
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="/obras/add">Nova obra</a>
-              {{else}}
-            {{/ifUR}}
-          {{/if}}
+          {{#ifUR}}
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/obras/add">Nova obra</a>
+          {{else}}
+          {{/ifUR}}
         </div>
       </li>
       <li class="nav-item dropdown">
@@ -30,24 +28,29 @@
           <a class="dropdown-item" href="/tarefas">Tarefas</a>
         </div>
       </li>
+      {{#ifUR}}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Máquinas
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/maquinas">Máquinas</a>
+              
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/maquinas/add">Nova máquina</a>
+                  
+          </div>
+        </li>
+      {{else}}
+      {{/ifUR}}
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Máquinas
+          Requisições
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Máquinas</a>
+          <a class="dropdown-item" href="#">Requisições</a>
           <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Nova máquina</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Componentes
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Compomentes</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Encomendar componentes</a>
+          <a class="dropdown-item" href="#">Nova requisição</a>
         </div>
       </li>
       <li class="nav-item dropdown">
