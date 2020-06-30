@@ -5,7 +5,8 @@
     </div>
     <div class="col-6 text-right">
         <button class="btn btn-dark" onclick="saltaParaEditar()">Editar</button>
-        <button class="btn btn-dark" onclick="saltaParaTras()" >Voltar</button>
+        <button class="btn btn-dark" onclick="saltaParaRequisitar()">Requisitar máquina</button>
+        <button class="btn btn-dark" onclick="saltaParaComecar()">Começar tarefa</button>
     </div>
 </div>
 <hr>
@@ -103,15 +104,18 @@
         handle.style.backgroundColor = "white";
     }
 
-    function saltaParaTras() {
-        if(document.referrer == ""){
-            window.location.href = "/tarefas";
-        }else{
-            window.location.href = document.referrer;
-        }
-    }
     
     function saltaParaEditar() {
+        tarefa = document.getElementById('id').getAttribute("value");
+        window.location.href = "/tarefa/"+tarefa+"/edit";
+    }
+
+    function saltaParaRequisitar() {
+        tarefa = document.getElementById('id').getAttribute("value");
+        window.location.href = "/tarefa/"+tarefa+"/edit";
+    }
+
+    function saltaParaComecar() {
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/edit";
     }

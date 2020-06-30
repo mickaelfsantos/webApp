@@ -114,7 +114,7 @@ router.get('/obra/:id/addTarefa', authenticated, userResponsavel, function(req, 
     Obra.findOne({_id:req.params.id}).then(function(obra){
         if(obra != null){
             Funcionario.find().then(function(funcionarios){
-                res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
+                res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, id:obra._id, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
             }).catch(function(err){
                 req.flash("error_msg", "Erro interno no GET dos funcionários.")
                 res.redirect('/obra/'+req.params.id);
@@ -166,155 +166,147 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
         erros.push({texto: "Associe funcionários à tarefa."});
     }
 
-    var today = moment().format("YYYY-MM-DD");
-    if(req.body.dataPrevistaInicio){
-        var date = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
-        if(moment(date).isValid()){
-            if(moment(today).isAfter(date) == true){
-                erros.push({texto: "Data invalida. Data de inicio tem que ser uma data supeior à data de hoje."});
-            }
-            else{
-                data = req.body.dataPrevistaInicio;
+    Obra.findOne({_id:req.params.id}).then(function(obra){
+        if(req.body.dataPrevistaInicio){
+            var today = moment().format("YYYY-MM-DD");
+            var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
+            var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD")
+            if(moment(dataTarefa).isValid()){
+                if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
+                    erros.push({texto: "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra."})
+                }
             }
         }
-    }
-    
 
-    if(erros.length > 0){
-        Obra.findOne({_id:req.params.id}).then(function(obra){
+        if(erros.length > 0){ 
             Funcionario.find({}).then(function(funcionarios){
                 if(funcionarios){
-                    res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
+                    res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, id:obra._id, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
                         funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
                 }
             }).catch(function(err){
                 req.flash("error_msg", "Erro interno no GET dos funcionários.")
                 res.redirect('/obra/'+req.params.nome);
             })
-        }).catch(function(error){
-            req.flash("error_msg", "Obra não encontrada.");
-            res.redirect("/obra/"+req.params.id);
-        })
-    }
-    else{
-        async function secondFunction(){
-            var f = req.body.funcionarios
-            var funcionarios = await getFuncionarios(f)
-            Obra.findOne({_id:req.params.id}).then(function(obra){
-                var novaTarefa;
-                if(req.body.dataPrevistaInicio){
-                    novaTarefa = {
-                        nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                        descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                        dataPrevistaInicio: req.body.dataPrevistaInicio,
-                        obra: obra._id,
-                        funcionarios: funcionarios,
-                        importancia: req.body.importancia.toLowerCase(),
-                        funcionarioCriador : req.user.id
+        }
+        else{
+            async function secondFunction(){
+                var f = req.body.funcionarios
+                var funcionarios = await getFuncionarios(f)
+                    var novaTarefa;
+                    if(req.body.dataPrevistaInicio){
+                        novaTarefa = {
+                            nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                            descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                            dataPrevistaInicio: req.body.dataPrevistaInicio,
+                            obra: obra._id,
+                            funcionarios: funcionarios,
+                            importancia: req.body.importancia.toLowerCase(),
+                            funcionarioCriador : req.user.id
+                        }
                     }
-                }
-                else{
-                    novaTarefa = { 
-                        nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                        descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                        obra: obra._id,
-                        funcionarios: funcionarios,
-                        importancia: req.body.importancia.toLowerCase(),
-                        funcionarioCriador : req.user.id
+                    else{
+                        novaTarefa = { 
+                            nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                            descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                            dataPrevistaInicio: obra.dataPrevistaInicio,
+                            obra: obra._id,
+                            funcionarios: funcionarios,
+                            importancia: req.body.importancia.toLowerCase(),
+                            funcionarioCriador : req.user.id
+                        }
                     }
-                }
-            
-                new Tarefa(novaTarefa).save().then(function(){
-                    Tarefa.findOne({"nome":novaTarefa.nome}).then(function(tarefa){
-                        for(var i=0; i<funcionarios.length; i++){
-                            
-                            Funcionario.updateOne(
-                                {"nome":funcionarios[i].nome},
-                                {$push: {tarefas : tarefa._id}}
-                            ).then().catch(function(erro){
-                                req.flash("error_msg", "Erro ao inserir as tarefas nos funcionários.")
-                                res.redirect('/obra/'+req.params.id);
-                            })
-                            
-                            var encontrou = false;
-                            for(var j=0; j<funcionarios[i].obras.length; j++){
-                                if(funcionarios[i].obras[j].equals(obra._id)){
-                                    encontrou = true;
-                                    break;
-                                }
-                            }
-                            if(!encontrou){
+                
+                    new Tarefa(novaTarefa).save().then(function(){
+                        Tarefa.findOne({"nome":novaTarefa.nome}).then(function(tarefa){
+                            for(var i=0; i<funcionarios.length; i++){
+                                
                                 Funcionario.updateOne(
                                     {"nome":funcionarios[i].nome},
-                                    {$push: {obras : obra._id}}
-                                ).catch(function(erro){
-                                    req.flash("error_msg", "Erro ao inserir a obra nos funcionários.")
+                                    {$push: {tarefas : tarefa._id}}
+                                ).then().catch(function(erro){
+                                    req.flash("error_msg", "Erro ao inserir as tarefas nos funcionários.")
                                     res.redirect('/obra/'+req.params.id);
                                 })
-                            }
-                        }
-
-                        Obra.updateOne(
-                            {"nome":obra.nome},
-                            {$push: {tarefas : tarefa._id}},
-                        ).catch(function(erro){
-                            req.flash("error_msg", "Erro ao atualizar a obra.")
-                            res.redirect('/obras/');
-                        })
-
-                        var encontrou = false
-                        for(var j=0; j<funcionarios.length; j++){
-                            for(var i=0; i<obra.funcionariosAssociados.length; i++){
-                                if(funcionarios[j]._id.equals(obra.funcionariosAssociados[i])){
-                                    encontrou = true;
-                                    break;
+                                
+                                var encontrou = false;
+                                for(var j=0; j<funcionarios[i].obras.length; j++){
+                                    if(funcionarios[i].obras[j].equals(obra._id)){
+                                        encontrou = true;
+                                        break;
+                                    }
+                                }
+                                if(!encontrou){
+                                    Funcionario.updateOne(
+                                        {"nome":funcionarios[i].nome},
+                                        {$push: {obras : obra._id}}
+                                    ).catch(function(erro){
+                                        req.flash("error_msg", "Erro ao inserir a obra nos funcionários.")
+                                        res.redirect('/obra/'+req.params.id);
+                                    })
                                 }
                             }
+    
+                            Obra.updateOne(
+                                {"nome":obra.nome},
+                                {$push: {tarefas : tarefa._id}},
+                            ).catch(function(erro){
+                                req.flash("error_msg", "Erro ao atualizar a obra.")
+                                res.redirect('/obras/');
+                            })
+    
+                            var encontrou = false
+                            for(var j=0; j<funcionarios.length; j++){
+                                for(var i=0; i<obra.funcionariosAssociados.length; i++){
+                                    if(funcionarios[j]._id.equals(obra.funcionariosAssociados[i])){
+                                        encontrou = true;
+                                        break;
+                                    }
+                                }
+                                
+                                if(!encontrou){
+                                    Obra.updateOne(
+                                        {"nome":obra.nome},
+                                        {$push: {funcionariosAssociados : funcionarios[j]._id}},
+                                    ).catch(function(erro){
+                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                        res.redirect('/obras/');
+                                    })
+                                }else{
+                                    encontrou=false;
+                                }
+                            }
+                            req.flash("success_msg", "Tarefa criada com sucesso.")
+                            res.redirect('/obra/'+obra._id);
                             
-                            if(!encontrou){
-                                Obra.updateOne(
-                                    {"nome":obra.nome},
-                                    {$push: {funcionariosAssociados : funcionarios[j]._id}},
-                                ).catch(function(erro){
-                                    req.flash("error_msg", "Erro ao atualizar a obra.")
-                                    res.redirect('/obras/');
-                                })
-                            }else{
-                                encontrou=false;
-                            }
-                        }
-                        req.flash("success_msg", "Tarefa criada com sucesso.")
-                        res.redirect('/obra/'+obra._id);
-                        
-                    }).catch(function(erro){
-                        req.flash("error_msg", "Erro ao encontrar a tarefa.")
-                        res.redirect('/obra/'+obra._id);
-                    })
-                      
-                }).catch(function(erro){
-                    erros.push({texto: "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."});
-                    Obra.findOne({_id:req.params.id}).then(function(obra){
-                        Funcionario.find({}).then(function(funcionarios){
-                            if(funcionarios){
-                                res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
-                                    funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
-                            }
-                        }).catch(function(err){
-                            req.flash("error_msg", "Erro interno no GET dos funcionários.")
-                            res.redirect('/obra/'+req.params.nome);
+                        }).catch(function(erro){
+                            req.flash("error_msg", "Erro ao encontrar a tarefa.")
+                            res.redirect('/obra/'+obra._id);
                         })
-                    }).catch(function(error){
-                        req.flash("error_msg", "Obra não encontrada.");
-                        res.redirect("/obra/"+req.params.id);
+                          
+                    }).catch(function(erro){
+                        erros.push({texto: "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."});
+                        Funcionario.find({}).then(function(funcionarios){
+                                if(funcionarios){
+                                    res.render("usersResponsaveis/tarefas/novaTarefa", {nomeO:obra.nome, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
+                                        funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
+                                }
+                            }).catch(function(err){
+                                req.flash("error_msg", "Erro interno no GET dos funcionários.")
+                                res.redirect('/obra/'+req.params.nome);
+                            })
+                        
                     })
-                })
-            }).catch(function(erro){
-                req.flash("error_msg", "Erro interno no GET da obra tarefa.")
-                res.redirect('/tarefas/');
-            })
-        };
-        secondFunction()
-    }
+            };
+            secondFunction()
+        }
+
+        
+    }).catch(function(error){
+        req.flash("error_msg", "Obra não encontrada.");
+        res.redirect("/obra/"+req.params.id);
+    })
+    
 })
 
 router.get('/obra/:id/edit', authenticated, userResponsavel, function(req, res){

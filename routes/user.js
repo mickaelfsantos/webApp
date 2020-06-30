@@ -232,6 +232,175 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
     })
 })
 
+router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
+    var erros = []
+   
+    Tarefa.findOne({_id: req.params.id}).then(function(tarefa){
+        Obra.findOne({_id:tarefa.obra}).then(function(obra){
+
+            if(req.user.role != "user"){
+                if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+                    erros.push({texto: "Nome inválido."});
+                }else{
+                    if(req.body.nome.trim().length < 2){
+                        erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres."});
+                    }
+                    else{
+                        tarefa.nome = req.body.nome;
+                    }
+                }
+            
+                if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
+                    erros.push({texto: "Descrição inválida."});
+                }
+                else{
+                    tarefa.descricao = req.body.descricao;
+                }
+
+                tarefa.importancia = req.body.importancia.toLowerCase();
+            }
+
+
+            if(req.body.dataPrevistaInicio){
+                var today = moment().format("YYYY-MM-DD");
+                var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
+                var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD")
+                if(moment(dataTarefa).isValid()){
+                    if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
+                        erros.push({texto: "Data inválida. Data de início tem que ser superior ou igual à data de hoje e à data de inicio da obra."})
+                    }
+                    else{
+                        tarefa.dataPrevistaInicio = req.body.dataPrevistaInicio;
+                    }
+                }
+            }
+
+            if(req.body.dataPrevistaFim){
+                var today = moment().format("YYYY-MM-DD");
+                var dataInicioTarefa;
+                if(req.body.dataPrevistaInicio){
+                    dataInicioTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
+                }else{
+                    dataInicioTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
+                }
+                var dataFimTarefa = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD")
+                if(moment(dataFimTarefa).isValid()){
+                    if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
+                        erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data de hoje e à data de inicio da tarefa."})
+                    }
+                    else{
+                        tarefa.dataPrevistaFim = req.body.dataPrevistaFim;
+                    }
+                }
+            }
+            
+
+            if(erros.length > 0){
+                Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).lean().then(function(tarefa){
+                    if(tarefa == null){
+                        req.flash("error_msg", "Tarefa não encontrada.")
+                        res.redirect("/tarefas");
+                    }
+                    else{
+                        Funcionario.find().lean().then(function(f){
+                            var func = []
+                            var encontrou = false;
+                        
+                            for(var i=0; i<f.length; i++){
+                                for(var j=0; j<tarefa.funcionarios.length; j++){
+                                    if(f[i]._id.equals(tarefa.funcionarios[j])){
+                                        encontrou=true;
+                                    }
+                                }
+                                if(!encontrou){
+                                    func.push(f[i]);
+                                }
+                                encontrou=false;
+                            }
+            
+                            var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
+                            var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD")
+                            var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DD")
+                            var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DD")
+                            res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                                 funcionarios : func})
+                        })
+                    }    
+                }).catch(function(erro){
+                    req.flash("error_msg", "Tarefa não encontrada.")
+                    res.redirect("/tarefas");
+                })
+            }
+            else{
+                async function secondFunction(){
+                    var f = req.body.funcionarios
+                    if(f != undefined){
+                        var funcs = await getFuncionarios(f)
+                    }
+        
+                    Tarefa.findOneAndUpdate({_id:req.params.id}, 
+                        {"$set": {
+                            "nome": tarefa.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                            "descricao": tarefa.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                            "dataPrevistaInicio": tarefa.dataPrevistaInicio,
+                            "dataPrevistaFim": tarefa.dataPrevistaFim,
+                            "importancia": tarefa.importancia
+                          }}, {useFindAndModify: false}).then(function(tarefa){
+                        
+                        if(f != undefined){
+                            for(var i=0; i<funcs.length; i++){
+                                Tarefa.updateOne(
+                                {"nome":tarefa.nome},
+                                {$push: {funcionarios : funcs[i]._id}},
+                                ).catch(function(erro){
+                                    req.flash("error_msg", "Erro ao atualizar a tarefa.")
+                                    res.redirect('/tarefa/'+req.params.id);
+                                });
+
+                                Funcionario.updateOne(
+                                    {"nome":funcs[i].nome},
+                                    {$push: {tarefas : tarefa._id}}
+                                ).then().catch(function(erro){
+                                    req.flash("error_msg", "Erro ao inserir as tarefas nos funcionários.")
+                                    res.redirect('/obra/'+req.params.id);
+                                })
+                                
+                                var encontrou = false;
+                                for(var j=0; j<funcs[i].obras.length; j++){
+                                    if(funcs[i].obras[j].equals(tarefa.obra)){
+                                        encontrou=true;
+                                        break;
+                                    }
+                                }
+
+                                if(!encontrou){
+                                    Obra.updateOne(
+                                        {"_id":tarefa.obra},
+                                        {$push: {funcionariosAssociados : funcs[i]._id}},
+                                    ).catch(function(erro){
+                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                        res.redirect('/obras/');
+                                    })
+                                }else{
+                                    encontrou=false;
+                                }
+                            }
+                        }
+                            
+                        req.flash("success_msg", "Tarefa editada com sucesso.");
+                        res.redirect("/tarefa/"+req.params.id);
+                    }).catch(function (error){
+                        req.flash("error_msg", "Já existe uma tarefa com esse nome.")
+                        res.redirect("/tarefa/"+req.params.id+"/edit")
+                    })
+                }
+                secondFunction()
+            }
+        })
+    })
+
+})
+
 router.get('/perfil', authenticated, function(req, res){
     Funcionario.findOne({ _id: req.user.id}).lean().then(function(funcionario){
         res.render("users/perfil/perfil", {funcionario:funcionario})
@@ -362,7 +531,28 @@ async function getFuncionariosInfo(funcionarios){
             a.push(funcionario)
         });
     }
-    
+    return a;
+}
+
+async function getFuncionarios(funcionarios, f){
+    var a=[]
+    if(funcionarios[0].length == 1){
+        await Funcionario.findOne({nome : funcionarios}).lean().then(function(funcionario){
+            a.push(funcionario);
+        })
+    }
+    else{
+        await Funcionario.find().lean().then(function(funcionario) {
+            for(var i=0; i<funcionarios.length; i++){
+                for(var j=0; j<funcionario.length; j++){
+                    if(funcionarios[i] == funcionario[j].nome){
+                        a.push(funcionario[j])
+                        break;
+                    }
+                }
+            }
+        })
+    }
     return a;
 }
 
