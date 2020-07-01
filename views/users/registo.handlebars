@@ -9,15 +9,15 @@
     <div class="card-body">
         <form action="/registo" method="POST">
             <label for="nome">Nome </label>
-            <input type="nome" name="nome" class="form-control" required>
+            <input type="nome" name="nome" value="{{nomeF}}" class="form-control" required>
             <label class="mt-4" for="funcao">Função na empresa </label>
-            <input type="funcao" class="form-control" name="funcao" required>
+            <input type="funcao" class="form-control" value="{{funcao}}" name="funcao" required>
             <label class="mt-4" for="departamento">Departamento </label>
-            <input type="departamento" class="form-control" name="departamento" required>
+            <input type="departamento" class="form-control" value="{{departamento}}" name="departamento" required>
             <label class="mt-4" for="equipa">Equipa </label>
-            <input type="equipa" class="form-control" name="equipa" required>
+            <input type="equipa" class="form-control" value="{{equipa}}" name="equipa" required>
             <label class="mt-4" for="email">Email </label>
-            <input type="email" class="form-control" name="email" required>
+            <input type="email" class="form-control" value="{{email}}" name="email" required>
             <label class="mt-4" for="password">Password </label>
             <input type="password" class="form-control" name="password" required>
             <label class="mt-4" for="password2">Repita a password </label>

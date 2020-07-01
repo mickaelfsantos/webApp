@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 const Tarefa = new Schema({    
     nome: {
         type: String,
-        unique: true,
         required: true
     },
 

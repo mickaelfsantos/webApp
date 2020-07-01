@@ -35,16 +35,6 @@
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Estado</h6>
-            </div>
-
-            <div class="col-9 mt-2">
-                <label for="estado" id="estado">{{estadoToString estado}}</label>
-            </div>
-        </div>
-        
-         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote">Descrição</h6>
             </div>
 
@@ -53,6 +43,27 @@
             </div>
         </div>
 
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
+                <h6 class="blockquote">Importância</h6>
+            </div>
+
+            <div class="col-9 mt-2">
+                <label for="descricao" id="descricao">{{importancia}}</label>
+            </div>
+        </div>
+
+
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 mt-2 text-left">
+                <h6 class="blockquote">Estado</h6>
+            </div>
+
+            <div class="col-9 mt-2">
+                <label for="estado" id="estado">{{estadoToString estado}}</label>
+            </div>
+        </div>
+        
          <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 mt-2 text-left">
                 <h6 class="blockquote">Funcionários</h6>

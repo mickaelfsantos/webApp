@@ -37,21 +37,37 @@ router.get('/registo', function(req, res){
 
 router.post('/registo', function asyncFunction(req, res){
     var erros = []
+    var nomeF;
+    var funcao;
+    var departamento;
+    var equipa;
 
     if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){
         erros.push({texto: "Nome obrigatório."})
+    }
+    else{
+        nomeF = req.body.nome;
     }
 
     if(!req.body.funcao || typeof req.body.funcao === undefined || req.body.funcao === null){
         erros.push({texto: "Função na empresa obrigatório."})
     }
+    else{
+        funcao = req.body.funcao;
+    }
     
     if(!req.body.departamento || typeof req.body.departamento === undefined || req.body.departamento === null){
         erros.push({texto: "Departamento obrigatório."})
     }
+    else{
+        departamento = req.body.departamento;
+    }
     
     if(!req.body.equipa || typeof req.body.equipa === undefined || req.body.equipa === null){
         erros.push({texto: "Equipa obrigatório."})
+    }
+    else{
+        equipa = req.body.equipa;
     }
 
     if(!req.body.password || typeof req.body.password === undefined || req.body.password === null){
@@ -72,10 +88,9 @@ router.post('/registo', function asyncFunction(req, res){
         }        
     } 
 
-    
-    
+    var email = req.body.email;
     if(erros.length > 0){
-        res.render("users/registo", {erros: erros})
+        res.render("users/registo", {erros: erros, nomeF:nomeF, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
     }
     else{
         Funcionario.findOne({email:req.body.email}).then(function(funcionario){
@@ -151,7 +166,8 @@ router.get('/obra/:id', authenticated, function(req, res){
     Obra.findOne({ $and: [{_id:req.params.id}, {funcionariosAssociados : req.user.id}]}).then(function(obra){
         if(obra != null){    
             async function secondFunction(){
-                var tarefas = await myFunction(obra.tarefas)
+                console.log(req.user.id)
+                var tarefas = await myFunction(obra.tarefas, req.user.id)
                 res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, user:req.user})
             };
             secondFunction();       
@@ -504,11 +520,16 @@ router.get('/requisicoes', authenticated, function(req, res){
 })
 
 
-async function myFunction(tarefas){
+async function myFunction(tarefas, id){
     var a=[]
     for(var i=0; i<tarefas.length; i++){
         await Tarefa.findById(tarefas[i], function(err, tarefa) {
-            a.push(tarefa)
+            for(var i=0; i<tarefa.funcionarios.length; i++){
+                if(tarefa.funcionarios[i] == id || tarefa.funcionarioCriador == id){
+                    a.push(tarefa)
+                    break;
+                }
+            }
         }).lean()
     }
     return a;
