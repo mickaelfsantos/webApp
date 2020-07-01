@@ -1,11 +1,19 @@
 
 <div class="row">
     <div class="col-6">
-        <h2>Máquina {{maquina.nome}}</h2>
+        <h2>Máquina</h2>
     </div>
     <div class="col-6 text-right">
-        <button class="btn btn-dark" onclick="saltaParaEditar()">Editar</button>
-        <button class="btn btn-dark" onclick="saltaParaTras()" >Voltar</button>
+        <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-navicon fa-2x"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
+            </div>
+        </li>
+        </ul>
     </div>
 </div>
 <hr>
@@ -13,32 +21,32 @@
     
 <input type="hidden" id="id" name="id" value="{{maquina._id}}">
 <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Nome</h6>
+    <div class="col-3 p-3 text-left">
+        <h6 class="blockquote m-0">Nome</h6>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="nomeTarefa">{{maquina.nome}}</label>
+    <div class="col-9 p-3">
+        <label for="nome" id="nomeTarefa" class="m-0">{{maquina.nome}}</label>
     </div>
 </div>
 
 <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Departamento</h6>
+    <div class="col-3 p-3 text-left">
+        <h6 class="blockquote m-0">Departamento</h6>
     </div>
 
-    <div class="col-9 mt-2">
-        <label for="departamento" id="departamento">{{maquina.departamento}}</label>
+    <div class="col-9 p-3">
+        <label for="departamento" id="departamento" class="m-0">{{maquina.departamento}}</label>
     </div>
 </div>
 
 {{#ifImAdmin}}
 <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Custo</h6>
+    <div class="col-3 p-3 text-left">
+        <h6 class="blockquote m-0">Custo</h6>
     </div>
 
-    <div class="col-9 mt-2">
-        <label for="custo" id="custo">{{maquina.custo}} €</label>
+    <div class="col-9 p-3">
+        <label for="custo" id="custo" class="m-0">{{maquina.custo}} €</label>
     </div>
  </div>
  {{else}}

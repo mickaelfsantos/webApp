@@ -315,7 +315,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
 })
 
 router.get('/obra/:id/edit', authenticated, userResponsavel, function(req, res){
-    Obra.findOne({_id:req.params.id}).then(function(obra){
+    Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         if(obra != null){
             Funcionario.find().lean().then(function(f){
                 var funcionarios = []
@@ -429,6 +429,83 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
         }
         secondFunction()
     }
+})
+
+router.get('/tarefa/:id/responderSubmissao', authenticated, userResponsavel, function (req, res){
+    Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).lean().then(function(tarefa){
+        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+            if(tarefa.estado != "porAceitar"){
+                req.flash("error_msg", "A tarefa "+ tarefa.nome + " não está por validar.")
+                res.redirect("/tarefa/"+req.params.id);
+            }
+            else{
+                res.render("usersResponsaveis/tarefas/responderSubmissao", {obra:obra, tarefa:tarefa});
+            }
+        }).catch(function(error){
+            req.flash("error_msg", "Obra não encontrada.")
+            res.redirect("/tarefa/"+req.params.id)
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Tarefa não encontrada.")
+        res.redirect("/tarefas/")
+    })
+
+})
+
+router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsavel, function asyncFunction (req, res){
+    Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).lean().then(function(tarefa){
+        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+            if(req.params.state == "accept"){
+                Tarefa.findOneAndUpdate({_id:req.params.id},
+                    {"$set": {
+                        "estado": "aceite",
+                      }}, {useFindAndModify: false}).then(function(tarefa){
+    
+                        req.flash("success_msg", "Tarefa validada com sucesso")
+                        res.redirect("/tarefa/"+req.params.id);
+                }).catch(function(error){
+                    req.flash("error_msg", "Erro ao validar a tarefa.")
+                    res.redirect("/tarefa/"+req.params.id);
+                })
+            }
+            else{
+                var erros=[];
+                if(!req.body.justificacao || typeof req.body.justificacao == undefined || req.body.justificacao == null){
+                    erros.push({texto: "Justificação inválida."});
+                }
+                else{
+                    if(req.body.justificacao.trim().length < 2){
+                        erros.push({texto: "Justificação com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+                    }
+                }
+    
+                if(erros.length > 0){
+                    res.render("usersResponsaveis/tarefas/responderSubmissao", {tarefa:tarefa, erros:erros})
+                }
+                else{
+                    Tarefa.findOneAndUpdate({_id:req.params.id},
+                        {"$set": {
+                            "estado": "recusada",
+                          }}, {useFindAndModify: false}).then(function(tarefa){
+        
+                            req.flash("success_msg", "Tarefa rejeitada com sucesso")
+                            res.redirect("/tarefa/"+req.params.id);
+                    }).catch(function(error){
+                        req.flash("error_msg", "Erro ao validar a tarefa.")
+                        res.redirect("/tarefa/"+req.params.id);
+                    })
+                }
+            }
+        }).catch(function(error){
+            req.flash("error_msg", "Obra não encontrada.")
+            res.redirect("/tarefa/"+req.params.id)
+        })
+       
+    }).catch(function(error){
+        req.flash("error_msg", "Tarefa não encontrada")
+        res.redirect("/tarefas/")
+    })
+
 })
 
 router.get('/funcionarios', authenticated, admin, function(req, res){

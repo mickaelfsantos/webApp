@@ -59,6 +59,11 @@ const Obra = new Schema({
         default: 0
     },
 
+    despesa: {
+        type: Number,
+        default: 0
+    },
+
     percentagemLucro: {
         type:Number,
         default: 25,

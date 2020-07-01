@@ -5,6 +5,8 @@ const moment = require('moment')
 moment().format();
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
+var pdf = require("pdf-creator-node");
+var fs = require('fs');
 
 const {authenticated} = require('../helpers/userRole')
 
@@ -163,10 +165,10 @@ router.get('/obras', authenticated, function(req, res){
 })
 
 router.get('/obra/:id', authenticated, function(req, res){
-    Obra.findOne({ $and: [{_id:req.params.id}, {funcionariosAssociados : req.user.id}]}).then(function(obra){
+    var html = fs.readFileSync('template.html', 'utf8');
+    Obra.findOne({ $and: [{_id:req.params.id}, {funcionariosAssociados : req.user.id}]}).lean().then(function(obra){
         if(obra != null){    
             async function secondFunction(){
-                console.log(req.user.id)
                 var tarefas = await myFunction(obra.tarefas, req.user.id)
                 res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, user:req.user})
             };
@@ -192,7 +194,7 @@ router.get('/tarefas', authenticated, function(req, res){
 })
 
 router.get('/tarefa/:id', authenticated, function(req, res){
-    Tarefa.findOne({ $and: [{_id:req.params.id}, { $or: [{funcionarios:req.user.id}, {funcionarioCriador : req.user.id}]}]}).then(function(tarefa){
+    Tarefa.findOne({ $and: [{_id:req.params.id}, { $or: [{funcionarios:req.user.id}, {funcionarioCriador : req.user.id}]}]}).lean().then(function(tarefa){
         if(tarefa != null){    
             async function secondFunction(){
                 var obraS = await getObraInfo(tarefa.obra)
@@ -312,40 +314,29 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
             
 
             if(erros.length > 0){
-                Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).lean().then(function(tarefa){
-                    if(tarefa == null){
-                        req.flash("error_msg", "Tarefa não encontrada.")
-                        res.redirect("/tarefas");
-                    }
-                    else{
-                        Funcionario.find().lean().then(function(f){
-                            var func = []
-                            var encontrou = false;
+                Funcionario.find().lean().then(function(f){
+                    var func = []
+                    var encontrou = false;
                         
-                            for(var i=0; i<f.length; i++){
-                                for(var j=0; j<tarefa.funcionarios.length; j++){
-                                    if(f[i]._id.equals(tarefa.funcionarios[j])){
-                                        encontrou=true;
-                                    }
-                                }
-                                if(!encontrou){
-                                    func.push(f[i]);
-                                }
-                                encontrou=false;
+                    for(var i=0; i<f.length; i++){
+                        for(var j=0; j<tarefa.funcionarios.length; j++){
+                            if(f[i]._id.equals(tarefa.funcionarios[j])){
+                                encontrou=true;
                             }
+                        }
+                        if(!encontrou){
+                            func.push(f[i]);
+                        }
+                        encontrou=false;
+                    }
             
-                            var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
-                            var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD")
-                            var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DD")
-                            var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DD")
-                            res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
-                                 funcionarios : func})
-                        })
-                    }    
-                }).catch(function(erro){
-                    req.flash("error_msg", "Tarefa não encontrada.")
-                    res.redirect("/tarefas");
-                })
+                    var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
+                    var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD")
+                    var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DD")
+                    var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DD")
+                    res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                            funcionarios : func})
+            })
             }
             else{
                 async function secondFunction(){
@@ -402,7 +393,7 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                                 }
                             }
                         }
-                            
+
                         req.flash("success_msg", "Tarefa editada com sucesso.");
                         res.redirect("/tarefa/"+req.params.id);
                     }).catch(function (error){
@@ -413,6 +404,37 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                 secondFunction()
             }
         })
+    })
+
+})
+
+router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res){
+    Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).then(function(tarefa){
+        if(tarefa.dataPrevistaFim == "Invalid date" || typeof tarefa.dataPrevistaFim == undefined || tarefa.dataPrevistaFim == null){
+            req.flash("error_msg", "Impossível validar tarefa, uma vez que esta não tem data prevista de fim.")
+            res.redirect("/tarefa/"+req.params.id)
+        }
+        else{
+            if(tarefa.estado != "associada" && tarefa.estado != "recusada"){
+                req.flash("error_msg", "Já foi submetida para validação")
+                res.redirect("/tarefa/"+req.params.id)
+            }
+            else{
+                Tarefa.findOneAndUpdate({_id:req.params.id},
+                    {"$set": {
+                        "estado": "porAceitar"
+                        }}, {useFindAndModify: false}).lean().then(function(funcionario){
+                        req.flash("success_msg", "Tarefa submetida com sucesso")
+                        res.redirect("/tarefa/"+req.params.id);
+                }).catch(function(error){
+                    req.flash("error_msg", "Erro ao submeter a tarefa.")
+                    res.redirect("/tarefa/"+req.params.id);
+                })
+            }
+        }
+    }).catch(function(error){
+        req.flash("error_msg", "Não tem permissões para submeter a tarefa.")
+        res.redirect("/tarefa/"+req.params.id)
     })
 
 })
@@ -576,5 +598,6 @@ async function getFuncionarios(funcionarios, f){
     }
     return a;
 }
+
 
 module.exports = router

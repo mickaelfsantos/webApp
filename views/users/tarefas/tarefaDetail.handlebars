@@ -4,106 +4,114 @@
         <h2>Tarefa</h2>
     </div>
     <div class="col-6 text-right">
-        <button class="btn btn-dark" onclick="saltaParaEditar()">Editar</button>
-        <button class="btn btn-dark" onclick="saltaParaRequisitar()">Requisitar máquina</button>
-        <button class="btn btn-dark" onclick="saltaParaComecar()">Começar tarefa</button>
+        <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-navicon fa-2x"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
+            {{#ifSubmeteu tarefa.estado}}
+                <a class="dropdown-item" onclick="saltaParaValidar()" style="cursor: pointer;">Submeter tarefa para validação</a>
+                {{else}}
+                {{#ifUR}}
+                <a class="dropdown-item" onclick="saltaParaResponder()" style="cursor: pointer;">Responder à submissão</a>
+                {{/ifUR}}
+            {{/ifSubmeteu}}
+            <a class="dropdown-item" onclick="saltaParaRequisitar()" style="cursor: pointer;">Requisitar máquina</a>
+            <a class="dropdown-item" onclick="saltaParaComecar()" style="cursor: pointer;">Começar tarefa</a>
+            </div>
+        </li>
+        </ul>
     </div>
 </div>
 <hr>
 
+
 {{#each obra}}
-    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-        <div class="col-3 mt-2 text-left">
-            <h6 class="blockquote">Obra</h6>
+    <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 p-3 text-left">
+            <h6 class="blockquote m-0">Obra</h6>
         </div>
-        <div class="col-9 mt-2">
-            <label for="nome" id="nomeObra">{{nome}}</label>
+        <div class="col-9 p-3">
+            <label for="nome" id="nomeObra" class="m-0">{{nome}}</label>
         </div>
     </div>
 {{/each}}
- {{#each tarefa}}
-    {{#if nome}}
-        <input type="hidden" id="id" name="id" value="{{_id}}">
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Nome</h6>
+        <input type="hidden" id="id" name="id" value="{{tarefa._id}}">
+        <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Nome</h6>
             </div>
-            <div class="col-9 mt-2">
-                <label for="nome" id="nomeTarefa">{{nome}}</label>
+            <div class="col-9 p-3">
+                <label for="nome" id="nomeTarefa" class="m-0">{{tarefa.nome}}</label>
             </div>
         </div>
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Descrição</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Descrição</h6>
             </div>
 
-            <div class="col-9 mt-2">
-                <label for="descricao" id="descricao">{{descricao}}</label>
+            <div class="col-9 p-3">
+                <label for="descricao" id="descricao" class="m-0">{{tarefa.descricao}}</label>
             </div>
         </div>
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Importância</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Importância</h6>
             </div>
 
-            <div class="col-9 mt-2">
-                <label for="descricao" id="descricao">{{importancia}}</label>
+            <div class="col-9 p-3">
+                <label for="descricao" id="descricao" class="m-0">{{tarefa.importancia}}</label>
             </div>
         </div>
 
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Estado</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Estado</h6>
             </div>
 
-            <div class="col-9 mt-2">
-                <label for="estado" id="estado">{{estadoToString estado}}</label>
+            <div class="col-9 p-3">
+                <label for="estado" id="estado" class="m-0">{{estadoToString tarefa.estado}}</label>
             </div>
         </div>
         
          <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Funcionários</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Funcionários</h6>
             </div>
-    {{/if}}
-{{/each}}
-            <div class="col-9 mt-2">
+   
+            <div class="col-9 p-3">
                 {{#each funcionarios}}
                     <label for="funcionarios" id="funcionarios">{{nome}}</label><br>
                 {{else}}
                 {{/each}}    
             </div>
         </div>
-{{#each tarefa}}
-   {{#if nome}}
 
 
          <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Datas previstas</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Datas previstas</h6>
             </div>
-            <div class="col-9 mt-2">
-                    {{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}
+            <div class="col-9 p-3">
+                    {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}
             </div>            
         </div>
 
          <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Datas</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Datas</h6>
             </div>
             
-            <div class="col-9 mt-2">
-                {{dateToString dataInicio}} - {{dateToString dataFim}}
+            <div class="col-9 p-3">
+                {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}
             </div>
         </div>
-    {{/if}}
- {{/each}}
-
-
 
 <script>
 
@@ -130,5 +138,16 @@
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/edit";
     }
+
+    function saltaParaValidar() {
+        tarefa = document.getElementById('id').getAttribute("value");
+        window.location.href = "/tarefa/"+tarefa+"/validar";
+    }
+
+    function saltaParaResponder() {
+        tarefa = document.getElementById('id').getAttribute("value");
+        window.location.href = "/tarefa/"+tarefa+"/responderSubmissao";
+    }
+    
 </script>
  

@@ -2,64 +2,70 @@
     <div class="col-6">
         <h2>Obra</h2>
     </div>
+    {{#ifUR}}
     <div class="col-6 text-right">
-        {{#ifUR}}
-            <button class="btn btn-dark" onclick="saltaParaEdit()" >Editar</button>
-            <button class="btn btn-dark" onclick="saltaParaAddTarefa()">Adicionar tarefa</button>
-        {{/ifUR}}
-        <button class="btn btn-dark" onclick="saltaParaObras()">Voltar</button>
+        <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-navicon fa-2x"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" onclick="saltaParaEdit()" style="cursor: pointer;">Editar</a>
+            <a class="dropdown-item" onclick="saltaParaAddTarefa()" style="cursor: pointer;">Adicionar tarefa</a>
+            </div>
+        </li>
+        </ul>
     </div>
+    {{/ifUR}}
 </div>
 <hr>
 
- {{#each obra}}
-    {{#if nome}}
-        <input type="hidden" id="id" name="id" value="{{_id}}">
+        <input type="hidden" id="id" name="id" value="{{obra._id}}">
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote" id="texto">Nome</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0" id="texto">Nome</h6>
             </div>
-            <div class="col-9 mt-2" id="texto">
-                <label for="nome" id="nomeObra">{{nome}}</label>
+            <div class="col-9 p-3" id="texto">
+                <label for="nome" id="nomeObra" class="m-0">{{obra.nome}}</label>
             </div>
         </div>
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Descrição</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Descrição</h6>
             </div>
-            <div class="col-9 mt-2">
-                <label for="descricao" id="descricao">{{descricao}}</label>
+            <div class="col-9 p-3">
+                <label for="descricao" class="m-0" id="descricao">{{obra.descricao}}</label>
             </div>
         </div>
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left" id="texto">
-                <h6 class="blockquote">Estado</h6>
+            <div class="col-3 p-3 text-left" id="texto">
+                <h6 class="blockquote m-0">Estado</h6>
             </div>
-            <div class="col-9 mt-2" id="texto">
-                <label for="estado" id="estado">{{estadoToString estado}}</label>
+            <div class="col-9 p-3" id="texto">
+                <label for="estado" id="estado" class="m-0">{{estadoToString obra.estado}}</label>
             </div>
         </div>
 
         {{#ifImAdmin}}
             <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-                <div class="col-3 mt-2 text-left">
-                    <h6 class="blockquote">Orçamento</h6>
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Orçamento</h6>
                 </div>
                 
-                <div class="col-9 mt-2">
-                    <label for="nome" id="nomeObra">{{precoToString orcamento}}</label>
+                <div class="col-9 p-3">
+                    <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.orcamento}}</label>
                 </div>
             </div>
 
             <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-                <div class="col-3 mt-2 text-left">
-                    <h6 class="blockquote">Custo final</h6>
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Custo final</h6>
                 </div>
 
-                <div class="col-9 mt-2">
-                    <label for="estado" id="estado">{{precoToString custoFinal}}</label>
+                <div class="col-9 p-3">
+                    <label for="estado" id="estado" class="m-0">{{precoToString obra.custoFinal}}</label>
                 </div>
             </div>
         {{else}}
@@ -67,22 +73,22 @@
         
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Datas previstas</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Datas previstas</h6>
             </div>
             
-            <div class="col-9 mt-2">
-                {{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}
+            <div class="col-9 p-3">
+                {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}
             </div>
         </div>
 
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 mt-2 text-left">
-                <h6 class="blockquote">Datas</h6>
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Datas</h6>
             </div>
-            <div class="col-9 mt-2">
-                {{dateToString dataInicio}} - {{dateToString dataFim}}
+            <div class="col-9 p-3">
+                {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}
             </div>
         </div>
 
@@ -92,8 +98,6 @@
             </div>
         </div>
 
-    {{/if}}
- {{/each}}
         {{#if tarefas}}
             <table class="mt-5 mb-5" id="myTable">
                 <thead>

@@ -1,11 +1,19 @@
 
 <div class="row">
     <div class="col-6">
-        <h2>Funcionário {{nomeF}}</h2>
+        <h2>Perfil</h2>
     </div>
     <div class="col-6 text-right">
-        <button class="btn btn-dark" onclick="saltaParaEditar()">Editar</button>
-        <button class="btn btn-dark" onclick="saltaParaTras()" >Voltar</button>
+        <ul class="navbar-nav mr-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-navicon fa-2x"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
+            </div>
+        </li>
+        </ul>
     </div>
 </div>
 <hr>

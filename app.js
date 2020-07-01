@@ -141,12 +141,12 @@
                 return options.inverse(this);
             },
 
-            ifEstado: function(estado, options){
-                if(estado === "associada") {
-                    return options.fn(this);
+            ifSubmeteu: function(estado, options){
+                if(estado === "associada" || estado === "recusada"){
+                    return options.fn(this)
                 }
                 return options.inverse(this);
-            }            
+            }
         }
     })
     app.engine('handlebars', hbs.engine)
