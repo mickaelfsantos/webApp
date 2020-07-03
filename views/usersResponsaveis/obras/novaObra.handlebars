@@ -23,7 +23,11 @@
             <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
 
             <label for="dataPrevistaInicio">Data prevista para inicio</label>
-            <input type="date" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4" min="0">
+            <div class="row">
+                <div class="col-3">
+                    <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                </div>
+            </div>
             <button type="submit" class="btn btn-dark">Concluir</button>
         </form>
     </div>

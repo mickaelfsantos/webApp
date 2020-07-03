@@ -25,7 +25,13 @@
         for(var i=0; i<e.length; i++){
           eventos[i].title = eventos[i].nome;
           eventos[i].start = eventos[i].dataPrevistaInicio;
-          eventos[i].end = eventos[i].dataPrevistaFim;
+          if(eventos[i].dataPrevistaFim == undefined){
+            eventos[i].end = Date.now();
+          }
+          else{
+            eventos[i].end = eventos[i].dataPrevistaFim
+          }
+          eventos[i].url = "/obra/"+eventos[i]._id;
         }
 
         var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -95,8 +101,20 @@
   {{/if}}
 </div>
 
-
+<div style="display: none;" id="infos">
+  <div class="row justify-content-end">
+    <div class="col-3">
+      <i class="fa fa-circle text-info"></i> Datas Previstas
+    </div>
+  </div>
+  <div class="row justify-content-end">
+    <div class="col-3">
+      <i class="fa fa-circle" style="color: orange;"></i> Datas
+    </div>
+  </div>
+</div>
 <div id='calendar'></div>
+
 
 <script>
   $(document).ready(function(){
@@ -120,10 +138,12 @@
     var x = document.getElementById("lista");
     var y = document.getElementById("calendar");
     var k = document.getElementById("inputFiltro");
+    var l = document.getElementById("infos");
     x.style.display = "block";
     k.style.display = "block";
     document.getElementById("btnLista").setAttribute("class", "btn btn-secondary active");
     y.style.display = "none";
+    l.style.display = "none";
     document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary");
   }
 
@@ -131,10 +151,12 @@
     var x = document.getElementById("lista");
     var y = document.getElementById("calendar");
     var k = document.getElementById("inputFiltro");
+    var l = document.getElementById("infos");
     x.style.display = "none";
     k.style.display = "none";
     document.getElementById("btnLista").setAttribute("class", "btn btn-secondary");
     y.style.display = "block";
+    l.style.display = "block";
     document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary active");
   }
 

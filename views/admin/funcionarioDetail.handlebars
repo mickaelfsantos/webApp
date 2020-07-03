@@ -11,6 +11,7 @@
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
+            <a class="dropdown-item" onclick="saltaParaRemover()" style="cursor: pointer;">Remover</a>
             </div>
         </li>
         </ul>
@@ -91,13 +92,15 @@
         handle.style.backgroundColor = "white";
     }
 
-    function saltaParaTras() {
-        window.location.href = "/funcionarios";
-    }
     
     function saltaParaEditar() {
         funcionario = document.getElementById('id').getAttribute("value");
         window.location.href = "/funcionario/"+funcionario+"/edit";
+    }
+
+    function saltaParaRemover() {
+        funcionario = document.getElementById('id').getAttribute("value");
+        window.location.href = "/funcionario/"+funcionario+"/remove";
     }
 </script>
  

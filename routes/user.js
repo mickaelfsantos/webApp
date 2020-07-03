@@ -5,8 +5,6 @@ const moment = require('moment')
 moment().format();
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
-var pdf = require("pdf-creator-node");
-var fs = require('fs');
 
 const {authenticated} = require('../helpers/userRole')
 
@@ -165,7 +163,6 @@ router.get('/obras', authenticated, function(req, res){
 })
 
 router.get('/obra/:id', authenticated, function(req, res){
-    var html = fs.readFileSync('template.html', 'utf8');
     Obra.findOne({ $and: [{_id:req.params.id}, {funcionariosAssociados : req.user.id}]}).lean().then(function(obra){
         if(obra != null){    
             async function secondFunction(){
@@ -236,10 +233,10 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
                     encontrou=false;
                 }
 
-                var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
-                var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD")
-                var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DD")
-                var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DD")
+                var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
+                var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
+                var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
                 res.render("users/tarefas/editarTarefa", {tarefa:tarefa, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
                      funcionarios : func})
             })
@@ -253,8 +250,8 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
 router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
     var erros = []
    
-    Tarefa.findOne({_id: req.params.id}).then(function(tarefa){
-        Obra.findOne({_id:tarefa.obra}).then(function(obra){
+    Tarefa.findOne({_id: req.params.id}).lean().then(function(tarefa){
+        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
 
             if(req.user.role != "user"){
                 if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
@@ -278,11 +275,11 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                 tarefa.importancia = req.body.importancia.toLowerCase();
             }
 
-
-            if(req.body.dataPrevistaInicio){
-                var today = moment().format("YYYY-MM-DD");
-                var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
-                var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD")
+            if(req.body.dataPrevistaInicio != tarefa.dataPrevistaInicio){
+                var today = moment().format("YYYY-MM-DD HH:mm");
+                var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                dataTarefa = moment(dataTarefa).add(1, "minutes");
                 if(moment(dataTarefa).isValid()){
                     if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
                         erros.push({texto: "Data inválida. Data de início tem que ser superior ou igual à data de hoje e à data de inicio da obra."})
@@ -294,14 +291,15 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
             }
 
             if(req.body.dataPrevistaFim){
-                var today = moment().format("YYYY-MM-DD");
+                var today = moment().format("YYYY-MM-DD HH:mm");
                 var dataInicioTarefa;
                 if(req.body.dataPrevistaInicio){
-                    dataInicioTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
+                    dataInicioTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                 }else{
-                    dataInicioTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
+                    dataInicioTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                 }
-                var dataFimTarefa = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD")
+                var dataFimTarefa = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                dataFimTarefa = moment(dataFimTarefa).add(1, "minutes");
                 if(moment(dataFimTarefa).isValid()){
                     if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
                         erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data de hoje e à data de inicio da tarefa."})
@@ -330,10 +328,10 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                         encontrou=false;
                     }
             
-                    var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD")
-                    var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD")
-                    var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DD")
-                    var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DD")
+                    var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                    var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
+                    var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
+                    var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
                     res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
                             funcionarios : func})
             })

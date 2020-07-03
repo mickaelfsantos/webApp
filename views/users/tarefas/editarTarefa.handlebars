@@ -37,10 +37,18 @@
                 
             {{/ifUR}}
             <label for="dataPrevistaInicio">Data prevista para inicio</label>
-            <input type="date" value="{{dataPrevistaInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4" min="0">
+            <div class="row">
+                <div class="col-3">
+                    <input type="datetime-local" value="{{dataPrevistaInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                </div>
+            </div>
             
             <label for="dataPrevistaFim">Data prevista para fim</label>
-            <input type="date" value="{{dataPrevistaFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control mb-4" min="0">
+            <div class="row">
+                <div class="col-3">
+                    <input type="datetime-local" value="{{dataPrevistaFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control mb-4">
+                </div>
+            </div>
 
             {{#ifUR}}
             <div class="form-group">

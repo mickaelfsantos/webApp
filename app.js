@@ -52,7 +52,7 @@
         //helpers
         helpers: {
             dateToString: function(data){
-                var d = moment(data).format("DD/MM/YYYY");
+                var d = moment(data).format("DD/MM/YYYY HH:mm");
                 if(d == "Invalid date" || typeof data == undefined)
                     return "Não definido"
                 return d;

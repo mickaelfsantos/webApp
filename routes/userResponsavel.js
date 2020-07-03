@@ -53,9 +53,11 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
         }
     }
 
-    var today = moment().format("YYYY-MM-DD");
+    var today = moment().format("YYYY-MM-DD HH:mm");
     if(req.body.dataPrevistaInicio){
-        var date = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
+        var date = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+        date = moment(date).add(1, 'minutes');
+        console.log(date);
         if(moment(date).isValid()){
             if(moment(today).isAfter(date) == true){
                 erros.push({texto: "Data invalida. Data de inicio tem que ser uma data supeior à data de hoje."});
@@ -168,9 +170,10 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
 
     Obra.findOne({_id:req.params.id}).then(function(obra){
         if(req.body.dataPrevistaInicio){
-            var today = moment().format("YYYY-MM-DD");
-            var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD")
-            var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD")
+            var today = moment().format("YYYY-MM-DD HH:mm");
+            var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+            var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+            dataTarefa = moment(dataTarefa).add(1, 'minutes');
             if(moment(dataTarefa).isValid()){
                 if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
                     erros.push({texto: "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra."})
@@ -213,7 +216,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
                             novaTarefa = { 
                                 nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                                 descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                                dataPrevistaInicio: obra.dataPrevistaInicio,
+                                dataPrevistaInicio: Date.now(),
                                 obra: obra._id,
                                 funcionarios: funcionarios,
                                 importancia: req.body.importancia.toLowerCase(),
@@ -271,7 +274,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
                                     if(!encontrou){
                                         Obra.updateOne(
                                             {"nome":obra.nome},
-                                            {$push: {funcionariosAssociados : funcionarios[j]._id}},
+                                            {$push: {funcionariosAssociados : funcionarios[j]._id}}
                                         ).catch(function(erro){
                                             req.flash("error_msg", "Erro ao atualizar a obra.")
                                             res.redirect('/obras/');
@@ -587,6 +590,73 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
             res.redirect("/funcionarios");
         })
     }
+})
+
+router.get('/funcionario/:id/remove', authenticated, admin, function(req, res){
+    Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
+        res.render("admin/removeFuncionario", {funcionario:funcionario})
+    }).catch(function(erro){
+        req.flash("error_msg", "Funcionario não encontrado")
+        res.redirect("/funcionarios");
+    })
+})
+
+router.post('/funcionario/:id/remove', authenticated, userResponsavel, function asyncFunction(req, res){
+    Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
+        Tarefa.find({ $or: [{funcionarios:funcionario._id}, {funcionarioCriador : funcionario._id}]}).lean().then(function(tarefas){
+            for(var i=0; i<tarefas.length; i++){
+                for(var j=0; j<tarefas[i].funcionarios.length; j++){
+                    if(tarefas[i].funcionarios[j].equals(funcionario._id)){
+                        Tarefa.findOneAndUpdate(
+                            {_id:tarefas[i]._id},
+                            {$pull: {funcionarios : tarefas[i].funcionarios[j]}},
+                            {useFindAndModify: false}
+                        ).lean().then(function(tarefa){
+                            if(tarefa.funcionarios.length == 1){
+                                i--;
+                                Obra.findOneAndUpdate(
+                                    {_id:tarefa.obra},
+                                    {$pull: {tarefas : tarefa._id}},
+                                    {useFindAndModify: false}
+                                ).lean().then()
+                                Tarefa.findOneAndDelete({_id: tarefa._id}).lean().then()
+                            }
+                        })
+
+                        Obra.findOneAndUpdate(
+                            { $and: [{_id:tarefas[i].obra}, {funcionariosAssociados : funcionario._id}]},
+                            {$pull: {funcionariosAssociados : funcionario._id}},
+                            {useFindAndModify: false}
+                        ).lean().then(function(obra){
+                            if(obra!=null){
+                                if(obra.funcionariosAssociados.length == 1){
+                                    Obra.findOneAndDelete({_id: obra._id}).lean().then()
+                                }
+                            }
+                        })
+
+                        break;
+                    }
+                }
+                //if(tarefas[i].funcionarioCriador == funcionario._id){
+                    //ver o que fazer
+                //}
+            }
+
+            Funcionario.findOneAndDelete({_id: req.params.id}).lean().then(function(){
+                req.flash("success_msg", "Funcionário removido com sucesso.")
+                res.redirect("/funcionarios")
+            }).catch(function(error){
+                req.flash("error_msg", "Erro ao remover funcionário.")
+                res.redirect("/funcionarios")
+            });
+            
+        })
+
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/funcionarios")
+    })
 })
 
 router.get('/maquinas', authenticated, userResponsavel, function(req, res){
