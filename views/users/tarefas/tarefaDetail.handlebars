@@ -28,16 +28,15 @@
 <hr>
 
 
-{{#each obra}}
+
     <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
         <div class="col-3 p-3 text-left">
             <h6 class="blockquote m-0">Obra</h6>
         </div>
         <div class="col-9 p-3">
-            <label for="nome" id="nomeObra" class="m-0">{{nome}}</label>
+            <label for="nome" id="nomeObra" class="m-0">{{obra.nome}}</label>
         </div>
     </div>
-{{/each}}
         <input type="hidden" id="id" name="id" value="{{tarefa._id}}">
         <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 p-3 text-left">

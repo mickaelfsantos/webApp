@@ -38,11 +38,6 @@ const Funcionario = new Schema({
         default: 0
     },
 
-    horasDeTrababalho: {
-        type:Number,
-        default: 0
-    },
-
     tarefas: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Tarefa"

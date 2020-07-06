@@ -6,7 +6,8 @@ moment().format();
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
 
-const {authenticated} = require('../helpers/userRole')
+const {authenticated} = require('../helpers/userRole');
+const { data } = require('jquery');
 
 //models
     require("../models/Obra")
@@ -153,97 +154,100 @@ router.get('/dashboard', authenticated, function(req, res){
 })
 
 router.get('/obras', authenticated, function(req, res){
-    Obra.find({ funcionariosAssociados: req.user.id}).lean().then(function(obras){
-        var o = JSON.stringify(obras);
-        res.render("users/obras/obras", {obras: obras, obrasS : o})
-    }).catch(function(erro){
-        req.flash("error_msg", "Erro ao fazer o GET das obras.")
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Obra.find({ _id:funcionario.obras}).lean().then(function(obras){
+            var o = JSON.stringify(obras);
+            res.render("users/obras/obras", {obras: obras, obrasS : o})
+        }).catch(function(erro){
+            req.flash("error_msg", "Erro ao fazer o GET das obras.")
+            res.redirect("/dashboard");
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
         res.redirect("/dashboard");
     })
+    
 })
 
 router.get('/obra/:id', authenticated, function(req, res){
-    Obra.findOne({ $and: [{_id:req.params.id}, {funcionariosAssociados : req.user.id}]}).lean().then(function(obra){
-        if(obra != null){    
-            async function secondFunction(){
-                var tarefas = await myFunction(obra.tarefas, req.user.id)
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
+            Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
                 res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, user:req.user})
-            };
-            secondFunction();       
-        }
-        else{
+            }).catch(function(error){
+                req.flash("error_msg", "Tarefas não encontradas")
+                res.redirect("/obras")
+            })
+        }).catch(function(erro){
             req.flash("error_msg", "Obra não encontrada.")
             res.redirect("/obras");
-        }        
-    }).catch(function(erro){
-        req.flash("error_msg", "Obra não encontrada.")
-        res.redirect("/obras");
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard")
     })
+    
 })
 
 router.get('/tarefas', authenticated, function(req, res){
-    Tarefa.find( { $or: [{ funcionarios: req.user.id}, {funcionarioCriador : req.user.id }]}).lean().then(function(tarefas){
-        res.render("users/tarefas/tarefas", {tarefas: tarefas})
-    }).catch(function(erro){
-        req.flash("error_msg", "Erro ao fazer o GET das tarefas.")
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.find({_id:funcionario.tarefas}).lean().then(function(tarefas){
+            res.render("users/tarefas/tarefas", {tarefas: tarefas})
+        }).catch(function(erro){
+            req.flash("error_msg", "Tarefas não encontradas")
+            res.redirect("/dashboard");
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
         res.redirect("/dashboard");
     })
 })
 
 router.get('/tarefa/:id', authenticated, function(req, res){
-    Tarefa.findOne({ $and: [{_id:req.params.id}, { $or: [{funcionarios:req.user.id}, {funcionarioCriador : req.user.id}]}]}).lean().then(function(tarefa){
-        if(tarefa != null){    
-            async function secondFunction(){
-                var obraS = await getObraInfo(tarefa.obra)
-                var funcionarios = await getFuncionariosInfo(tarefa.funcionarios)
-                res.render("users/tarefas/tarefaDetail", {obra:obraS, tarefa:tarefa, funcionarios:funcionarios})
-            };
-            secondFunction(); 
-        }
-        else{
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
+            Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                Funcionario.find({tarefas:tarefa._id}).lean().then(function(funcionarios){
+                    res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, funcionarios:funcionarios})
+                }).catch(function(error){
+                    req.flash("error_msg", "Funcionários não encontrados.")
+                    res.redirect("/tarefas");
+                })
+            }).catch(function(error){
+                req.flash("error_msg", "Obra não encontrada.")
+                res.redirect("/tarefas");
+            })
+        }).catch(function(erro){
             req.flash("error_msg", "Tarefa não encontrada.")
             res.redirect("/tarefas");
-        }
-    }).catch(function(erro){
-        req.flash("error_msg", "Tarefa não encontrada.")
-        res.redirect("/tarefas");
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard");
     })
 })
 
 router.get('/tarefa/:id/edit', authenticated, function(req, res){
-    Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).lean().then(function(tarefa){
-        if(tarefa == null){
-            req.flash("error_msg", "Tarefa não encontrada.")
-            res.redirect("/tarefas");
-        }
-        else{
-            Funcionario.find().lean().then(function(f){
-                var func = []
-                var encontrou = false;
-            
-                for(var i=0; i<f.length; i++){
-                    for(var j=0; j<tarefa.funcionarios.length; j++){
-                        if(f[i]._id.equals(tarefa.funcionarios[j])){
-                            encontrou=true;
-                        }
-                    }
-                    if(!encontrou){
-                        func.push(f[i]);
-                    }
-                    encontrou=false;
-                }
-
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
+            Funcionario.find( { tarefas: { $ne: tarefa._id}}).lean().then(function(f){    
                 var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
                 var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
                 var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
                 var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
                 res.render("users/tarefas/editarTarefa", {tarefa:tarefa, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
-                     funcionarios : func})
+                    funcionarios : f})
+            }).catch(function(erro){
+                req.flash("error_msg", "Tarefa não encontrada.")
+                res.redirect("/tarefas");
             })
-        }    
-    }).catch(function(erro){
-        req.flash("error_msg", "Tarefa não encontrada.")
-        res.redirect("/tarefas");
+        }).catch(function(erro){
+            req.flash("error_msg", "Tarefa não encontrada.")
+            res.redirect("/tarefas");
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard");
     })
 })
 
@@ -274,23 +278,25 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
 
                 tarefa.importancia = req.body.importancia.toLowerCase();
             }
+            
 
-            if(req.body.dataPrevistaInicio != tarefa.dataPrevistaInicio){
+            var dataT =  moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+            var dataForm =  moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+            if(dataT != dataForm){
                 var today = moment().format("YYYY-MM-DD HH:mm");
                 var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                 var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                 dataTarefa = moment(dataTarefa).add(1, "minutes");
                 if(moment(dataTarefa).isValid()){
                     if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
-                        erros.push({texto: "Data inválida. Data de início tem que ser superior ou igual à data de hoje e à data de inicio da obra."})
-                    }
-                    else{
-                        tarefa.dataPrevistaInicio = req.body.dataPrevistaInicio;
+                        erros.push({texto: "Data inválida. Data de início tem que ser superior ou igual à data atual e à data de inicio da obra."})
                     }
                 }
             }
 
-            if(req.body.dataPrevistaFim){
+            var dataTF =  moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+            var dataFormF =  moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+            if(dataTF != dataFormF){
                 var today = moment().format("YYYY-MM-DD HH:mm");
                 var dataInicioTarefa;
                 if(req.body.dataPrevistaInicio){
@@ -302,39 +308,29 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                 dataFimTarefa = moment(dataFimTarefa).add(1, "minutes");
                 if(moment(dataFimTarefa).isValid()){
                     if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
-                        erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data de hoje e à data de inicio da tarefa."})
-                    }
-                    else{
-                        tarefa.dataPrevistaFim = req.body.dataPrevistaFim;
+                        erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data de inicio da tarefa."})
                     }
                 }
             }
             
+            if(moment(req.body.dataPrevistaInicio).isValid() && moment(req.body.dataPrevistaFim).isValid()){
+                if(moment(req.body.dataPrevistaInicio).isAfter(req.body.dataPrevistaFim) == true){
+                    erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data início da tarefa."})
+                }
+            }
 
             if(erros.length > 0){
-                Funcionario.find().lean().then(function(f){
-                    var func = []
-                    var encontrou = false;
-                        
-                    for(var i=0; i<f.length; i++){
-                        for(var j=0; j<tarefa.funcionarios.length; j++){
-                            if(f[i]._id.equals(tarefa.funcionarios[j])){
-                                encontrou=true;
-                            }
-                        }
-                        if(!encontrou){
-                            func.push(f[i]);
-                        }
-                        encontrou=false;
-                    }
-            
+                Funcionario.find({ tarefas: { $ne: tarefa._id}}).lean().then(function(f){
                     var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
                     var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
                     var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
                     var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
                     res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
-                            funcionarios : func})
-            })
+                            funcionarios : f})
+                }).catch(function(error){
+                    req.flash("error_msg", "Funcionários não encontrados.")
+                    res.redirect("/tarefa/"+req.params.id)
+                })
             }
             else{
                 async function secondFunction(){
@@ -342,6 +338,8 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     if(f != undefined){
                         var funcs = await getFuncionarios(f)
                     }
+                    tarefa.dataPrevistaInicio = req.body.dataPrevistaInicio;
+                    tarefa.dataPrevistaFim = req.body.dataPrevistaFim;
         
                     Tarefa.findOneAndUpdate({_id:req.params.id}, 
                         {"$set": {
@@ -354,41 +352,18 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                         
                         if(f != undefined){
                             for(var i=0; i<funcs.length; i++){
-                                Tarefa.updateOne(
-                                {"nome":tarefa.nome},
-                                {$push: {funcionarios : funcs[i]._id}},
-                                ).catch(function(erro){
-                                    req.flash("error_msg", "Erro ao atualizar a tarefa.")
-                                    res.redirect('/tarefa/'+req.params.id);
-                                });
-
                                 Funcionario.updateOne(
                                     {"nome":funcs[i].nome},
                                     {$push: {tarefas : tarefa._id}}
-                                ).then().catch(function(erro){
-                                    req.flash("error_msg", "Erro ao inserir as tarefas nos funcionários.")
-                                    res.redirect('/obra/'+req.params.id);
-                                })
-                                
-                                var encontrou = false;
-                                for(var j=0; j<funcs[i].obras.length; j++){
-                                    if(funcs[i].obras[j].equals(tarefa.obra)){
-                                        encontrou=true;
-                                        break;
+                                ).then()
+                                Funcionario.findOne({$and: [{_id:funcs[i]._id}, { obras : { $ne: obra._id}}]}).lean().then(function(funcionario){
+                                    if(funcionario != null){
+                                        Funcionario.updateOne(
+                                            {"nome":funcionario.nome},
+                                            {$push: {obras : obra._id}}
+                                        ).then()
                                     }
-                                }
-
-                                if(!encontrou){
-                                    Obra.updateOne(
-                                        {"_id":tarefa.obra},
-                                        {$push: {funcionariosAssociados : funcs[i]._id}},
-                                    ).catch(function(erro){
-                                        req.flash("error_msg", "Erro ao atualizar a obra.")
-                                        res.redirect('/obras/');
-                                    })
-                                }else{
-                                    encontrou=false;
-                                }
+                                })
                             }
                         }
 
@@ -407,34 +382,38 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
 })
 
 router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res){
-    Tarefa.findOne({ $and: [{_id:req.params.id}, {funcionarios : req.user.id}]}).then(function(tarefa){
-        if(tarefa.dataPrevistaFim == "Invalid date" || typeof tarefa.dataPrevistaFim == undefined || tarefa.dataPrevistaFim == null){
-            req.flash("error_msg", "Impossível validar tarefa, uma vez que esta não tem data prevista de fim.")
-            res.redirect("/tarefa/"+req.params.id)
-        }
-        else{
-            if(tarefa.estado != "associada" && tarefa.estado != "recusada"){
-                req.flash("error_msg", "Já foi submetida para validação")
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).then(function(tarefa){
+            if(tarefa.dataPrevistaFim == "Invalid date" || typeof tarefa.dataPrevistaFim == undefined || tarefa.dataPrevistaFim == null){
+                req.flash("error_msg", "Impossível validar tarefa, uma vez que esta não tem data prevista de fim.")
                 res.redirect("/tarefa/"+req.params.id)
             }
             else{
-                Tarefa.findOneAndUpdate({_id:req.params.id},
-                    {"$set": {
-                        "estado": "porAceitar"
-                        }}, {useFindAndModify: false}).lean().then(function(funcionario){
-                        req.flash("success_msg", "Tarefa submetida com sucesso")
+                if(tarefa.estado != "associada" && tarefa.estado != "recusada"){
+                    req.flash("error_msg", "Já foi submetida para validação")
+                    res.redirect("/tarefa/"+req.params.id)
+                }
+                else{
+                    Tarefa.findOneAndUpdate({_id:req.params.id},
+                        {"$set": {
+                            "estado": "porAceitar"
+                            }}, {useFindAndModify: false}).lean().then(function(funcionario){
+                            req.flash("success_msg", "Tarefa submetida com sucesso")
+                            res.redirect("/tarefa/"+req.params.id);
+                    }).catch(function(error){
+                        req.flash("error_msg", "Erro ao submeter a tarefa.")
                         res.redirect("/tarefa/"+req.params.id);
-                }).catch(function(error){
-                    req.flash("error_msg", "Erro ao submeter a tarefa.")
-                    res.redirect("/tarefa/"+req.params.id);
-                })
+                    })
+                }
             }
-        }
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para submeter a tarefa.")
+            res.redirect("/tarefa/"+req.params.id)
+        })
     }).catch(function(error){
-        req.flash("error_msg", "Não tem permissões para submeter a tarefa.")
+        req.flash("error_msg", "Funcionário não encontrado.")
         res.redirect("/tarefa/"+req.params.id)
     })
-
 })
 
 router.get('/perfil', authenticated, function(req, res){

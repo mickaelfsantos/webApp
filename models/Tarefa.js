@@ -12,7 +12,7 @@ const Tarefa = new Schema({
         required: true
     },
 
-    funcionarios: [{
+    /*funcionarios: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Funcionario"
     }],
@@ -20,7 +20,7 @@ const Tarefa = new Schema({
     funcionarioCriador : {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Funcionario"
-    },
+    },*/
 
     dataPrevistaInicio: {
         type: Date,
