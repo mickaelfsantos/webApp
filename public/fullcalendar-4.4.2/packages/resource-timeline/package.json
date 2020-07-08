@@ -1,0 +1,66 @@
+{
+  "_from": "@fullcalendar/resource-timeline@^4.4.2",
+  "_id": "@fullcalendar/resource-timeline@4.4.2",
+  "_inBundle": false,
+  "_integrity": "sha512-gCXCqfYwUJmgpSLGO+rM29VRrYiJ76dBqpZuzIDSleZoC4h+MOf+TuaTmJI3OXqjfDGQThfGoMGu8FC1rEJ2ag==",
+  "_location": "/@fullcalendar/resource-timeline",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "@fullcalendar/resource-timeline@^4.4.2",
+    "name": "@fullcalendar/resource-timeline",
+    "escapedName": "@fullcalendar%2fresource-timeline",
+    "scope": "@fullcalendar",
+    "rawSpec": "^4.4.2",
+    "saveSpec": null,
+    "fetchSpec": "^4.4.2"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@fullcalendar/resource-timeline/-/resource-timeline-4.4.2.tgz",
+  "_shasum": "550da0a1bf7e65dfb14719a1372f82375aa3cbd6",
+  "_spec": "@fullcalendar/resource-timeline@^4.4.2",
+  "_where": "C:\\Users\\Mickaël\\Desktop\\app",
+  "author": {
+    "name": "Adam Shaw",
+    "email": "arshaw@arshaw.com",
+    "url": "http://arshaw.com/"
+  },
+  "bugs": {
+    "url": "https://fullcalendar.io/reporting-bugs"
+  },
+  "bundleDependencies": false,
+  "copyright": "2019 Adam Shaw",
+  "dependencies": {
+    "@fullcalendar/resource-common": "~4.4.0",
+    "@fullcalendar/timeline": "~4.4.0"
+  },
+  "deprecated": false,
+  "description": "Display events and resources on a horizontal time axis",
+  "docs": "https://fullcalendar.io/docs/timeline-view",
+  "homepage": "https://fullcalendar.io/scheduler",
+  "keywords": [
+    "calendar",
+    "event",
+    "full-sized"
+  ],
+  "license": "SEE LICENSE IN LICENSE.md",
+  "main": "main.js",
+  "module": "main.esm.js",
+  "name": "@fullcalendar/resource-timeline",
+  "peerDependencies": {
+    "@fullcalendar/core": "~4.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fullcalendar/fullcalendar-scheduler.git",
+    "homepage": "https://github.com/fullcalendar/fullcalendar-scheduler"
+  },
+  "title": "FullCalendar Resource Timeline Plugin",
+  "types": "main.d.ts",
+  "unpkg": "main.min.js",
+  "version": "4.4.2"
+}

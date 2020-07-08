@@ -1,19 +1,98 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
-   <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
+    <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
     <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery.min.js'></script>
     <script src="http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery-ui.custom.min.js"></script>
     <script src='http://fullcalendar.io/js/fullcalendar-2.1.1/fullcalendar.min.js'></script>
     
-    <link href='fullcalendar-4.4.2/packages/core/main.css' rel='stylesheet' />
+     <link href='fullcalendar-4.4.2/packages/core/main.css' rel='stylesheet' />
     <link href='fullcalendar-4.4.2/packages/daygrid/main.css' rel='stylesheet' />
     <link href='fullcalendar-4.4.2/packages/bootstrap/main.css' rel='stylesheet' />
+    <!--<link href='lib/main.css' rel='stylesheet' />-->
+    
 
     <script src='fullcalendar-4.4.2/packages/core/main.js'></script>
     <script src='fullcalendar-4.4.2/packages/daygrid/main.js'></script>
     <script src='fullcalendar-4.4.2/packages/bootstrap/main.js'></script>
-
+    <!-- <script src='lib/main.js'></script>-->
+      
     <script>
+      /*document.addEventListener('DOMContentLoaded', function() {
+      var calendarEl = document.getElementById('gantt');
+
+      var e = {{{obrasS}}};
+        var resources = [];
+        for(var i=0; i<e.length; i++){
+          resources[i] = e[i];
+        }
+        for(var i=0; i<e.length; i++){
+          resources[i].tittle = resources[i].nome;
+        }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      now: '2020-06-07',
+      scrollTime: '00:00', // undo default 6am scrollTime
+      selectable: true,
+      aspectRatio: 1.8,
+      headerToolbar: {
+        left: 'today prev,next',
+        center: 'title',
+        right: 'resourceTimelineDay,resourceTimelineThreeDays,timeGridWeek'
+      },
+      initialView: 'resourceTimelineDay',
+      views: {
+        resourceTimelineThreeDays: {
+          type: 'resourceTimeline',
+          duration: { days: 3 },
+          buttonText: '3 days'
+        }
+      },
+      resourceAreaHeaderContent: 'Rooms',
+      resources: [
+        { id: 'a', title: 'Auditorium A' },
+        { id: 'b', title: 'Auditorium B', eventColor: 'green' },
+        { id: 'c', title: 'Auditorium C', eventColor: 'orange' },
+        { id: 'd', title: 'Auditorium D', children: [
+          { id: 'd1', title: 'Room D1' },
+          { id: 'd2', title: 'Room D2' }
+        ] },
+        { id: 'e', title: 'Auditorium E' },
+        { id: 'f', title: 'Auditorium F', eventColor: 'red' },
+        { id: 'g', title: 'Auditorium G' },
+        { id: 'h', title: 'Auditorium H' },
+        { id: 'i', title: 'Auditorium I' },
+        { id: 'j', title: 'Auditorium J' },
+        { id: 'k', title: 'Auditorium K' },
+        { id: 'l', title: 'Auditorium L' },
+        { id: 'm', title: 'Auditorium M' },
+        { id: 'n', title: 'Auditorium N' },
+        { id: 'o', title: 'Auditorium O' },
+        { id: 'p', title: 'Auditorium P' },
+        { id: 'q', title: 'Auditorium Q' },
+        { id: 'r', title: 'Auditorium R' },
+        { id: 's', title: 'Auditorium S' },
+        { id: 't', title: 'Auditorium T' },
+        { id: 'u', title: 'Auditorium U' },
+        { id: 'v', title: 'Auditorium V' },
+        { id: 'w', title: 'Auditorium W' },
+        { id: 'x', title: 'Auditorium X' },
+        { id: 'y', title: 'Auditorium Y' },
+        { id: 'z', title: 'Auditorium Z' }
+      ],
+      events: [
+        { id: '1', resourceId: 'b', start: '2020-06-07T02:00:00', end: '2020-06-07T07:00:00', title: 'event 1' },
+        { id: '2', resourceId: 'c', start: '2020-06-07T05:00:00', end: '2020-06-07T22:00:00', title: 'event 2' },
+        { id: '3', resourceId: 'd', start: '2020-06-06', end: '2020-06-08', title: 'event 3' },
+        { id: '4', resourceId: 'e', start: '2020-06-07T03:00:00', end: '2020-06-07T08:00:00', title: 'event 4' },
+        { id: '5', resourceId: 'f', start: '2020-06-07T00:30:00', end: '2020-06-07T02:30:00', title: 'event 5' }
+      ]
+    });
+
+    calendar.render();
+    calendarEl.style.display = "none";
+  });*/
+
+
 
       document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
@@ -48,7 +127,6 @@
         calendar.render();
         calendarEl.style.display = "none";
       });
-
     </script>
 </style>
 <h2>Lista de obras</h2>
@@ -60,7 +138,7 @@
       <div class="btn-group mt-4" role="group" aria-label="Basic example">
         <button type="button" id="btnLista" class="btn btn-secondary active" onclick="lista()">Lista</button>
         <button type="button" id="btnCalendario" class="btn btn-secondary" onclick="calendario()">Calendário</button>
-        <button type="button" id="btnGantt" class="btn btn-secondary">Gantt</button>
+        <button type="button" id="btnGantt" class="btn btn-secondary" onclick="gantt()">Gantt</button>
       </div>
     </div>
     <div class="col-6 mt-4 text-right">
@@ -77,7 +155,9 @@
           <th onclick="sortTable(1)">Data de inicio <i class="fa fa-sort"> </i></th>
           <th onclick="sortTable(2)">Data de fim <i class="fa fa-sort"> </i></th>
           <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
-          <th onclick="sortTable(4)">Orçamento <i class="fa fa-sort"> </i>
+          {{#ifImAdmin}}
+            <th onclick="sortTable(4)">Orçamento <i class="fa fa-sort"> </i>
+          {{/ifImAdmin}}
           </th>
         </tr>
       </thead>
@@ -89,7 +169,9 @@
               <td>{{dateToString dataInicio}}</td>
               <td>{{dateToString dataFim}}</td>
               <td>{{estadoToString estado}}</td>
-              <td>{{precoToString orcamento}}</td>
+              {{#ifImAdmin}}
+                <td>{{precoToString orcamento}}</td>
+              {{/ifImAdmin}}
           </tr>
         {{else}}
 
@@ -114,6 +196,7 @@
   </div>
 </div>
 <div id='calendar'></div>
+<div id='gantt'></div>
 
 
 <script>
@@ -139,12 +222,15 @@
     var y = document.getElementById("calendar");
     var k = document.getElementById("inputFiltro");
     var l = document.getElementById("infos");
+    var m = document.getElementById("gantt");
     x.style.display = "block";
     k.style.display = "block";
     document.getElementById("btnLista").setAttribute("class", "btn btn-secondary active");
     y.style.display = "none";
     l.style.display = "none";
+    m.style.display = "none";
     document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary");
+    document.getElementById("btnGantt").setAttribute("class", "btn btn-secondary");
   }
 
   function calendario() {
@@ -152,13 +238,32 @@
     var y = document.getElementById("calendar");
     var k = document.getElementById("inputFiltro");
     var l = document.getElementById("infos");
+    var m = document.getElementById("gantt");
     x.style.display = "none";
     k.style.display = "none";
+    m.style.display = "none";
     document.getElementById("btnLista").setAttribute("class", "btn btn-secondary");
+    document.getElementById("btnGantt").setAttribute("class", "btn btn-secondary");
     y.style.display = "block";
     l.style.display = "block";
     document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary active");
   }
+
+  function gantt() {
+      var x = document.getElementById("lista");
+      var y = document.getElementById("calendar");
+      var k = document.getElementById("inputFiltro");
+      var l = document.getElementById("infos");
+      var m = document.getElementById("gantt");
+      x.style.display = "none";
+      k.style.display = "none";
+      y.style.display = "none";
+      l.style.display = "none";
+      document.getElementById("btnLista").setAttribute("class", "btn btn-secondary");
+      document.getElementById("btnCalendario").setAttribute("class", "btn btn-secondary");
+      m.style.display = "block";
+      document.getElementById("Gantt").setAttribute("class", "btn btn-secondary active");
+    }
 
   function sortTable(n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;

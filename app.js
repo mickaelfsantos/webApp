@@ -13,6 +13,7 @@
     const passport = require('passport')
     const { use } = require('passport')
     require('./config/auth')(passport)
+    
 
 //Configurações
     var u;
@@ -143,6 +144,13 @@
 
             ifSubmeteu: function(estado, options){
                 if(estado === "associada" || estado === "recusada"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
+            ifComecar: function(estado, options){
+                if(estado === "aceite"){
                     return options.fn(this)
                 }
                 return options.inverse(this);

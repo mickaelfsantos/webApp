@@ -235,9 +235,11 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
                 var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
                 var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
                 var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
+                
                 res.render("users/tarefas/editarTarefa", {tarefa:tarefa, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
                     funcionarios : f})
             }).catch(function(erro){
+                console.log(erro)
                 req.flash("error_msg", "Tarefa não encontrada.")
                 res.redirect("/tarefas");
             })
@@ -404,6 +406,110 @@ router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res
                         req.flash("error_msg", "Erro ao submeter a tarefa.")
                         res.redirect("/tarefa/"+req.params.id);
                     })
+
+
+                    Tarefa.findOneAndUpdate({_id:req.params.id},
+                        {"$set": {"estado": "porAceitar"}}, {useFindAndModify: false}).lean().then(function(funcionario){
+                        //     Funcionario.find({tarefas:req.params.id}).then(function(funcionarios){
+                        //         Tarefa.findOne({_id:req.params.id}).lean().then(function(tarefa){
+                        //             Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                                            
+
+                        //             async function secondFunction(){
+                        //                 var finishDay = momentBD(tarefa.dataPrevistaFim).format('DD')
+                        //                 var startDay = momentBD(tarefa.dataPrevistaInicio).format('DD')
+                        //                 var cost = tarefa.despesa;
+                                            
+                        //                 if(moment(tarefa.dataPrevistaInicio).isValid() && moment(tarefa.dataPrevistaFim).isValid()){
+                        //                     var expectedStartDateYear = moment(tarefa.dataPrevistaInicio).format("YYYY");
+                        //                     var expectedFinishDateYear = moment(tarefa.dataPrevistaFim).format("YYYY");
+
+                        //                     var holidays = [];
+                        //                     for(var i=expectedStartDateYear; i <= expectedFinishDateYear; i++){
+                        //                         var yearHolidays = hd.getHolidays(i);
+                        //                         for(var j=0; j<yearHolidays.length; j++){
+                        //                             holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
+                        //                         }
+                        //                     }
+                                    
+                        //                     momentBD.updateLocale('PT', {
+                        //                         holidays: holidays,
+                        //                         holidayFormat: 'YYYY-MM-DD',
+                        //                         workingWeekdays: [1, 2, 3, 4, 5]
+                        //                     });
+                                            
+                        //                     var days = momentBD(tarefa.dataPrevistaFim).businessDiff(moment(tarefa.dataPrevistaInicio));
+                        //                     var hours = momentBD(tarefa.dataPrevistaFim).diff(moment(tarefa.dataPrevistaInicio), 'days', true) % 1;
+                        //                     if(hours != 0 && days != 0){
+                        //                         days = days - 1;
+                        //                     }
+                        //                     days = days + hours;
+                        //                     if(startDay == finishDay)
+                        //                         for(var i=0; i<funcionarios.length; i++){
+                        //                             cost = cost + ((days * 24) * funcionarios[i].custo);
+                        //                         }
+                        //                     else{
+                        //                         var aux = finishDay - startDay;
+                        //                         for(var i=0; i<funcionarios.length; i++){
+                        //                             cost = cost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
+                        //                         }
+                        //                     }
+                        //                     var expectedFinishDate;
+                        //                     if(moment(obra.dataPrevistaFim).isValid()){
+                        //                         if(moment(tarefa.dataPrevistaFim).isAfter(obra.dataPrevistaFim)){
+                        //                             expectedFinishDate = tarefa.dataPrevistaFim;
+                        //                         }
+                        //                         else{
+                        //                             expectedFinishDate = obra.dataPrevistaFim;
+                        //                         }
+                        //                     }
+                        //                     else{
+                        //                         expectedFinishDate = tarefa.dataPrevistaFim;
+                        //                     }
+
+                        //                     Tarefa.find({ $and: [{obra:obra._id}, {$or: [{estado: "porAceitar"}, {estado:"associada"}, {estado:"recusada"}]}]}).lean().then(function(tarefas){
+                        //                         console.log(tarefas)
+                        //                         if(tarefas.length > 0){
+                        //                             Obra.findOneAndUpdate({_id:req.params.id}, {"$set": {"custo": cost, "dataPrevistaFim": expectedFinishDate}}, 
+                        //                                 {useFindAndModify: false}).lean().then(function(){
+                        //                                 req.flash("success_msg", "Tarefa submetida com sucesso")
+                        //                                 res.redirect("/tarefa/"+req.params.id);
+                        //                             }).catch(function(error){
+                        //                                 req.flash("error_msg", "Erro ao atualizar a obra.")
+                        //                                 res.redirect("/tarefa/"+req.params.id);
+                        //                             })
+                        //                         }
+                        //                         else{
+                        //                             Obra.findOneAndUpdate({_id:req.params.id}, {"$set": {"custo": cost, "dataPrevistaFim": expectedFinishDate, "estado": "aAguardarResposta"}}, 
+                        //                                 {useFindAndModify: false}).lean().then(function(){
+                        //                                 req.flash("e", "Tarefa submetida com sucesso")
+                        //                                 res.redirect("/tarefa/"+req.params.id);
+                        //                             }).catch(function(error){
+                        //                                 req.flash("error_msg", "Erro ao atualizar a obra.")
+                        //                                 res.redirect("/tarefa/"+req.params.id);
+                        //                             })
+                        //                         }
+                        //                     }).catch(function(error){
+                        //                         req.flash("error_msg", "Tarefas não encontradas.")
+                        //                         res.redirect("/tarefa/"+req.params.id)
+                        //                     })
+                        //                 }
+                        //                 else{
+                        //                     req.flash("error_msg", "Datas da tarefa inválidas.")
+                        //                     res.redirect("/tarefa/"+req.params.id);
+                        //                 }
+                        //             };
+                        //             secondFunction()  
+                        //         })
+                        //     })
+                        // }).catch(function(error){
+                        //     req.flash("error_msg", "Funcionários não encontrados.")
+                        //     res.redirect("/tarefa/"+req.params.id)
+                        // })
+                    }).catch(function(error){
+                        req.flash("error_msg", "Erro ao submeter a tarefa.")
+                        res.redirect("/tarefa/"+req.params.id);
+                    })
                 }
             }
         }).catch(function(error){
@@ -518,42 +624,6 @@ router.get('/requisicoes', authenticated, function(req, res){
     })
 })
 
-
-async function myFunction(tarefas, id){
-    var a=[]
-    for(var i=0; i<tarefas.length; i++){
-        await Tarefa.findById(tarefas[i], function(err, tarefa) {
-            for(var i=0; i<tarefa.funcionarios.length; i++){
-                if(tarefa.funcionarios[i] == id || tarefa.funcionarioCriador == id){
-                    a.push(tarefa)
-                    break;
-                }
-            }
-        }).lean()
-    }
-    return a;
-}
-
-async function getObraInfo(obra){
-    var a=[]
-    
-    await Obra.findById(obra, function(err, tarefa) {
-        a.push(tarefa)
-    }).lean()
-
-    return a;
-}
-
-async function getFuncionariosInfo(funcionarios){    
-    var a=[]
-    for(var i=0; i<funcionarios.length; i++){
-        await Funcionario.findById(funcionarios[i]).lean().then(function(funcionario) {
-            a.push(funcionario)
-        });
-    }
-    return a;
-}
-
 async function getFuncionarios(funcionarios, f){
     var a=[]
     if(funcionarios[0].length == 1){
@@ -576,5 +646,11 @@ async function getFuncionarios(funcionarios, f){
     return a;
 }
 
+async function countWeekendDays( d0, d1, d2, d3 )
+{
+  var ndays = 1 + Math.round((d1.getTime()-d0.getTime())/(24*3600*1000));
+  var nsaturdays = Math.floor( (d2+ndays) / 7 );
+  return 2*nsaturdays + (d0.getDay()==0) - (d1.getDay()==6);
+}
 
 module.exports = router

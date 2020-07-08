@@ -11,17 +11,7 @@ const Tarefa = new Schema({
         type: String,
         required: true
     },
-
-    /*funcionarios: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funcionario"
-    }],
-
-    funcionarioCriador : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funcionario"
-    },*/
-
+    
     dataPrevistaInicio: {
         type: Date,
         format: "DD/MM/YYYY",
@@ -53,10 +43,7 @@ const Tarefa = new Schema({
         type: String
     },
 
-    duracao: {
-        type: Number
-    },
-    
+        
     validada: {
         type:Boolean,
         default: false

@@ -32,7 +32,7 @@
             {{#ifImAdmin}}
                 <label for="percentagem">Percentagem de lucro (%)</label>
                 <input type="text" id="percentagem" name="percentagemLucro" value="{{obra.percentagemLucro}}" class="form-control mb-4" onchange="calcula(this)">
-                <label for="precoFinal" id="precoFinal">Preço final: {{obra.custoFinal}}€</label>
+                <label for="preco" id="preco" value="{{obra.despesa}}">Preço: {{obra.orcamento}}€</label>
                 <br>
                 {{else}}
             {{/ifImAdmin}}
@@ -44,11 +44,12 @@
                     
  <script>
      function calcula(handle){
+         var despesa = parseInt(document.getElementById("preco").getAttribute("value"));
          var per = document.getElementById("percentagem").value;
-         console.log(custo)
-         //var calculo = custo + custo*per;
-         calculo = 1;
-         document.getElementById('precoFinal').innerHTML = 'Preço final: '+calculo+'€';
+         var calculo = despesa + despesa * per / 100;
+         if(calculo < despesa)
+            calculo = despesa;
+         document.getElementById('preco').innerHTML = 'Preço: '+calculo+'€';
      }
 
 

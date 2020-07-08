@@ -17,17 +17,17 @@
                 {{#ifUR}}
                 <a class="dropdown-item" onclick="saltaParaResponder()" style="cursor: pointer;">Responder à submissão</a>
                 {{/ifUR}}
+                {{#ifComecar tarefa.estado}}
+                <a class="dropdown-item" onclick="saltaParaComecar()" style="cursor: pointer;">Começar tarefa</a>
+                {{/ifComecar}}
             {{/ifSubmeteu}}
             <a class="dropdown-item" onclick="saltaParaRequisitar()" style="cursor: pointer;">Requisitar máquina</a>
-            <a class="dropdown-item" onclick="saltaParaComecar()" style="cursor: pointer;">Começar tarefa</a>
             </div>
         </li>
         </ul>
     </div>
 </div>
 <hr>
-
-
 
     <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
         <div class="col-3 p-3 text-left">

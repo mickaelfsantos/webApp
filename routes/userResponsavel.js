@@ -4,6 +4,10 @@ const mongoose = require('mongoose')
 const moment = require('moment')
 moment().format();
 
+const Holidays = require('date-holidays')
+const hd = new Holidays('PT')
+
+var momentBD = require('moment-business-days');
 
 const {authenticated, admin, userResponsavel} = require('../helpers/userRole');
 const userRole = require('../helpers/userRole');
@@ -200,10 +204,14 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
                             }
                         }
                         else{
+                            var today = moment().format("YYYY-MM-DD HH:mm");
+                            var expectedStartDate = today;
+                            if(moment(obra.dataPrevistaInicio).isAfter(today))
+                                expectedStartDate = obra.dataPrevistaInicio 
                             novaTarefa = { 
                                 nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                                 descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                                dataPrevistaInicio: Date.now(),
+                                dataPrevistaInicio: expectedStartDate,
                                 obra: obra._id,
                                 importancia: req.body.importancia.toLowerCase()
                             }
@@ -233,7 +241,6 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
             
                                     req.flash("success_msg", "Tarefa criada com sucesso.")
                                     res.redirect('/obra/'+obra._id);
-                                    
                                 }).catch(function(erro){
                                     req.flash("error_msg", "Erro ao encontrar a tarefa.")
                                     res.redirect('/obra/'+obra._id);
@@ -388,9 +395,120 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                     {"$set": {
                         "estado": "aceite",
                       }}, {useFindAndModify: false}).then(function(tarefa){
-    
-                        req.flash("success_msg", "Tarefa validada com sucesso")
-                        res.redirect("/tarefa/"+req.params.id);
+                        Funcionario.find({tarefas:req.params.id}).then(function(funcionarios){
+                            Tarefa.findOne({_id:req.params.id}).lean().then(function(tarefa){
+                                Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                                    async function secondFunction(){
+                                        var finishDay = momentBD(tarefa.dataPrevistaFim).format('DD')
+                                        var startDay = momentBD(tarefa.dataPrevistaInicio).format('DD')
+                                        var cost = obra.despesa;
+                                            
+                                        if(moment(tarefa.dataPrevistaInicio).isValid() && moment(tarefa.dataPrevistaFim).isValid()){
+                                            var expectedStartDateYear = moment(tarefa.dataPrevistaInicio).format("YYYY");
+                                            var expectedFinishDateYear = moment(tarefa.dataPrevistaFim).format("YYYY");
+
+                                            var holidays = [];
+                                            for(var i=expectedStartDateYear; i <= expectedFinishDateYear; i++){
+                                                var yearHolidays = hd.getHolidays(i);
+                                                for(var j=0; j<yearHolidays.length; j++){
+                                                    holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
+                                                }
+                                            }
+                                    
+                                            momentBD.updateLocale('PT', {
+                                                holidays: holidays,
+                                                holidayFormat: 'YYYY-MM-DD',
+                                                workingWeekdays: [1, 2, 3, 4, 5]
+                                            });
+                                            
+                                            var days = momentBD(tarefa.dataPrevistaFim).businessDiff(moment(tarefa.dataPrevistaInicio));
+                                            var hours = momentBD(tarefa.dataPrevistaFim).diff(moment(tarefa.dataPrevistaInicio), 'days', true) % 1;
+                                            if(hours != 0 && days != 0){
+                                                days = days - 1;
+                                            }
+                                            days = days + hours;
+                                            if(startDay == finishDay)
+                                                for(var i=0; i<funcionarios.length; i++){
+                                                    cost = cost + ((days * 24) * funcionarios[i].custo);
+                                                }
+                                            else{
+                                                var aux = finishDay - startDay;
+                                                for(var i=0; i<funcionarios.length; i++){
+                                                    cost = cost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
+                                                }
+                                            }
+                                            var expectedFinishDate;
+                                            if(moment(obra.dataPrevistaFim).isValid()){
+                                                if(moment(tarefa.dataPrevistaFim).isAfter(obra.dataPrevistaFim)){
+                                                    expectedFinishDate = tarefa.dataPrevistaFim;
+                                                }
+                                                else{
+                                                    expectedFinishDate = obra.dataPrevistaFim;
+                                                }
+                                            }
+                                            else{
+                                                expectedFinishDate = tarefa.dataPrevistaFim;
+                                            }
+
+                                            Tarefa.find({ $and: [{obra:obra._id}, {$or: [{estado: "porAceitar"}, {estado:"associada"}, {estado:"recusada"}]}]}).lean().then(function(tarefas){
+                                                if(tarefas.length > 0){
+                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate, 
+                                                    "orcamento" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
+                                                        if(obra == null){  
+                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                        else{
+                                                            req.flash("success_msg", "Tarefa validada com sucesso")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                        
+                                                    }).catch(function(error){
+                                                        console.log(error)
+                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                        res.redirect("/tarefa/"+req.params.id);
+                                                    })
+                                                }
+                                                else{
+                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate, 
+                                                        "estado": "aAguardarResposta", "orcamento" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                        {useFindAndModify: false}).lean().then(function(obra){
+                                                        if(obra == null){  
+                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                        else{
+                                                            req.flash("success_msg", "Tarefa validada com sucesso")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                    }).catch(function(error){
+                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                        res.redirect("/tarefa/"+req.params.id);
+                                                    })
+                                                }
+                                            }).catch(function(error){
+                                                req.flash("error_msg", "Tarefas não encontradas.")
+                                                res.redirect("/tarefa/"+req.params.id)
+                                            })
+                                        }
+                                        else{
+                                            req.flash("error_msg", "Datas da tarefa inválidas.")
+                                            res.redirect("/tarefa/"+req.params.id);
+                                        }
+                                    };
+                                    secondFunction()  
+                                }).catch(function(error){
+                                    req.flash("error_msg", "Obra não encontrada.")
+                                    res.redirect("/tarefa/"+req.params.id)
+                                })
+                            }).catch(function(error){
+                                req.flash("error_msg", "Tarefa não encontrada.")
+                                res.redirect("/tarefas/")
+                            })
+                        }).catch(function(error){
+                            req.flash("error_msg", "Funcionários não encontrados.")
+                            res.redirect("/tarefa/"+req.params.id)
+                        })
                 }).catch(function(error){
                     req.flash("error_msg", "Erro ao validar a tarefa.")
                     res.redirect("/tarefa/"+req.params.id);
