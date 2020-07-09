@@ -1,0 +1,65 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="js/script.js"></script>
+
+
+<div class="row pt-5">
+    <div class="col-md-6">
+        <div class="card card-danger">
+                <div class="card-header" style="background-color: #dc3545; color:white">
+                    <div class="row">
+                        <div class="col-6">
+                            <h3 class="card-title">Tarefas</h3>
+                        </div>
+
+                        <div class="col-6 text-right">
+                            <div class="card-tools">
+                                <button type="button" class="btn" id="minimiza"><i class="fa fa-fw fa-minus" id="buttonTarefas" style="color: white;"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              <div class="card-body" id="isto">
+                <canvas id="doughnutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+              </div>
+              <!-- /.card-body -->
+            </div>
+    </div>
+</div>
+
+<div class="row pt-5">
+    <div class="col-md-6">
+        <h3>ola</h3>
+    </div>
+</div>
+
+<script>
+    var obras = {{{obras}}};
+    var preOrcamento = 0, aAguardarResposta =0;
+    for(var i=0; i<obras.length; i++){
+        if(obras[i].estado == "aAguardarResposta"){
+            aAguardarResposta++;
+        }
+        else
+            preOrcamento++;
+    }
+    var ctxD = document.getElementById("doughnutChart").getContext('2d');
+    var myLineChart = new Chart(ctxD, {
+    type: 'doughnut',
+    data: {
+        labels: ["Pré-Orçamento", "A aguardar resposta"], //, "Yellow", "Grey", "Dark Grey", "Forest Green"],
+        datasets: [{
+            data: [preOrcamento, aAguardarResposta], //, 1, 4, 12, 2],
+            backgroundColor: ["#B22222", "#46BFBD"], //, "#FDB45C", "#949FB1", "#4D5360", "#228B22"],
+            hoverBackgroundColor: ["#F7464A", "#5AD3D1"] //, "#FFC870", "#A8B3C5", "#616774", "#006400"]
+        }]
+    },
+    options: {
+        maintainAspectRatio : false,
+        responsive: true
+    }
+    });
+
+</script>
+
+

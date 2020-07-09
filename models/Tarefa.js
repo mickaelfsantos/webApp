@@ -62,6 +62,13 @@ const Tarefa = new Schema({
         default: 0
     },
 
+    custo:{
+        type:Number,
+        max:100,
+        min:0,
+        default: 0
+    },
+
     obra: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Obra",

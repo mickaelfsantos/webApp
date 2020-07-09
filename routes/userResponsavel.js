@@ -3,14 +3,14 @@ const router = express.Router()
 const mongoose = require('mongoose')
 const moment = require('moment')
 moment().format();
-
 const Holidays = require('date-holidays')
 const hd = new Holidays('PT')
-
 var momentBD = require('moment-business-days');
-
 const {authenticated, admin, userResponsavel} = require('../helpers/userRole');
 const userRole = require('../helpers/userRole');
+const pdf = require("html-pdf")
+const fs = require("fs")
+const path = require("path")
 
 //models
     require("../models/Obra")
@@ -361,6 +361,39 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
     }
 })
 
+router.get('/obras/generateReport', authenticated, admin, async function(req, res){
+    Obra.find({}).lean().then(function(obras){
+        Tarefa.find({}).lean().then(function(tarefas){
+            var o = obras;
+            for(var i=0; i<o.length; i++){
+                o[i].tarefas = [];
+            }
+            for(var i=0; i<o.length; i++){
+                for(var j=0; j<tarefas.length; j++){
+                    if(tarefas[j].obra.equals(o[i]._id)){
+                        o[i].tarefas.push(tarefas[j])
+                    }
+                }
+            }
+            res.render("users/obras/obrasReport", {obras:o}, function(err, html){
+                var mySubString = html.substring(
+                    html.lastIndexOf("<div id=\"comeca\""),
+                    html.lastIndexOf("<br id=\"finish\">")
+                );
+                pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
+                    if(err)
+                        console.log(err)
+                    else{
+                        console.log(reposta)
+                        req.flash("success_msg", "Report criado com sucesso.")
+                        res.redirect("/obras")
+                    }
+                })
+            })
+        })
+    })
+})
+
 router.get('/tarefa/:id/responderSubmissao', authenticated, userResponsavel, function (req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
@@ -402,6 +435,7 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                         var finishDay = momentBD(tarefa.dataPrevistaFim).format('DD')
                                         var startDay = momentBD(tarefa.dataPrevistaInicio).format('DD')
                                         var cost = obra.despesa;
+                                        var issueCost = 0;
                                             
                                         if(moment(tarefa.dataPrevistaInicio).isValid() && moment(tarefa.dataPrevistaFim).isValid()){
                                             var expectedStartDateYear = moment(tarefa.dataPrevistaInicio).format("YYYY");
@@ -430,11 +464,13 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                             if(startDay == finishDay)
                                                 for(var i=0; i<funcionarios.length; i++){
                                                     cost = cost + ((days * 24) * funcionarios[i].custo);
+                                                    issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
                                                 }
                                             else{
                                                 var aux = finishDay - startDay;
                                                 for(var i=0; i<funcionarios.length; i++){
                                                     cost = cost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
+                                                    issueCost = issueCost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
                                                 }
                                             }
                                             var expectedFinishDate;
@@ -449,6 +485,10 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                             else{
                                                 expectedFinishDate = tarefa.dataPrevistaFim;
                                             }
+                                            Tarefa.findOneAndUpdate({_id:req.params.id},
+                                                {"$set": {
+                                                    "custo": issueCost,
+                                                  }}, {useFindAndModify: false}).then()
 
                                             Tarefa.find({ $and: [{obra:obra._id}, {$or: [{estado: "porAceitar"}, {estado:"associada"}, {estado:"recusada"}]}]}).lean().then(function(tarefas){
                                                 if(tarefas.length > 0){
@@ -772,7 +812,6 @@ router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncF
         })
     }
 })
-
 
 async function getFuncionarios(funcionarios, f){
     var a=[]

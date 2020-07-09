@@ -5,7 +5,6 @@ const moment = require('moment')
 moment().format();
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
-
 const {authenticated} = require('../helpers/userRole');
 const { data } = require('jquery');
 
@@ -150,7 +149,21 @@ router.get('/', function(req, res){
 })
 
 router.get('/dashboard', authenticated, function(req, res){
-    res.render("users/dashboard")
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.find({_id:funcionario.tarefas}).lean().then(function(tarefas){
+            Obra.find({_id:funcionario.obras}).lean().then(function(obras){
+                var tarefas = JSON.stringify(tarefas);
+                var obras = JSON.stringify(obras);
+                res.render("users/dashboard", {tarefas:tarefas, obras:obras})
+            })
+        }).catch(function(error){
+            req.flash("error_msg", "Tarefas não encontradas")
+            res.redirect("/logout")
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/logout")
+    })
 })
 
 router.get('/obras', authenticated, function(req, res){
