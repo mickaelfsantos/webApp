@@ -4,54 +4,128 @@
 
 
 <div class="row pt-5">
-    <div class="col-md-6">
+    <div class="col-md-6 mb-5">
         <div class="card card-danger">
-                <div class="card-header" style="background-color: #dc3545; color:white">
-                    <div class="row">
-                        <div class="col-6">
-                            <h3 class="card-title">Tarefas</h3>
-                        </div>
+            <div class="card-header" style="background-color: #dc3545; color:white">
+                <div class="row">
+                    <div class="col-6">
+                        <h3 class="card-title">Tarefas</h3>
+                    </div>
 
-                        <div class="col-6 text-right">
-                            <div class="card-tools">
-                                <button type="button" class="btn" id="minimiza"><i class="fa fa-fw fa-minus" id="buttonTarefas" style="color: white;"></i></button>
-                            </div>
+                    <div class="col-6 text-right">
+                        <div class="card-tools">
+                            <button type="button" class="btn" id="tarefasButton" data-toggle="collapse" data-target="#tarefas" aria-expanded="true" aria-controls="tarefas"><i class="fa fa-fw fa-minus" id="buttonTarefas" style="color: white;"></i></button>
                         </div>
                     </div>
                 </div>
-              <div class="card-body" id="isto">
-                <canvas id="doughnutChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-              </div>
-              <!-- /.card-body -->
             </div>
+            
+            <div class="collapse show" id="tarefas">
+                <div class="card card-body">
+                    <canvas id="doughnutChartT" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="row pt-5">
-    <div class="col-md-6">
-        <h3>ola</h3>
+    <div class="col-md-6 mb-5">
+        <div class="card card-danger">
+            <div class="card-header" style="background-color: #dc3545; color:white">
+                <div class="row">
+                    <div class="col-6">
+                        <h3 class="card-title">Obras</h3>
+                    </div>
+
+                    <div class="col-6 text-right">
+                        <div class="card-tools">
+                            <button type="button" class="btn" id="obrasButton" data-toggle="collapse" data-target="#obras" aria-expanded="true" aria-controls="obras"><i class="fa fa-fw fa-minus" id="buttonObras" style="color: white;"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="collapse show" id="obras">
+                <div class="card card-body">
+                    <canvas id="doughnutChartO" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     var obras = {{{obras}}};
-    var preOrcamento = 0, aAguardarResposta =0;
+    var preOrcamento = 0, aAguardarResposta = 0, preProducao = 0, producao = 0, finalizada = 0;
     for(var i=0; i<obras.length; i++){
-        if(obras[i].estado == "aAguardarResposta"){
-            aAguardarResposta++;
-        }
-        else
-            preOrcamento++;
+        switch(obras[i].estado){
+            case 'preOrcamento':
+                preOrcamento++;
+                break;
+            case 'aAguardarResposta':
+                aAguardarResposta++;
+                break;
+            case 'preProducao':
+                preProducao++;
+                break;
+            case 'producao':
+                producao++;
+                break;
+            case 'finalizada':
+                finalizada++;
+                break;
+        }   
     }
-    var ctxD = document.getElementById("doughnutChart").getContext('2d');
+
+    var tarefas = {{{tarefas}}};
+    var associada = 0, porAceitar = 0, aceite = 0, recusada = 0, emExecucao = 0, finalizada = 0;
+    for(var i=0; i<tarefas.length; i++){
+        switch(tarefas[i].estado){
+            case 'associada':
+                associada++;
+                break;
+            case 'porAceitar':
+                porAceitar++;
+                break;
+            case 'aceite':
+                aceite++;
+                break;
+            case 'recusada':
+                recusada++;
+                break;
+            case 'emExecucao':
+                emExecucao++;
+                break;
+            case 'finalizada':
+                finalizada++;
+                break;
+        }   
+    }
+
+    var ctxD = document.getElementById("doughnutChartO").getContext('2d');
     var myLineChart = new Chart(ctxD, {
     type: 'doughnut',
     data: {
-        labels: ["Pré-Orçamento", "A aguardar resposta"], //, "Yellow", "Grey", "Dark Grey", "Forest Green"],
+        labels: ["Pré-orçamento", "A aguardar resposta", "Pré-produção", "Produção", "Finalizada"],
         datasets: [{
-            data: [preOrcamento, aAguardarResposta], //, 1, 4, 12, 2],
-            backgroundColor: ["#B22222", "#46BFBD"], //, "#FDB45C", "#949FB1", "#4D5360", "#228B22"],
-            hoverBackgroundColor: ["#F7464A", "#5AD3D1"] //, "#FFC870", "#A8B3C5", "#616774", "#006400"]
+            data: [preOrcamento, aAguardarResposta, preProducao, producao, finalizada],
+            backgroundColor: ["#B22222", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
+            hoverBackgroundColor: ["#F7464A", "#5AD3D1" , "#FFC870", "#A8B3C5", "#616774"] 
+        }]
+    },
+    options: {
+        maintainAspectRatio : false,
+        responsive: true
+    }
+    });
+
+    var ctxD = document.getElementById("doughnutChartT").getContext('2d');
+    var myLineChart = new Chart(ctxD, {
+    type: 'doughnut',
+    data: {
+        labels: ["Associada", "Por aceitar", "Aceite", "Recusada", "Em execução", "Finalizada"], 
+        datasets: [{
+            data: [associada, porAceitar, aceite, recusada, emExecucao, finalizada],
+            backgroundColor: ["#B22222", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360", "#228B22"],
+            hoverBackgroundColor: ["#F7464A", "#5AD3D1" , "#FFC870", "#A8B3C5", "#616774", "#006400"]
         }]
     },
     options: {

@@ -1,0 +1,64 @@
+<div id="comeca" style="font-family: Palatino Linotype; padding:5%">
+    <div class="row">
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: left;"><img style="height: 20%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+
+    <br>
+    <h2>Tarefa {{tarefa.nome}}</h2>
+    <br>
+
+    <label for="obra">Obra: {{obra.nome}}</label><br><br>
+    <label for="descricao">Descrição: {{tarefa.descricao}}</label><br><br>
+    <label for="despesa">Despesa: {{precoToString tarefa.despesa}}</label><br><br>
+    <label for="orcamento">Orçamento: {{precoToString tarefa.orcamento}}</label><br><br>
+    <label for="importancia">Importância: {{tarefa.importancia}}</label><br><br>
+    <label for="estado">Estado: {{tarefa.estado}}</label><br><br>
+    <label for="datasPrevistas">Datas previstas: {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}</label><br><br>
+    <label for="datas">Datas: {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}</label><br><br>
+
+    <br>
+    <br>
+    <br>
+    <h3>Funcionários</h3>
+    {{#if funcionarios}}
+        <table style="width: 100%">
+            <thead>
+            <tr>
+                <th style="width: 15%; text-align:left">Nome</th>
+                <th style="width: 20%; text-align:left">Email</th>
+                <th style="width: 15%; text-align:left">Função</th>
+                <th style="width: 15%; text-align:left">Equipa</th>
+                <th style="width: 20%; text-align:left">Departamento</th>
+                <th style="width: 15%; text-align:left">Custo(€/h)</th>
+            </tr>
+            </thead>
+            <tbody>
+                {{#each funcionarios}}
+                    <tr>
+                        <td style="width: 15%;">{{nome}}</td>
+                        <td style="width: 20%;">{{email}}</td>
+                        <td style="width: 15%;">{{funcao}}</td>
+                        <td style="width: 15%;">{{equipa}}</td>
+                        <td style="width: 25%;">{{departamento}}</td>
+                        <td style="width: 15%;">{{custo}}</td>
+                    </tr>
+                {{else}}
+
+                {{/each}}
+            
+            </tbody>
+        </table>
+        <br>
+        <br>
+        <br>
+    {{/if}}
+</div>
+
+<br id="finish">

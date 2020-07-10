@@ -62,7 +62,14 @@ const Tarefa = new Schema({
         default: 0
     },
 
-    custo:{
+    despesa:{
+        type:Number,
+        max:100,
+        min:0,
+        default: 0
+    },
+
+    orcamento:{
         type:Number,
         max:100,
         min:0,

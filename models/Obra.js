@@ -45,7 +45,7 @@ const Obra = new Schema({
 
     estado: {
         type: String,
-        enum: ['preOrcamento', 'aAguardarResposta', 'preProducao', '', 'finalizada' ],
+        enum: ['preOrcamento', 'aAguardarResposta', 'preProducao', 'producao', 'finalizada' ],
         default: 'preOrcamento'
     },
 

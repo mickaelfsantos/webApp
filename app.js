@@ -13,6 +13,7 @@
     const passport = require('passport')
     const { use } = require('passport')
     require('./config/auth')(passport)
+    const fs = require('fs')
     
 
 //Configurações
@@ -123,7 +124,7 @@
             precoToString: function(numero){
                 if(numero == 0)
                     return "Por definir";
-                return numero;
+                return numero+"€";
             },
 
             ifUR: function(options){
@@ -154,6 +155,26 @@
                     return options.fn(this)
                 }
                 return options.inverse(this);
+            },
+
+            ifNotGenerated: function(id, options){
+                try {
+                    const stats = fs.statSync('reports/obra'+id+'Report.pdf');
+                    // print file last modified date
+                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
+                    var now = moment().format("YYYY-MM-DD HH:mm")
+                    //i = moment(i).add(2, 'minutes');
+                    if(moment(i).isAfter(now)){
+                        return options.inverse(this);
+                    }
+                    else{
+                        return options.fn(this);
+                    }
+                    // console.log(`File Data Last Modified: ${stats.mtime}`);
+                    // console.log(`File Status Last Modified: ${stats.ctime}`);
+                } catch (error) {
+                    return options.fn(this);
+                }
             }
         }
     })

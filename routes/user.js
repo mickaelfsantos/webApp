@@ -150,9 +150,9 @@ router.get('/', function(req, res){
 
 router.get('/dashboard', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
-        Tarefa.find({_id:funcionario.tarefas}).lean().then(function(tarefas){
+        Tarefa.find({_id:funcionario.tarefas}).lean().then(function(t){
             Obra.find({_id:funcionario.obras}).lean().then(function(obras){
-                var tarefas = JSON.stringify(tarefas);
+                var tarefas = JSON.stringify(t);
                 var obras = JSON.stringify(obras);
                 res.render("users/dashboard", {tarefas:tarefas, obras:obras})
             })

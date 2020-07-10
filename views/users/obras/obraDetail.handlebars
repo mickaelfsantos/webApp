@@ -10,8 +10,16 @@
             <i class="fa fa-navicon fa-2x"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" onclick="saltaParaEdit()" style="cursor: pointer;">Editar</a>
-            <a class="dropdown-item" onclick="saltaParaAddTarefa()" style="cursor: pointer;">Adicionar tarefa</a>
+                <a class="dropdown-item" onclick="saltaParaEdit()" style="cursor: pointer;">Editar</a>
+                <a class="dropdown-item" onclick="saltaParaAddTarefa()" style="cursor: pointer;">Adicionar tarefa</a>
+                <a class="dropdown-item" onclick="saltaParaObraReportCliente()" style="cursor: pointer;">Gerar relatório para cliente</a>
+                {{#ifImAdmin}}
+                    {{#ifNotGenerated obra._id}}
+                        <a class="dropdown-item" onclick="saltaParaObraReport()" style="cursor: pointer;">Gerar relatório da obra</a>
+                    {{else}}
+                        <a class="dropdown-item" onclick="saltaParaDownloadReport()" style="cursor: pointer;">Download do relatório de obra</a>
+                    {{/ifNotGenerated}}
+                {{/ifImAdmin}}
             </div>
         </li>
         </ul>
@@ -49,6 +57,26 @@
         </div>
 
         {{#ifImAdmin}}
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Despesa</h6>
+                </div>
+                
+                <div class="col-9 p-3">
+                    <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.despesa}}</label>
+                </div>
+            </div>
+
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Percentagem de lucro</h6>
+                </div>
+                
+                <div class="col-9 p-3">
+                    <label for="nome" id="nomeObra" class="m-0">{{obra.percentagemLucro}}%</label>
+                </div>
+            </div>
+
             <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Orçamento</h6>
@@ -161,6 +189,21 @@
         function saltaParaEdit() {
             obra = document.getElementById('id').getAttribute("value");
             window.location.href = "/obra/"+obra+"/edit";
+        }
+
+        function saltaParaObraReportCliente() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/generateClientReport";
+        }
+
+        function saltaParaObraReport() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/generateReport";
+        }
+
+        function saltaParaDownloadReport() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/downloadReport";
         }
         
         function sortTable(n) {

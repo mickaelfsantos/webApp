@@ -14,13 +14,17 @@
             {{#ifSubmeteu tarefa.estado}}
                 <a class="dropdown-item" onclick="saltaParaValidar()" style="cursor: pointer;">Submeter tarefa para validação</a>
                 {{else}}
-                {{#ifUR}}
-                <a class="dropdown-item" onclick="saltaParaResponder()" style="cursor: pointer;">Responder à submissão</a>
-                {{/ifUR}}
                 {{#ifComecar tarefa.estado}}
-                <a class="dropdown-item" onclick="saltaParaComecar()" style="cursor: pointer;">Começar tarefa</a>
+                    <a class="dropdown-item" onclick="saltaParaComecar()" style="cursor: pointer;">Começar tarefa</a>
+                {{else}}
+                    {{#ifUR}}
+                        <a class="dropdown-item" onclick="saltaParaResponder()" style="cursor: pointer;">Responder à submissão</a>
+                    {{/ifUR}}
                 {{/ifComecar}}
             {{/ifSubmeteu}}
+            {{#ifImAdmin}}
+                <a class="dropdown-item" onclick="saltaParaTarefaReport()" style="cursor: pointer;">Gerar relatório da tarefa</a>
+            {{/ifImAdmin}}
             <a class="dropdown-item" onclick="saltaParaRequisitar()" style="cursor: pointer;">Requisitar máquina</a>
             </div>
         </li>
@@ -56,6 +60,28 @@
                 <label for="descricao" id="descricao" class="m-0">{{tarefa.descricao}}</label>
             </div>
         </div>
+
+        {{#ifImAdmin}}
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Despesa</h6>
+            </div>
+
+            <div class="col-9 p-3">
+                <label for="descricao" id="descricao" class="m-0">{{precoToString tarefa.despesa}}</label>
+            </div>
+        </div>
+
+        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="col-3 p-3 text-left">
+                <h6 class="blockquote m-0">Orçamento</h6>
+            </div>
+
+            <div class="col-9 p-3">
+                <label for="descricao" id="descricao" class="m-0">{{precoToString tarefa.orcamento}}</label>
+            </div>
+        </div>
+        {{/ifImAdmin}}
 
         <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
             <div class="col-3 p-3 text-left">
@@ -146,6 +172,11 @@
     function saltaParaResponder() {
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/responderSubmissao";
+    }
+
+    function saltaParaTarefaReport() {
+        tarefa = document.getElementById('id').getAttribute("value");
+        window.location.href = "/tarefa/"+tarefa+"/generateReport";
     }
     
 </script>
