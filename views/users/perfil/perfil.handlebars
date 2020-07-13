@@ -1,84 +1,86 @@
+<div class="container-fluid mt-4">
 
-<div class="row">
-    <div class="col-6">
-        <h2>Perfil</h2>
+    <div class="row">
+        <div class="col-6">
+            <h2>Perfil</h2>
+        </div>
+        <div class="col-6 text-right">
+            <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-navicon fa-2x"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
+                </div>
+            </li>
+            </ul>
+        </div>
     </div>
-    <div class="col-6 text-right">
-        <ul class="navbar-nav mr-auto">
-        <li class="nav-item dropdown">
-            <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-navicon fa-2x"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
-            </div>
-        </li>
-        </ul>
-    </div>
-</div>
-<hr>
+    <hr>
 
-<input type="hidden" id="id" name="id" value="{{funcionario._id}}">
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Nome</h6>
+    <input type="hidden" id="id" name="id" value="{{funcionario._id}}">
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left">
+            <h6 class="blockquote">Nome</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="nomeFuncionario">{{funcionario.nome}}</label>
+        </div>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="nomeFuncionario">{{funcionario.nome}}</label>
-    </div>
-</div>
 
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left"> 
-        <h6 class="blockquote">Email</h6>
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left"> 
+            <h6 class="blockquote">Email</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="email">{{funcionario.email}}</label>
+        </div>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="email">{{funcionario.email}}</label>
-    </div>
-</div>
 
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Departamento</h6>
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left">
+            <h6 class="blockquote">Departamento</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="departamento">{{funcionario.departamento}}</label>
+        </div>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="departamento">{{funcionario.departamento}}</label>
-    </div>
-</div>
 
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Equipa</h6>
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left">
+            <h6 class="blockquote">Equipa</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="equipa">{{funcionario.equipa}}</label>
+        </div>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="equipa">{{funcionario.equipa}}</label>
-    </div>
-</div>
 
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Função</h6>
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left">
+            <h6 class="blockquote">Função</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="funcao">{{funcionario.funcao}}</label>
+        </div>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="funcao">{{funcionario.funcao}}</label>
-    </div>
-</div>
 
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Custo por hora</h6>
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left">
+            <h6 class="blockquote">Custo por hora</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="custo">{{funcionario.custo}}€</label>
+        </div>
     </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="custo">{{funcionario.custo}}€</label>
-    </div>
-</div>
 
-<div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-    <div class="col-3 mt-2 text-left">
-        <h6 class="blockquote">Cargo</h6>
-    </div>
-    <div class="col-9 mt-2">
-        <label for="nome" id="cargo">{{cargoToString funcionario.role}}</label>
+    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="col-3 mt-2 text-left">
+            <h6 class="blockquote">Cargo</h6>
+        </div>
+        <div class="col-9 mt-2">
+            <label for="nome" id="cargo">{{cargoToString funcionario.role}}</label>
+        </div>
     </div>
 </div>
 <script>

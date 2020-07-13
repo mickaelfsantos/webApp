@@ -163,7 +163,7 @@
                     // print file last modified date
                     var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
                     var now = moment().format("YYYY-MM-DD HH:mm")
-                    //i = moment(i).add(2, 'minutes');
+                    i = moment(i).add(2, 'minutes');
                     if(moment(i).isAfter(now)){
                         return options.inverse(this);
                     }
@@ -175,7 +175,67 @@
                 } catch (error) {
                     return options.fn(this);
                 }
-            }
+            },
+
+            ifNotGeneratedObras: function(options){
+                try {
+                    const stats = fs.statSync('reports/obrasReport.pdf');
+                    // print file last modified date
+                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
+                    var now = moment().format("YYYY-MM-DD HH:mm")
+                    i = moment(i).add(2, 'minutes');
+                    if(moment(i).isAfter(now)){
+                        return options.inverse(this);
+                    }
+                    else{
+                        return options.fn(this);
+                    }
+                    // console.log(`File Data Last Modified: ${stats.mtime}`);
+                    // console.log(`File Status Last Modified: ${stats.ctime}`);
+                } catch (error) {
+                    return options.fn(this);
+                }
+            },
+
+            ifNotGeneratedClientReport: function(id, options){
+                try {
+                    const stats = fs.statSync('reports/obra'+id+'ClientReport.pdf');
+                    // print file last modified date
+                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
+                    var now = moment().format("YYYY-MM-DD HH:mm")
+                    i = moment(i).add(2, 'minutes');
+                    if(moment(i).isAfter(now)){
+                        return options.inverse(this);
+                    }
+                    else{
+                        return options.fn(this);
+                    }
+                    // console.log(`File Data Last Modified: ${stats.mtime}`);
+                    // console.log(`File Status Last Modified: ${stats.ctime}`);
+                } catch (error) {
+                    return options.fn(this);
+                }
+            },
+
+            ifNotGeneratedIssue: function(id, options){
+                try {
+                    const stats = fs.statSync('reports/tarefa'+id+'Report.pdf');
+                    // print file last modified date
+                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
+                    var now = moment().format("YYYY-MM-DD HH:mm")
+                    i = moment(i).add(2, 'minutes');
+                    if(moment(i).isAfter(now)){
+                        return options.inverse(this);
+                    }
+                    else{
+                        return options.fn(this);
+                    }
+                    // console.log(`File Data Last Modified: ${stats.mtime}`);
+                    // console.log(`File Status Last Modified: ${stats.ctime}`);
+                } catch (error) {
+                    return options.fn(this);
+                }
+            },
         }
     })
     app.engine('handlebars', hbs.engine)

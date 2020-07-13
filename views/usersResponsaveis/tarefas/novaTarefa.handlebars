@@ -49,7 +49,8 @@
                 </select>
             </div>
             
-            <button type="submit" class="btn btn-dark mt-2">Concluir</button>
+            <button type="submit" class="btn btn-success mt-3"><i class="fa fa-check"></i> Concluir</button>
+            <button type="button" onclick="saltaParaObra()" class="btn btn-danger mt-3"><i class="fa fa-close"></i> Cancelar</button>
         </form>
     </div>
 </div>
@@ -72,5 +73,10 @@
                 document.getElementById("alta").setAttribute("selected", "selected")
             }
         }
+    }
+
+    function saltaParaObra(){
+        var obra = document.getElementById('id').getAttribute("value");
+        window.location.href = "/obra/"+obra;
     }
 </script>

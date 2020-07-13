@@ -1,44 +1,37 @@
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<div class="container-fluid mt-4">
 
-{{#each erros}}
-    <div class="alert alert-danger">{{texto}}</div>
-{{else}}
+  <h2>Lista de máquinas</h2>
+  <hr>
 
-{{/each}}
+  <div class="row">
+      <div class="col-6 mt-4" style="float:none;margin:auto;">
+          <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
+      </div>
+  </div>
 
-
-<h2>Lista de máquinas</h2>
-<hr>
-
-<div class="row">
-    <div class="col-6 mt-4" style="float:none;margin:auto;">
-        <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
-    </div>
-</div>
-
-{{#if maquinas}}
-  <table class="mt-5" id="myTable">
-    <thead>
-      <tr>
-        <th onclick="sortTable(0)">Nome</th>
-        <th onclick="sortTable(1)">Departamento</th>
-      </tr>
-    </thead>
-    
-    <tbody id="filtro">
-      {{#each maquinas}}
-        <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaMaquina(this)">
-            <td>{{nome}}</td>
-            <td>{{departamento}}</td>
+  {{#if maquinas}}
+    <table class="mt-5" id="myTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">Nome</th>
+          <th onclick="sortTable(1)">Departamento</th>
         </tr>
-      {{else}}
+      </thead>
+      
+      <tbody id="filtro">
+        {{#each maquinas}}
+          <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaMaquina(this)">
+              <td>{{nome}}</td>
+              <td>{{departamento}}</td>
+          </tr>
+        {{else}}
 
-      {{/each}}
-    </tbody>
-  </table>
-{{else}}
-{{/if}}
-
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+  {{/if}}
+</div>
 
 <script>
   $(document).ready(function(){

@@ -1,75 +1,77 @@
-<div id="comeca" style="font-family: Palatino Linotype; padding:5%">
-    <div class="row">
-        <table>
-            <thead>
+<div class="container-fluid mt-4">
+    <div id="comeca" style="font-family: Palatino Linotype; padding:5%">
+        <div class="row">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: left;"><img style="height: 20%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+
+        <br>
+        <h2>Obra {{obra.nome}}</h2>
+        <br>
+
+        <label for="descricao">Descrição: {{obra.descricao}}</label><br><br>
+        <label for="estado">Estado: {{estadoToString obra.estado}}</label><br><br>
+        <label for="estado">Despesa: {{precoToString obra.despesa}}</label><br><br>
+        <label for="estado">Percentagem de lucro: {{obra.percentagemLucro}}%</label><br><br>
+        <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br><br>
+        <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br><br>
+        <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br><br>
+        <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br><br>
+
+        <br>
+        <br>
+        <br>
+        <h3>Tarefas</h3>
+        {{#if tarefas}}
+            <table style="width: 100%">
+                <thead>
                 <tr>
-                    <th style="text-align: left;"><img style="height: 20%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+                    <th style="width: 15%; text-align:left">Nome</th>
+                    <th style="width: 30%; text-align:left">Datas previstas</th>
+                    <th style="width: 30%; text-align:left">Datas</th>
+                    <th style="width: 13%; text-align:left">Estado</th>
+                    <th style="width: 12%; text-align:left">Despesa</th>
                 </tr>
-            </thead>
-        </table>
+                </thead>
+                <tbody>
+                    {{#each tarefas}}
+                        <tr>
+                            <td style="width: 15%;">{{nome}}</td>
+                            <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                            <td style="width: 13%;">{{estadoToStringOD estado}}</td>
+                            <td style="width: 12%;">{{precoToString despesa}}</td>
+                        </tr>
+                    {{else}}
+
+                    {{/each}}
+                
+                </tbody>
+            </table>
+            <hr>
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <th style="width: 15%; text-align:left">Total</td>
+                        <td style="width: 30%;"></td>
+                        <td style="width: 30%;"></td>
+                        <td style="width: 13%;"></td>
+                        <td style="width: 12%;">{{precoToString obra.despesa}}</td>
+                    </tr>
+                </thead>
+            </table>
+
+            <br>
+            <br>
+            <br>
+        {{/if}}
     </div>
 
-
-    <br>
-    <h2>Obra {{obra.nome}}</h2>
-    <br>
-
-    <label for="descricao">Descrição: {{obra.descricao}}</label><br><br>
-    <label for="estado">Estado: {{estadoToString obra.estado}}</label><br><br>
-    <label for="estado">Despesa: {{precoToString obra.despesa}}</label><br><br>
-    <label for="estado">Percentagem de lucro: {{obra.percentagemLucro}}%</label><br><br>
-    <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br><br>
-    <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br><br>
-    <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br><br>
-    <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br><br>
-
-    <br>
-    <br>
-    <br>
-    <h3>Tarefas</h3>
-    {{#if tarefas}}
-        <table style="width: 100%">
-            <thead>
-            <tr>
-                <th style="width: 15%; text-align:left">Nome</th>
-                <th style="width: 30%; text-align:left">Datas previstas</th>
-                <th style="width: 30%; text-align:left">Datas</th>
-                <th style="width: 13%; text-align:left">Estado</th>
-                <th style="width: 12%; text-align:left">Despesa</th>
-            </tr>
-            </thead>
-            <tbody>
-                {{#each tarefas}}
-                    <tr>
-                        <td style="width: 15%;">{{nome}}</td>
-                        <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                        <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
-                        <td style="width: 13%;">{{estadoToStringOD estado}}</td>
-                        <td style="width: 12%;">{{precoToString despesa}}</td>
-                    </tr>
-                {{else}}
-
-                {{/each}}
-            
-            </tbody>
-        </table>
-        <hr>
-        <table style="width: 100%">
-            <thead>
-                <tr>
-                    <th style="width: 15%; text-align:left">Total</td>
-                    <td style="width: 30%;"></td>
-                    <td style="width: 30%;"></td>
-                    <td style="width: 13%;"></td>
-                    <td style="width: 12%;">{{precoToString obra.despesa}}</td>
-                </tr>
-            </thead>
-        </table>
-
-        <br>
-        <br>
-        <br>
-    {{/if}}
+    <br id="finish">
 </div>
-
-<br id="finish">

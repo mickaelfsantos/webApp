@@ -1,3 +1,74 @@
+{{#if user}}
+
+<nav class="navbar navbar-expand navbar-dark bg-dark" id="navbar">
+  <button class="btn btn-dark" id="menu-toggle"><i class="fa fa-navicon fa-2x"></i><span class="fa-2x">
+      Menu</span></button>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+      {{>_profile}}
+    </ul>
+  </div>
+</nav>
+
+<div class="toggled d-flex" id="wrapper">
+  <!-- Sidebar -->
+  <div class="bg-dark" id="sidebar-wrapper">
+    <div class="list-group list-group-flush" id="sidebar-content">
+
+      <a href="/dashboard" class="list-group-item list-group-item-action bg-dark">Dashboard</a>
+
+      <ul class="sidebar-nav" id="sidebar">
+        <li class="sub-sidebar-brand">
+          <a class="list-group-item list-group-item-action bg-dark" href="/obras">Obras</a>
+        </li>
+      </ul>
+
+      <ul class="sidebar-nav" id="sidebar">
+        <li class="sub-sidebar-brand">
+          <a class="list-group-item list-group-item-action bg-dark" href="/tarefas">Tarefas</a>
+        </li>
+      </ul>
+
+      {{#ifUR}}
+      <ul class="sidebar-nav" id="sidebar">
+        <li class="sub-sidebar-brand">
+          <a class="list-group-item list-group-item-action bg-dark dropdown-toggle" role="button">Máquinas</a>
+          <ul class="sub-menu">
+            <li class="sub-sub-sidebar-brand"><a href="/obras"
+                class="list-group-item list-group-item-action bg-dark">Ver máquinas</a></li>
+            <li class="sub-sub-sidebar-brand"><a href="/obras/add"
+                class="list-group-item list-group-item-action bg-dark">Nova máquina</a></li>
+          </ul>
+        </li>
+      </ul>
+      {{else}}
+      {{/ifUR}}
+      <a href="#" class="list-group-item list-group-item-action bg-dark">Status</a>
+    </div>
+  </div>
+  <div id="page-content-wrapper">
+
+    {{/if}}
+
+    <script>
+      $("#menu-toggle").click(function (e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+      });
+
+      $('.sidebar-nav li a').click(function () {
+        $(this).parent().toggleClass('active')
+      })
+    </script>
+
+
+    {{!-- {{#if user}}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-end">
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -82,3 +153,4 @@
   {{>_profile}}
   
 </nav>
+{{/if}} --}}

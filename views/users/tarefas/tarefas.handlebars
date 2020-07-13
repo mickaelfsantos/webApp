@@ -1,62 +1,90 @@
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<div class="container-fluid mt-4">
 
-{{#each erros}}
-    <div class="alert alert-danger">{{texto}}</div>
-{{else}}
+  {{#each erros}}
+      <div class="alert alert-danger">{{texto}}</div>
+  {{else}}
 
-{{/each}}
-
-
-<h2>Lista de tarefas</h2>
-<hr>
+  {{/each}}
 
 
-<div class="row">
-    <div class="col-6">
-      <div class="btn-group mt-4" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary active">Lista</button>
-        <button type="button" class="btn btn-secondary">Calendário</button>
-        <button type="button" class="btn btn-secondary">Gantt</button>
+
+  <div class="row">
+      <div class="col-4">
+        <h2>Lista de tarefas</h2>
       </div>
-    </div>
-    <div class="col-6 mt-4 text-right">
-        <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
-    </div>
+
+      {{#ifUR}}
+      <div class="col-8 text-right">
+        <button type="button" class="btn btn-light" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
+      </div>
+    {{/ifUR}}
+  </div>
+  <hr>
+  <br>
+
+
+  <nav id="navbar">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" onclick="lista()" style="cursor: pointer;">Lista</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" onclick="calendario()" style="cursor: pointer;">Calendário</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" onclick="gantt()" style="cursor: pointer;">Gantt</a>
+      </li>
+
+      <li class="navbar-nav ml-auto mt-2 mt-lg-0">
+          <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
+      </li>
+    </ul>
+  </nav>
+
+  <div id="lista">
+    {{#if tarefas}}
+      <table class="mt-5" id="myTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Nome <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable(1)">Data de inicio <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable(2)">Data de fim <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable(3)">Estado <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable2(4)">Progresso <i class="fa fa-angle-down"> </i></th>
+          </tr>
+        </thead>
+        
+        <tbody id="filtro">
+          {{#each tarefas}}
+            <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
+                <td>{{nome}}</td>
+                <td>{{dateToString dataInicio}}</td>
+                <td>{{dateToString dataFim}}</td>
+                <td>{{estadoToString estado}}</td>
+                <td>
+                  <div class="progress">
+                      <div class="progress-bar progress-bar-striped progress-bar-animated" id ="{{progresso}}" role="progressbar" style="width: {{progresso}}%;" aria-valuenow="{{progresso}}" aria-valuemin="0" aria-valuemax="100" value="{{progresso}}">{{progresso}}%</div>
+                    </div>
+                </td>
+            </tr>
+          {{else}}
+
+          {{/each}}
+        </tbody>
+      </table>
+    {{else}}
+    {{/if}}
+  </div>
+
+  <div id="calendar">
+
+  </div>
+
+
+  <div id="gantt">
+
+  </div>
 </div>
-
-{{#if tarefas}}
-  <table class="mt-5" id="myTable">
-    <thead>
-      <tr>
-        <th onclick="sortTable(0)">Nome</th>
-        <th onclick="sortTable(1)">Data de inicio</th>
-        <th onclick="sortTable(2)">Data de fim</th>
-        <th onclick="sortTable(3)">Estado</th>
-        <th onclick="sortTable2(4)">Progresso</th>
-      </tr>
-    </thead>
-    
-    <tbody id="filtro">
-      {{#each tarefas}}
-        <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
-            <td>{{nome}}</td>
-            <td>{{dateToString dataInicio}}</td>
-            <td>{{dateToString dataFim}}</td>
-            <td>{{estadoToString estado}}</td>
-            <td>
-              <div class="progress">
-                  <div class="progress-bar progress-bar-striped progress-bar-animated" id ="{{progresso}}" role="progressbar" style="width: {{progresso}}%;" aria-valuenow="{{progresso}}" aria-valuemin="0" aria-valuemax="100" value="{{progresso}}">{{progresso}}%</div>
-                </div>
-            </td>
-        </tr>
-      {{else}}
-
-      {{/each}}
-    </tbody>
-  </table>
-{{else}}
-{{/if}}
-
 
 <script>
   $(document).ready(function(){
@@ -120,6 +148,16 @@
         }
       }
     }
+
+    for(var i=0; i<5; i++){
+      if(i!=n)
+        table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+    }
+
+    if(table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+    else
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
   } 
 
   function sortTable2(n) {
@@ -165,7 +203,60 @@
         }
       }
     }
+
+    for(var i=0; i<5; i++){
+      if(i!=n)
+        table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+    }
+
+    if(table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+    else
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
   } 
 
+
+function lista() {
+    
+    var lista = document.getElementById("lista");
+    var calendario = document.getElementById("calendar");
+    var gantt = document.getElementById("gantt");
+    lista.style.display = "block";
+    calendario.style.display = "none";
+    gantt.style.display = "none";
+
+    var navbar = document.getElementById("navbar");
+    navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link active")
+    navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
+    navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
+  }
+
+  function calendario() {
+    var lista = document.getElementById("lista");
+    var calendario = document.getElementById("calendar");
+    var gantt = document.getElementById("gantt");
+    lista.style.display = "none";
+    calendario.style.display = "block";
+    gantt.style.display = "none";
+    
+    var navbar = document.getElementById("navbar");
+    navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
+    navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link active")
+    navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
+  }
+
+  function gantt() {
+      var lista = document.getElementById("lista");
+    var calendario = document.getElementById("calendar");
+    var gantt = document.getElementById("gantt");
+    lista.style.display = "none";
+    calendario.style.display = "none";
+    gantt.style.display = "block";
+    
+    var navbar = document.getElementById("navbar");
+    navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
+    navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
+    navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link active")
+    }
 
 </script>

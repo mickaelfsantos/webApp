@@ -1,5 +1,5 @@
-#row:hover{
-    background-color: #DCDCDC;
+#row:hover {
+  background-color: #dcdcdc;
 }
 
 table.dataTable thead .sorting:after,
@@ -12,7 +12,7 @@ table.dataTable thead .sorting_desc:after,
 table.dataTable thead .sorting_desc:before,
 table.dataTable thead .sorting_desc_disabled:after,
 table.dataTable thead .sorting_desc_disabled:before {
-bottom: .5em;
+  bottom: 0.5em;
 }
 
 table {
@@ -24,12 +24,14 @@ table {
 th {
   cursor: pointer;
 }
-tbody > #row:hover{
+
+tbody > #row:hover {
   background-color: #45a8ac;
-  color:white;
+  color: white;
 }
 
-th, td {
+th,
+td {
   text-align: left;
   padding: 16px;
 }
@@ -42,4 +44,118 @@ progress#progressBar:hover:after {
 #calendar {
   max-width: 900px;
   margin: 40px auto;
+}
+
+#wrapper {
+  overflow-x: hidden;
+}
+
+#sidebar-wrapper {
+  margin-left: -15rem;
+  -webkit-transition: margin 0.25s ease-out;
+  -moz-transition: margin 0.25s ease-out;
+  -o-transition: margin 0.25s ease-out;
+  transition: margin 0.25s ease-out;
+}
+
+#sidebar-obras {
+  -webkit-transition: margin 0.25s ease;
+  -moz-transition: margin 0.25s ease;
+  -o-transition: margin 0.25s ease;
+  transition: margin 0.25s ease;
+}
+
+#sidebar-wrapper .sidebar-heading {
+  padding: 0.875rem 1.25rem;
+  font-size: 1.2rem;
+}
+
+#sidebar-wrapper .list-group {
+  width: 15rem;
+}
+
+#page-content-wrapper {
+  min-width: 100vw;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+  margin-left: 0;
+}
+
+.list-group-item,
+#profileName {
+  color: white !important;
+  border: 0 none;
+}
+
+.sidebar-nav {
+  list-style: none;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+.sub-menu {
+  display: none;
+  list-style: none;
+}
+
+.sub-sub-sidebar-brand > a {
+  padding-left: 20%;
+}
+
+.sidebar-nav li.active ul {
+  display: block;
+}
+
+.nav-link.active {
+  font-weight: bold;
+}
+
+#menu-toggle {
+  font-size: 10px;
+}
+
+.row > .col-8 > .btn {
+  font-size: 16px;
+}
+
+thead > tr > th {
+  background-color: rgb(95, 158, 160, 0.3);
+}
+
+.btn-success:hover {
+  background-color: rgb(0, 100, 0);
+}
+
+.btn-danger:hover {
+  background-color: rgb(139, 2, 2);
+}
+
+.fc-right .fc-prev-button,
+.fc-right .fc-next-button {
+  background-color: #3498db;
+  border: none;
+}
+
+.fc-right:hover .fc-prev-button:hover,
+.fc-right:hover .fc-next-button:hover {
+  background-color: #2980b9;
+}
+
+@media (min-width: 300px) {
+  #sidebar-wrapper {
+    margin-left: 0;
+  }
+
+  #page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  #wrapper.toggled #sidebar-wrapper {
+    margin-left: -15rem;
+  }
 }

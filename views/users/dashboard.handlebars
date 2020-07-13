@@ -1,51 +1,52 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-<script src="js/script.js"></script>
 
+<div class="container-fluid mt-4">
 
-<div class="row pt-5">
-    <div class="col-md-6 mb-5">
-        <div class="card card-danger">
-            <div class="card-header" style="background-color: #dc3545; color:white">
-                <div class="row">
-                    <div class="col-6">
-                        <h3 class="card-title">Tarefas</h3>
-                    </div>
+    <div class="row pt-5">
+        <div class="col-md-6 mb-5">
+            <div class="card card-danger">
+                <div class="card-header" style="background-color: #dc3545; color:white">
+                    <div class="row">
+                        <div class="col-6">
+                            <h3 class="card-title">Tarefas</h3>
+                        </div>
 
-                    <div class="col-6 text-right">
-                        <div class="card-tools">
-                            <button type="button" class="btn" id="tarefasButton" data-toggle="collapse" data-target="#tarefas" aria-expanded="true" aria-controls="tarefas"><i class="fa fa-fw fa-minus" id="buttonTarefas" style="color: white;"></i></button>
+                        <div class="col-6 text-right">
+                            <div class="card-tools">
+                                <button type="button" class="btn" id="tarefasButton" data-toggle="collapse" data-target="#tarefas" aria-expanded="true" aria-controls="tarefas"><i class="fa fa-fw fa-minus" id="buttonTarefas" style="color: white;"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="collapse show" id="tarefas">
-                <div class="card card-body">
-                    <canvas id="doughnutChartT" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                
+                <div class="collapse show" id="tarefas">
+                    <div class="card card-body">
+                        <canvas id="doughnutChartT" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-6 mb-5">
-        <div class="card card-danger">
-            <div class="card-header" style="background-color: #dc3545; color:white">
-                <div class="row">
-                    <div class="col-6">
-                        <h3 class="card-title">Obras</h3>
-                    </div>
+        <div class="col-md-6 mb-5">
+            <div class="card card-danger">
+                <div class="card-header" style="background-color: #dc3545; color:white">
+                    <div class="row">
+                        <div class="col-6">
+                            <h3 class="card-title">Obras</h3>
+                        </div>
 
-                    <div class="col-6 text-right">
-                        <div class="card-tools">
-                            <button type="button" class="btn" id="obrasButton" data-toggle="collapse" data-target="#obras" aria-expanded="true" aria-controls="obras"><i class="fa fa-fw fa-minus" id="buttonObras" style="color: white;"></i></button>
+                        <div class="col-6 text-right">
+                            <div class="card-tools">
+                                <button type="button" class="btn" id="obrasButton" data-toggle="collapse" data-target="#obras" aria-expanded="true" aria-controls="obras"><i class="fa fa-fw fa-minus" id="buttonObras" style="color: white;"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="collapse show" id="obras">
-                <div class="card card-body">
-                    <canvas id="doughnutChartO" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                <div class="collapse show" id="obras">
+                    <div class="card card-body">
+                        <canvas id="doughnutChartO" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
                 </div>
             </div>
         </div>

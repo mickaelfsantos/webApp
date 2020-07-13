@@ -19,25 +19,26 @@
             <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3">{{obra.descricao}}</textarea>
 
 
-                <div class="form-group">
-                    <label for="funcionarios">Dar permissão de intervir na obra</label>
-                     <select multiple class="form-control" id="funcionarios" name="funcionarios">
-                        {{#each funcionarios}}
-                            <option value="{{nome}}">{{nome}}</option>
-                        {{/each}}
-                    </select>
-                </div>
+            <div class="form-group">
+                <label for="funcionarios">Dar permissão de intervir na obra</label>
+                <select multiple class="form-control" id="funcionarios" name="funcionarios">
+                {{#each funcionarios}}
+                    <option value="{{nome}}">{{nome}}</option>
+                {{/each}}
+                </select>
+            </div>
                         
  
             {{#ifImAdmin}}
-                <label for="percentagem">Percentagem de lucro (%)</label>
+                <label for="percentagem">Percentagem de lucro (%)*</label>
                 <input type="text" id="percentagem" name="percentagemLucro" value="{{obra.percentagemLucro}}" class="form-control mb-4" onchange="calcula(this)">
                 <label for="preco" id="preco" value="{{obra.despesa}}">Preço: {{obra.orcamento}}€</label>
                 <br>
                 {{else}}
             {{/ifImAdmin}}
 
-            <button type="submit" class="btn btn-dark mt-3">Concluir</button>
+            <button type="submit" class="btn btn-success mt-3"><i class="fa fa-check"></i> Concluir</button>
+            <button type="button" onclick="saltaParaObra()" class="btn btn-danger mt-3"><i class="fa fa-close"></i> Cancelar</button>
         </form>
     </div>
 </div>
@@ -55,5 +56,10 @@
 
     var obra = document.getElementById('id').getAttribute("value");
     document.getObra.action = "/obra/"+obra+"/edit";
+
+    function saltaParaObra(){
+        var obra = document.getElementById('id').getAttribute("value");
+        window.location.href = "/obra/"+obra;
+    }
 
  </script>

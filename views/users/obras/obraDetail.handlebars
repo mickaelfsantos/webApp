@@ -1,168 +1,165 @@
-<div class="row">
-    <div class="col-6">
-        <h2>Obra</h2>
-    </div>
-    {{#ifUR}}
-    <div class="col-6 text-right">
-        <ul class="navbar-nav mr-auto">
-        <li class="nav-item dropdown">
-            <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-navicon fa-2x"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" onclick="saltaParaEdit()" style="cursor: pointer;">Editar</a>
-                <a class="dropdown-item" onclick="saltaParaAddTarefa()" style="cursor: pointer;">Adicionar tarefa</a>
-                <a class="dropdown-item" onclick="saltaParaObraReportCliente()" style="cursor: pointer;">Gerar relatório para cliente</a>
-                {{#ifImAdmin}}
-                    {{#ifNotGenerated obra._id}}
-                        <a class="dropdown-item" onclick="saltaParaObraReport()" style="cursor: pointer;">Gerar relatório da obra</a>
-                    {{else}}
-                        <a class="dropdown-item" onclick="saltaParaDownloadReport()" style="cursor: pointer;">Download do relatório de obra</a>
-                    {{/ifNotGenerated}}
-                {{/ifImAdmin}}
-            </div>
-        </li>
-        </ul>
-    </div>
-    {{/ifUR}}
-</div>
-<hr>
-
-        <input type="hidden" id="id" name="id" value="{{obra._id}}">
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 p-3 text-left">
-                <h6 class="blockquote m-0" id="texto">Nome</h6>
-            </div>
-            <div class="col-9 p-3" id="texto">
-                <label for="nome" id="nomeObra" class="m-0">{{obra.nome}}</label>
-            </div>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-4">
+            <h2>Obra</h2>
         </div>
 
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 p-3 text-left">
-                <h6 class="blockquote m-0">Descrição</h6>
-            </div>
-            <div class="col-9 p-3">
-                <label for="descricao" class="m-0" id="descricao">{{obra.descricao}}</label>
-            </div>
-        </div>
-
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 p-3 text-left" id="texto">
-                <h6 class="blockquote m-0">Estado</h6>
-            </div>
-            <div class="col-9 p-3" id="texto">
-                <label for="estado" id="estado" class="m-0">{{estadoToString obra.estado}}</label>
-            </div>
-        </div>
-
-        {{#ifImAdmin}}
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-                <div class="col-3 p-3 text-left">
-                    <h6 class="blockquote m-0">Despesa</h6>
-                </div>
-                
-                <div class="col-9 p-3">
-                    <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.despesa}}</label>
-                </div>
-            </div>
-
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-                <div class="col-3 p-3 text-left">
-                    <h6 class="blockquote m-0">Percentagem de lucro</h6>
-                </div>
-                
-                <div class="col-9 p-3">
-                    <label for="nome" id="nomeObra" class="m-0">{{obra.percentagemLucro}}%</label>
-                </div>
-            </div>
-
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-                <div class="col-3 p-3 text-left">
-                    <h6 class="blockquote m-0">Orçamento</h6>
-                </div>
-                
-                <div class="col-9 p-3">
-                    <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.orcamento}}</label>
-                </div>
-            </div>
-
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-                <div class="col-3 p-3 text-left">
-                    <h6 class="blockquote m-0">Custo final</h6>
-                </div>
-
-                <div class="col-9 p-3">
-                    <label for="estado" id="estado" class="m-0">{{precoToString obra.custoFinal}}</label>
-                </div>
-            </div>
-        {{else}}
-        {{/ifImAdmin}}
-        
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            
-            <div class="col-3 p-3 text-left">
-                <h6 class="blockquote m-0">Datas previstas</h6>
-            </div>
-            
-            <div class="col-9 p-3">
-                {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}
-            </div>
-        </div>
-
-
-        <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
-            <div class="col-3 p-3 text-left">
-                <h6 class="blockquote m-0">Datas</h6>
-            </div>
-            <div class="col-9 p-3">
-                {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}
-            </div>
-        </div>
-
-        <div class="row mt-5 text-center">
-            <div class="col-12">
-                <h6 class="blockquote">Tarefas</h6>
-            </div>
-        </div>
-
-        {{#if tarefas}}
-            <table class="mt-5 mb-5" id="myTable">
-                <thead>
-                <tr>
-                    <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
-                    <th onclick="sortTable(1)">Data prevista de inicio <i class="fa fa-sort"> </i></th>
-                    <th onclick="sortTable(2)">Data prevista de fim <i class="fa fa-sort"> </i></th>
-                    <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
-                    <th onclick="sortTable2(4)">Progresso <i class="fa fa-sort"> </i>
-                    </th>
-                </tr>
-                </thead>
-        
-                <tbody id="filtro">
-                    {{#each tarefas}}
-                        <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
-                            <td>{{nome}}</td>
-                            <td>{{dateToString dataPrevistaInicio}}</td>
-                            <td>{{dateToString dataPrevistaFim}}</td>
-                            <td>{{estadoToStringOD estado}}</td>
-                            <td>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" id ="{{progresso}}" role="progressbar" style="width: {{progresso}}%;" aria-valuenow="{{progresso}}" aria-valuemin="0" aria-valuemax="100" value="{{progresso}}">{{progresso}}%</div>
-                                </div>
-                            </td>
-                        </tr>
-                    {{else}}
-
-                    {{/each}}
-                </tbody>
-            </table>
+        {{#ifUR}}
+        <div class="col-8 text-right">
+            <button type="button" class="btn btn-light" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+            <button type="button" class="btn btn-light" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova tarefa</button>
+            {{#ifNotGeneratedClientReport obra._id}}
+                <button type="button" class="btn btn-light" onclick="saltaParaObraReportCliente()" style="cursor: pointer;"><i class="fa fa-file"></i> Gerar orçamento para cliente</button>
             {{else}}
-            <div class="row text-center mt-4 mb-5">
-                <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
+                <button type="button" class="btn btn-light" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download do orçamento</button> 
+            {{/ifNotGeneratedClientReport}}   
+            {{#ifImAdmin}}
+                {{#ifNotGenerated obra._id}}
+                    <button type="button" class="btn btn-light" onclick="saltaParaObraReport()" style="cursor: pointer;"><i class="fa fa-file"></i> Gerar relatório da obra</button>
+                {{else}}
+                    <button type="button" class="btn btn-light" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download do relatório de obra</button>
+                {{/ifNotGenerated}}
+            {{/ifImAdmin}}
+        </div>
+        {{/ifUR}}
+    </div>
+    <hr>
+
+            <input type="hidden" id="id" name="id" value="{{obra._id}}">
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0" id="texto">Nome</h6>
+                </div>
+                <div class="col-9 p-3" id="texto">
+                    <label for="nome" id="nomeObra" class="m-0">{{obra.nome}}</label>
+                </div>
             </div>
-        {{/if}}
-        
+
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Descrição</h6>
+                </div>
+                <div class="col-9 p-3">
+                    <label for="descricao" class="m-0" id="descricao">{{obra.descricao}}</label>
+                </div>
+            </div>
+
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 p-3 text-left" id="texto">
+                    <h6 class="blockquote m-0">Estado</h6>
+                </div>
+                <div class="col-9 p-3" id="texto">
+                    <label for="estado" id="estado" class="m-0">{{estadoToString obra.estado}}</label>
+                </div>
+            </div>
+
+            {{#ifImAdmin}}
+                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                    <div class="col-3 p-3 text-left">
+                        <h6 class="blockquote m-0">Despesa</h6>
+                    </div>
+                    
+                    <div class="col-9 p-3">
+                        <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.despesa}}</label>
+                    </div>
+                </div>
+
+                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                    <div class="col-3 p-3 text-left">
+                        <h6 class="blockquote m-0">Percentagem de lucro</h6>
+                    </div>
+                    
+                    <div class="col-9 p-3">
+                        <label for="nome" id="nomeObra" class="m-0">{{obra.percentagemLucro}}%</label>
+                    </div>
+                </div>
+
+                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                    <div class="col-3 p-3 text-left">
+                        <h6 class="blockquote m-0">Orçamento</h6>
+                    </div>
+                    
+                    <div class="col-9 p-3">
+                        <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.orcamento}}</label>
+                    </div>
+                </div>
+
+                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                    <div class="col-3 p-3 text-left">
+                        <h6 class="blockquote m-0">Custo final</h6>
+                    </div>
+
+                    <div class="col-9 p-3">
+                        <label for="estado" id="estado" class="m-0">{{precoToString obra.custoFinal}}</label>
+                    </div>
+                </div>
+            {{else}}
+            {{/ifImAdmin}}
+            
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Datas previstas</h6>
+                </div>
+                
+                <div class="col-9 p-3">
+                    {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}
+                </div>
+            </div>
+
+
+            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="col-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Datas</h6>
+                </div>
+                <div class="col-9 p-3">
+                    {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}
+                </div>
+            </div>
+
+            <div class="row mt-5 text-center">
+                <div class="col-12">
+                    <h6 class="blockquote">Tarefas</h6>
+                </div>
+            </div>
+
+            {{#if tarefas}}
+                <table class="mt-5 mb-5" id="myTable">
+                    <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
+                        <th onclick="sortTable(1)">Data prevista de inicio <i class="fa fa-sort"> </i></th>
+                        <th onclick="sortTable(2)">Data prevista de fim <i class="fa fa-sort"> </i></th>
+                        <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
+                        <th onclick="sortTable2(4)">Progresso <i class="fa fa-sort"> </i>
+                        </th>
+                    </tr>
+                    </thead>
+            
+                    <tbody id="filtro">
+                        {{#each tarefas}}
+                            <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
+                                <td>{{nome}}</td>
+                                <td>{{dateToString dataPrevistaInicio}}</td>
+                                <td>{{dateToString dataPrevistaFim}}</td>
+                                <td>{{estadoToStringOD estado}}</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" id ="{{progresso}}" role="progressbar" style="width: {{progresso}}%;" aria-valuenow="{{progresso}}" aria-valuemin="0" aria-valuemax="100" value="{{progresso}}">{{progresso}}%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {{else}}
+
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{else}}
+                <div class="row text-center mt-4 mb-5">
+                    <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
+                </div>
+            {{/if}}  
+</div>
    <script>
        function setColor(handle){
            handle.style.backgroundColor = "rgb(95, 158, 160, 0.3)";

@@ -1,35 +1,25 @@
-{{#each erros}}
-    <div class="alert alert-danger">{{texto}}</div>
-{{else}}
+<div class="container-fluid mt-4">
+    <h2>Nova obra</h2>
+    <div class="card mt-4">
+        <div class="card-body">
+            <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+            <form action="/obras/add" method="POST">
+                <label for="nome">Nome*</label>
+                <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control" required>
+                
 
-{{/each}}
+                <label for="descricao" class="mt-4">Descrição*</label>
+                <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
 
-{{#each mensagem}}
-    <div class="alert alert-success">{{texto}}</div>
-{{else}}
-
-{{/each}}
-
-<h2>Nova obra</h2>
-<div class="card mt-4">
-    <div class="card-body">
-        <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-        <form action="/obras/add" method="POST">
-            <label for="nome">Nome*</label>
-            <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control" required>
-            
-
-            <label for="descricao" class="mt-4">Descrição*</label>
-            <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
-
-            <label for="dataPrevistaInicio">Data prevista para inicio</label>
-            <div class="row">
-                <div class="col-3">
-                    <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                <label for="dataPrevistaInicio">Data prevista para inicio</label>
+                <div class="row">
+                    <div class="col-3">
+                        <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                    </div>
                 </div>
-            </div>
-            <button type="submit" class="btn btn-dark">Concluir</button>
-        </form>
+                <button type="submit" class="btn btn-dark">Concluir</button>
+            </form>
+        </div>
     </div>
 </div>
 
