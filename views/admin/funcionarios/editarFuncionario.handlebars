@@ -1,4 +1,4 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
     <h2 id="nomeFuncionario">Editar funcionario {{funcionario.nome}}</h2>
     
         
@@ -30,8 +30,10 @@
                     </select>
                 </div>
 
-        
-                <button type="submit" class="btn btn-dark mt-3">Concluir</button>
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaFuncionario()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                </div>
             </form>
         </div>
     </div>
@@ -55,5 +57,10 @@
     
     var funcionario = document.getElementById('id').getAttribute("value");
     document.getFuncionario.action = "/funcionario/"+funcionario+"/edit";
+
+    function saltaParaFuncionario(){
+        var funcionario = document.getElementById('id').getAttribute("value");
+        window.location.href = "/funcionario/"+funcionario;
+    }
 
  </script>

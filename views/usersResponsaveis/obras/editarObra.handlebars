@@ -1,45 +1,43 @@
-{{#each erros}}
-    <div class="alert alert-danger">{{texto}}</div>
-{{else}}
+<div class="container-fluid mt-4 pl-4 pr-4">
+    <h2 id="nomeObra">Editar obra {{obra.nome}}</h2>
+    
+        
+    <div class="card mt-4">
+        <div class="card-body">
+            <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+            <form action="" name="getObra" method="POST">
+                <input type="hidden" id="id" value="{{obra._id}}">
+                <label for="nome">Nome*</label>
+                <input type="text" id="nome" name="nome" value="{{obra.nome}}" class="form-control mb-4">
 
-{{/each}}
-
-<h2 id="nomeObra">Editar obra {{obra.nome}}</h2>
- 
-       
-<div class="card mt-4">
-    <div class="card-body">
-        <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-        <form action="" name="getObra" method="POST">
-            <input type="hidden" id="id" value="{{obra._id}}">
-            <label for="nome">Nome*</label>
-            <input type="text" id="nome" name="nome" value="{{obra.nome}}" class="form-control mb-4">
-
-            <label for="descricao">Descrição*</label>
-            <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3">{{obra.descricao}}</textarea>
+                <label for="descricao">Descrição*</label>
+                <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3">{{obra.descricao}}</textarea>
 
 
-            <div class="form-group">
-                <label for="funcionarios">Dar permissão de intervir na obra</label>
-                <select multiple class="form-control" id="funcionarios" name="funcionarios">
-                {{#each funcionarios}}
-                    <option value="{{nome}}">{{nome}}</option>
-                {{/each}}
-                </select>
-            </div>
-                        
- 
-            {{#ifImAdmin}}
-                <label for="percentagem">Percentagem de lucro (%)*</label>
-                <input type="text" id="percentagem" name="percentagemLucro" value="{{obra.percentagemLucro}}" class="form-control mb-4" onchange="calcula(this)">
-                <label for="preco" id="preco" value="{{obra.despesa}}">Preço: {{obra.orcamento}}€</label>
-                <br>
-                {{else}}
-            {{/ifImAdmin}}
+                <div class="form-group">
+                    <label for="funcionarios">Dar permissão de intervir na obra</label>
+                    <select multiple class="form-control" id="funcionarios" name="funcionarios">
+                    {{#each funcionarios}}
+                        <option value="{{nome}}">{{nome}}</option>
+                    {{/each}}
+                    </select>
+                </div>
+                            
+    
+                {{#ifImAdmin}}
+                    <label for="percentagem">Percentagem de lucro (%)*</label>
+                    <input type="text" id="percentagem" name="percentagemLucro" value="{{obra.percentagemLucro}}" class="form-control mb-4" onchange="calcula(this)">
+                    <label for="preco" id="preco" value="{{obra.despesa}}">Preço: {{obra.orcamento}}€</label>
+                    <br>
+                    {{else}}
+                {{/ifImAdmin}}
 
-            <button type="submit" class="btn btn-success mt-3"><i class="fa fa-check"></i> Concluir</button>
-            <button type="button" onclick="saltaParaObra()" class="btn btn-danger mt-3"><i class="fa fa-close"></i> Cancelar</button>
-        </form>
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaObra()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
                     

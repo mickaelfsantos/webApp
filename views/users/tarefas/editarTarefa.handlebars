@@ -3,7 +3,7 @@
     <h2 id="nomeFuncionario">Editar tarefa</h2>
     
         
-    <div class="card mt-4">
+    <div class="card mt-4 mb-5">
         <div class="card-body">
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
             <form action="" method="POST">
@@ -61,8 +61,10 @@
                     <br>
                 {{/ifUR}}
                 
-                <button type="submit" class="btn btn-success mt-3"><i class="fa fa-check"></i> Concluir</button>
-                <button type="button" onclick="saltaParaTarefa()" class="btn btn-danger mt-3"><i class="fa fa-close"></i> Cancelar</button>
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaTarefa()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                </div>
             </form>
         </div>
     </div>

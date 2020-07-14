@@ -77,7 +77,7 @@
                     case "porAceitar":
                         return "Por aceitar. À espera da aceitação de um superior.";
                     case "aceite":
-                        return "Foi aceite pelo superior. A aguardar data de inicio";
+                        return "Foi aceite pelo superior. A aguardar data de inicio.";
                     case "recusada":
                         return "Recusada. Volte a estimar o tempo que demora na realização da tarefa";
                     case "emExecucao":
@@ -157,85 +157,13 @@
                 return options.inverse(this);
             },
 
-            ifNotGenerated: function(id, options){
-                try {
-                    const stats = fs.statSync('reports/obra'+id+'Report.pdf');
-                    // print file last modified date
-                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
-                    var now = moment().format("YYYY-MM-DD HH:mm")
-                    i = moment(i).add(2, 'minutes');
-                    if(moment(i).isAfter(now)){
-                        return options.inverse(this);
-                    }
-                    else{
-                        return options.fn(this);
-                    }
-                    // console.log(`File Data Last Modified: ${stats.mtime}`);
-                    // console.log(`File Status Last Modified: ${stats.ctime}`);
-                } catch (error) {
-                    return options.fn(this);
+            ifWaitForClient: function(estado, options){
+                if(estado === "aAguardarResposta"){
+                    return options.fn(this)
                 }
+                return options.inverse(this);
             },
 
-            ifNotGeneratedObras: function(options){
-                try {
-                    const stats = fs.statSync('reports/obrasReport.pdf');
-                    // print file last modified date
-                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
-                    var now = moment().format("YYYY-MM-DD HH:mm")
-                    i = moment(i).add(2, 'minutes');
-                    if(moment(i).isAfter(now)){
-                        return options.inverse(this);
-                    }
-                    else{
-                        return options.fn(this);
-                    }
-                    // console.log(`File Data Last Modified: ${stats.mtime}`);
-                    // console.log(`File Status Last Modified: ${stats.ctime}`);
-                } catch (error) {
-                    return options.fn(this);
-                }
-            },
-
-            ifNotGeneratedClientReport: function(id, options){
-                try {
-                    const stats = fs.statSync('reports/obra'+id+'ClientReport.pdf');
-                    // print file last modified date
-                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
-                    var now = moment().format("YYYY-MM-DD HH:mm")
-                    i = moment(i).add(2, 'minutes');
-                    if(moment(i).isAfter(now)){
-                        return options.inverse(this);
-                    }
-                    else{
-                        return options.fn(this);
-                    }
-                    // console.log(`File Data Last Modified: ${stats.mtime}`);
-                    // console.log(`File Status Last Modified: ${stats.ctime}`);
-                } catch (error) {
-                    return options.fn(this);
-                }
-            },
-
-            ifNotGeneratedIssue: function(id, options){
-                try {
-                    const stats = fs.statSync('reports/tarefa'+id+'Report.pdf');
-                    // print file last modified date
-                    var i = moment(stats.mtime).format("YYYY-MM-DD HH:mm")
-                    var now = moment().format("YYYY-MM-DD HH:mm")
-                    i = moment(i).add(2, 'minutes');
-                    if(moment(i).isAfter(now)){
-                        return options.inverse(this);
-                    }
-                    else{
-                        return options.fn(this);
-                    }
-                    // console.log(`File Data Last Modified: ${stats.mtime}`);
-                    // console.log(`File Status Last Modified: ${stats.ctime}`);
-                } catch (error) {
-                    return options.fn(this);
-                }
-            },
         }
     })
     app.engine('handlebars', hbs.engine)

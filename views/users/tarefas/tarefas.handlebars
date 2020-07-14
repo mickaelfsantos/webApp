@@ -1,4 +1,4 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
 
   {{#each erros}}
       <div class="alert alert-danger">{{texto}}</div>
@@ -15,7 +15,7 @@
 
       {{#ifUR}}
       <div class="col-8 text-right">
-        <button type="button" class="btn btn-light" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
+        <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
       </div>
     {{/ifUR}}
   </div>
@@ -35,8 +35,8 @@
         <a class="nav-link" onclick="gantt()" style="cursor: pointer;">Gantt</a>
       </li>
 
-      <li class="navbar-nav ml-auto mt-2 mt-lg-0">
-          <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
+      <li class="navbar-nav ml-auto" style="width: 30%;">
+        <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
       </li>
     </ul>
   </nav>
@@ -85,6 +85,7 @@
 
   </div>
 </div>
+
 
 <script>
   $(document).ready(function(){

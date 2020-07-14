@@ -1,3 +1,7 @@
+:root {
+  --blue-background-color-hover:  rgb(81, 135, 138);
+  --blue-background-color: #45a8ac;
+}
 #row:hover {
   background-color: #dcdcdc;
 }
@@ -42,7 +46,7 @@ progress#progressBar:hover:after {
 }
 
 #calendar {
-  max-width: 900px;
+  max-width: max-content;
   margin: 40px auto;
 }
 
@@ -126,24 +130,32 @@ thead > tr > th {
   background-color: rgb(95, 158, 160, 0.3);
 }
 
-.btn-success:hover {
-  background-color: rgb(0, 100, 0);
-}
-
-.btn-danger:hover {
-  background-color: rgb(139, 2, 2);
-}
-
 .fc-right .fc-prev-button,
 .fc-right .fc-next-button {
-  background-color: #3498db;
+  background-color: var(--blue-background-color);
   border: none;
 }
 
 .fc-right:hover .fc-prev-button:hover,
 .fc-right:hover .fc-next-button:hover {
-  background-color: #2980b9;
+  background-color:  var(--blue-background-color-hover);
 }
+
+#dashboard{
+  background-color: var(--blue-background-color);
+   color:white;
+}
+
+.btn-outline-info{
+  color: var(--blue-background-color-hover);
+}
+
+#infoHover:hover{
+  background-color: rgb(95, 158, 160, 0.3);
+  cursor: context-menu;
+}
+
+
 
 @media (min-width: 300px) {
   #sidebar-wrapper {

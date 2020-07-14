@@ -1,4 +1,4 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
     <div class="row">
         <div class="col-4">
             <h2>Obra</h2>
@@ -6,19 +6,15 @@
 
         {{#ifUR}}
         <div class="col-8 text-right">
-            <button type="button" class="btn btn-light" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
-            <button type="button" class="btn btn-light" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova tarefa</button>
-            {{#ifNotGeneratedClientReport obra._id}}
-                <button type="button" class="btn btn-light" onclick="saltaParaObraReportCliente()" style="cursor: pointer;"><i class="fa fa-file"></i> Gerar orçamento para cliente</button>
-            {{else}}
-                <button type="button" class="btn btn-light" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download do orçamento</button> 
-            {{/ifNotGeneratedClientReport}}   
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Orçamento</button> 
             {{#ifImAdmin}}
-                {{#ifNotGenerated obra._id}}
-                    <button type="button" class="btn btn-light" onclick="saltaParaObraReport()" style="cursor: pointer;"><i class="fa fa-file"></i> Gerar relatório da obra</button>
-                {{else}}
-                    <button type="button" class="btn btn-light" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download do relatório de obra</button>
-                {{/ifNotGenerated}}
+                {{#ifWaitForClient obra.estado}}
+                    <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaObraAceite()" style="cursor: pointer;"><i class="	fa fa-thumbs-up"></i> Cliente Aceitou</button>
+                    <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaObraRecusada()" style="cursor: pointer;"><i class="	fa fa-thumbs-down"></i> Cliente Recusou</button>
+                {{/ifWaitForClient}}
+                <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
             {{/ifImAdmin}}
         </div>
         {{/ifUR}}
@@ -26,7 +22,7 @@
     <hr>
 
             <input type="hidden" id="id" name="id" value="{{obra._id}}">
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0" id="texto">Nome</h6>
                 </div>
@@ -35,7 +31,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Descrição</h6>
                 </div>
@@ -44,7 +40,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left" id="texto">
                     <h6 class="blockquote m-0">Estado</h6>
                 </div>
@@ -54,7 +50,7 @@
             </div>
 
             {{#ifImAdmin}}
-                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-3 p-3 text-left">
                         <h6 class="blockquote m-0">Despesa</h6>
                     </div>
@@ -64,7 +60,7 @@
                     </div>
                 </div>
 
-                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-3 p-3 text-left">
                         <h6 class="blockquote m-0">Percentagem de lucro</h6>
                     </div>
@@ -74,7 +70,7 @@
                     </div>
                 </div>
 
-                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-3 p-3 text-left">
                         <h6 class="blockquote m-0">Orçamento</h6>
                     </div>
@@ -84,7 +80,7 @@
                     </div>
                 </div>
 
-                <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+                <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-3 p-3 text-left">
                         <h6 class="blockquote m-0">Custo final</h6>
                     </div>
@@ -96,7 +92,7 @@
             {{else}}
             {{/ifImAdmin}}
             
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
@@ -108,7 +104,7 @@
             </div>
 
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>
@@ -138,7 +134,7 @@
             
                     <tbody id="filtro">
                         {{#each tarefas}}
-                            <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
+                            <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
                                 <td>{{nome}}</td>
                                 <td>{{dateToString dataPrevistaInicio}}</td>
                                 <td>{{dateToString dataPrevistaFim}}</td>
@@ -161,19 +157,6 @@
             {{/if}}  
 </div>
    <script>
-       function setColor(handle){
-           handle.style.backgroundColor = "rgb(95, 158, 160, 0.3)";
-       }
-
-       function setColor2(handle){
-           handle.style.backgroundColor = "white";
-       }
-
-
-        function saltaParaObras() {
-            window.location.href = "/obras";
-        }
-
         function saltaParaAddTarefa(){
             obra = document.getElementById('id').getAttribute("value");
             window.location.href = "/obra/"+obra+"/addTarefa";
@@ -188,20 +171,27 @@
             window.location.href = "/obra/"+obra+"/edit";
         }
 
-        function saltaParaObraReportCliente() {
-            obra = document.getElementById('id').getAttribute("value");
-            window.location.href = "/obra/"+obra+"/generateClientReport";
-        }
-
-        function saltaParaObraReport() {
-            obra = document.getElementById('id').getAttribute("value");
-            window.location.href = "/obra/"+obra+"/generateReport";
-        }
 
         function saltaParaDownloadReport() {
             obra = document.getElementById('id').getAttribute("value");
             window.location.href = "/obra/"+obra+"/downloadReport";
         }
+
+        function saltaParaDownloadReportCliente() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/downloadClientReport";
+        }
+
+        function saltaParaObraAceite() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/clientAccepted";
+        }
+
+        function saltaParaObraRecusada() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/clientRejected";
+        }
+
         
         function sortTable(n) {
             var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;

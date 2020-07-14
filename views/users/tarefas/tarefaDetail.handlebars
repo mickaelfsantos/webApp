@@ -1,36 +1,32 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
 
     <div class="row">
         <div class="col-4">
             <h2>Tarefa</h2>
         </div>
         <div class="col-8 text-right">
-            <button type="button" class="btn btn-light" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
             {{#ifSubmeteu tarefa.estado}}
-                    <button type="button" class="btn btn-light" onclick="saltaParaValidar()" style="cursor: pointer;"><i class="fa fa-share-square"></i> Submeter tarefa para validação</button>
+                    <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaValidar()" style="cursor: pointer;"><i class="fa fa-share-square"></i> Submeter Tarefa Para Validação</button>
                     {{else}}
                     {{#ifComecar tarefa.estado}}
-                        <button type="button" class="btn btn-light" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar tarefa</button>
+                        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar Tarefa</button>
                     {{else}}
                         {{#ifUR}}
-                            <button type="button" class="btn btn-light" onclick="saltaParaResponder()" style="cursor: pointer;"><i class="fa fa-hourglass-end"></i> Responder à submissão</button>
+                            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaResponder()" style="cursor: pointer;"><i class="fa fa-hourglass-end"></i> Responder à Submissão</button>
                         {{/ifUR}}
                     {{/ifComecar}}
             {{/ifSubmeteu}}
             {{#ifImAdmin}}
-                {{#ifNotGeneratedIssue tarefa._id}}
-                    <button type="button" class="btn btn-light" onclick="saltaParaTarefaReport()" style="cursor: pointer;"><i class="fa fa-file"></i> Gerar relatório da tarefa</button>
-                {{else}}
-                    <button type="button" class="btn btn-light" onclick="saltaParaDownloadTarefaReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download do relatório da tarefa</button>
-                {{/ifNotGeneratedIssue}}
+               <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadTarefaReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
             {{/ifImAdmin}}
-            <button type="button" class="btn btn-light" onclick="saltaParaRequisitar()" style="cursor: pointer;"><i class="fa fa-calendar-plus-o"></i> Requisitar máquina</button>
+            <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaRequisitar()" style="cursor: pointer;"><i class="fa fa-calendar-plus-o"></i> Requisitar Máquina</button>
         </div>
 
     </div>
     <hr>
 
-        <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+        <div class="row col-12 mt-4" id="infoHover">
             <div class="col-3 p-3 text-left">
                 <h6 class="blockquote m-0">Obra</h6>
             </div>
@@ -39,7 +35,7 @@
             </div>
         </div>
             <input type="hidden" id="id" name="id" value="{{tarefa._id}}">
-            <div class="row col-12 mt-4" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row col-12 mt-4" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Nome</h6>
                 </div>
@@ -48,7 +44,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Descrição</h6>
                 </div>
@@ -59,7 +55,7 @@
             </div>
 
             {{#ifImAdmin}}
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Despesa</h6>
                 </div>
@@ -69,7 +65,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Orçamento</h6>
                 </div>
@@ -80,7 +76,7 @@
             </div>
             {{/ifImAdmin}}
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Importância</h6>
                 </div>
@@ -91,7 +87,7 @@
             </div>
 
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Estado</h6>
                 </div>
@@ -101,7 +97,7 @@
                 </div>
             </div>
             
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Funcionários</h6>
                 </div>
@@ -115,7 +111,7 @@
             </div>
 
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 col-12" id="infoHover">
                 
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
@@ -125,7 +121,7 @@
                 </div>            
             </div>
 
-            <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+            <div class="row mt-4 mb-5 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>
@@ -137,15 +133,6 @@
 
 </div>
 <script>
-
-    function setColor(handle){
-        handle.style.backgroundColor = "rgb(95, 158, 160, 0.3)";
-    }
-
-    function setColor2(handle){
-        handle.style.backgroundColor = "white";
-    }
-
     
     function saltaParaEditar() {
         tarefa = document.getElementById('id').getAttribute("value");
@@ -159,7 +146,7 @@
 
     function saltaParaComecar() {
         tarefa = document.getElementById('id').getAttribute("value");
-        window.location.href = "/tarefa/"+tarefa+"/edit";
+        window.location.href = "/tarefa/"+tarefa+"/comecar";
     }
 
     function saltaParaValidar() {
@@ -172,9 +159,9 @@
         window.location.href = "/tarefa/"+tarefa+"/responderSubmissao";
     }
 
-    function saltaParaTarefaReport() {
+    function saltaParaDownloadTarefaReport() {
         tarefa = document.getElementById('id').getAttribute("value");
-        window.location.href = "/tarefa/"+tarefa+"/generateReport";
+        window.location.href = "/tarefa/"+tarefa+"/downloadReport";
     }
     
 </script>

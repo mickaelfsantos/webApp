@@ -105,7 +105,7 @@ calendarEl.style.display = "none";
     eventos[i].title = eventos[i].nome;
     eventos[i].start = eventos[i].dataPrevistaInicio;
     if (eventos[i].dataPrevistaFim == undefined) {
-      eventos[i].end = Date.now();
+      eventos[i].end = eventos[i].start;
     }
     else {
       eventos[i].end = eventos[i].dataPrevistaFim
@@ -117,6 +117,17 @@ calendarEl.style.display = "none";
       if (eventos[i].estado == "preProducao" || eventos[i].estado == "aAguardarResposta")
         eventos[i].color = '#008B8B';
       else {
+        if(eventos[i].estado == "producao"){
+          if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
+            eventos[i].color = '#008000';
+          }
+          else{
+            eventos[i].color = '#FF0000';
+          }
+        }
+        else{
+            eventos[i].color = '#778899';
+        }
       }
     }
   }
@@ -143,7 +154,7 @@ calendarEl.style.display = "none";
 </script>
 </style>
 
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
   
 
   <div class="row">
@@ -153,15 +164,8 @@ calendarEl.style.display = "none";
 
     {{#ifUR}}
     <div class="col-8 text-right">
-      {{#ifNotGeneratedObras}}
-      <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaGerarRelatorio()"
-        style="cursor: pointer;"><i class="fa fa-file"></i> Gerar relatório</button>
-      {{else}}
-      <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaDownloadReport()"
-        style="cursor: pointer;"><i class="fa fa-download"></i> Download do relatório</button>
-      {{/ifNotGeneratedObras}}
-      <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaGerarRelatorio()"
-        style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova obra</button>
+      <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
+      <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaAddObra()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Obra</button>  
     </div>
     {{/ifUR}}
   </div>
@@ -169,7 +173,7 @@ calendarEl.style.display = "none";
   <br>
 
   <nav id="navbar">
-    <ul class="nav nav-tabs">
+    <ul class="nav nav-tabs" id="nav-tabs">
       <li class="nav-item">
         <a class="nav-link active" onclick="lista()" style="cursor: pointer;">Lista</a>
       </li>
@@ -192,12 +196,12 @@ calendarEl.style.display = "none";
     <table class="mt-5" id="myTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)">Nome <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(1)">Data de inicio <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(2)">Data de fim <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(3)">Estado <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(0)" style="width: 20%;">Nome <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(1)" style="width: 24%;">Datas Previstas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(2)" style="width: 24%;">Datas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(3)" style="width: 22%;">Estado <i class="fa fa-angle-down"> </i></th>
           {{#ifImAdmin}}
-          <th onclick="sortTable(4)">Orçamento <i class="fa fa-angle-down"> </i>
+          <th onclick="sortTablePrecos(4)" style="width: 10%;">Orçamento <i class="fa fa-angle-down"> </i>
             {{/ifImAdmin}}
           </th>
         </tr>
@@ -207,8 +211,8 @@ calendarEl.style.display = "none";
         {{#each obras}}
         <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaObra(this)">
           <td>{{nome}}</td>
-          <td>{{dateToString dataInicio}}</td>
-          <td>{{dateToString dataFim}}</td>
+          <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+          <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
           <td>{{estadoToString estado}}</td>
           {{#ifImAdmin}}
           <td>{{precoToString orcamento}}</td>
@@ -224,40 +228,14 @@ calendarEl.style.display = "none";
     {{/if}}
   </div>
 
-  <div style="display: none;" id="infos">
-    <div class="row justify-content-center">
-      <button type="button" class="btn btn-link mt-5" data-toggle="modal" data-target="#exampleModalCenter">
-        Consultar informação das cores no calendário
-      </button>
-      <!-- Modal -->
-      <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLongTitle">Informação das cores usadas</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - obras em pré-orçamento que ainda não
-              têm data prevista de fim calculada <br>
-              <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - obras por começar<br>
-              <i class="fa fa-circle" style="color: #008000;"></i> Datas - obras em execução às quais estão dentro do
-              prazo <br>
-              <i class="fa fa-circle" style="color: #FF0000;"></i> Datas - obras em execução às quais já passaram o prazo
-              final <br>
-              <i class="fa fa-circle" style="color: #778899;"></i> Datas - obras concluídas <br>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
+  <div class="mt-5" id="infos" style="display: none;">
+      <h4>Informações</h4>
+      <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - obras em pré-orçamento que ainda não têm data prevista de fim calculada <br>
+      <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - obras por começar<br>
+      <i class="fa fa-circle" style="color: #008000;"></i> Datas - obras em execução às quais estão dentro do prazo <br>
+      <i class="fa fa-circle" style="color: #FF0000;"></i> Datas - obras em execução às quais já passaram o prazo final <br>
+      <i class="fa fa-circle" style="color: #778899;"></i> Datas - obras concluídas <br>
   </div>
   <div id='calendar'></div>
   <div id='gantt'></div>
@@ -277,12 +255,13 @@ calendarEl.style.display = "none";
     window.location.href = "/obra/" + handle.dataset.name;
   }
 
-  function saltaParaGerarRelatorio(handle) {
-    window.location.href = "/obras/generateReport";
-  }
-
   function saltaParaDownloadReport(handle) {
     window.location.href = "/obras/downloadReport";
+  }
+
+
+  function saltaParaAddObra(handle) {
+    window.location.href = "/obras/add";
   }
 
   window.onload = function () {
@@ -300,7 +279,7 @@ calendarEl.style.display = "none";
     calendario.style.display = "none";
     gantt.style.display = "none";
 
-    var navbar = document.getElementById("navbar");
+    var navbar = document.getElementById("nav-tabs");
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
@@ -316,7 +295,7 @@ calendarEl.style.display = "none";
     calendario.style.display = "block";
     gantt.style.display = "none";
 
-    var navbar = document.getElementById("navbar");
+    var navbar = document.getElementById("nav-tabs");
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
@@ -332,7 +311,7 @@ calendarEl.style.display = "none";
     calendario.style.display = "none";
     gantt.style.display = "block";
 
-    var navbar = document.getElementById("navbar");
+    var navbar = document.getElementById("nav-tabs");
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link active")
@@ -364,6 +343,124 @@ calendarEl.style.display = "none";
           }
         } else if (dir == "desc") {
           if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+
+    for (var i = 0; i < 5; i++) {
+      if (i != n)
+        table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+    }
+
+    if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+    else
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+  }
+
+  function sortTableDatas(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+
+    dir = "asc";
+
+    while (switching) {
+
+      switching = false;
+      rows = table.rows;
+
+      for (i = 1; i < (rows.length - 1); i++) {
+
+        shouldSwitch = false;
+
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        const xDate = moment(x.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+        const yDate = moment(y.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+        if(moment(xDate).isValid() && moment(yDate).isValid){
+          if (dir == "asc") {
+            if (moment(yDate).isBefore(xDate)) {
+              shouldSwitch = true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (moment(yDate).isAfter(xDate)) {
+              shouldSwitch = true;
+              break;
+            }
+          }
+        }        
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+
+    for (var i = 0; i < 5; i++) {
+      if (i != n)
+        table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+    }
+
+    if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+    else
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+  }
+
+
+  function sortTablePrecos(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+
+    dir = "asc";
+
+    while (switching) {
+
+      switching = false;
+      rows = table.rows;
+
+      for (i = 1; i < (rows.length - 1); i++) {
+
+        shouldSwitch = false;
+
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        var valueX = parseInt(x.innerHTML);
+        var valueY = parseInt(y.innerHTML);
+    
+        if(isNaN(valueX) && !isNaN(valueY)){
+          shouldSwitch = true;
+          break;
+        }
+        if (dir == "asc") {
+          if (valueX > valueY) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (valueX < valueY) {
             shouldSwitch = true;
             break;
           }

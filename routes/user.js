@@ -218,7 +218,7 @@ router.get('/tarefas', authenticated, function(req, res){
 
 router.get('/tarefa/:id', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
-        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {$or: [{_id:funcionario.tarefas}, {_id:funcionario.tarefasCriadas}]}]}).lean().then(function(tarefa){
             Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
                 Funcionario.find({tarefas:tarefa._id}).lean().then(function(funcionarios){
                     res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, funcionarios:funcionarios})
@@ -398,7 +398,7 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
 
 router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
-        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).then(function(tarefa){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
             if(tarefa.dataPrevistaFim == "Invalid date" || typeof tarefa.dataPrevistaFim == undefined || tarefa.dataPrevistaFim == null){
                 req.flash("error_msg", "Impossível validar tarefa, uma vez que esta não tem data prevista de fim.")
                 res.redirect("/tarefa/"+req.params.id)
@@ -412,113 +412,9 @@ router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res
                     Tarefa.findOneAndUpdate({_id:req.params.id},
                         {"$set": {
                             "estado": "porAceitar"
-                            }}, {useFindAndModify: false}).lean().then(function(funcionario){
+                            }}, {useFindAndModify: false}).lean().then(function(){
                             req.flash("success_msg", "Tarefa submetida com sucesso")
                             res.redirect("/tarefa/"+req.params.id);
-                    }).catch(function(error){
-                        req.flash("error_msg", "Erro ao submeter a tarefa.")
-                        res.redirect("/tarefa/"+req.params.id);
-                    })
-
-
-                    Tarefa.findOneAndUpdate({_id:req.params.id},
-                        {"$set": {"estado": "porAceitar"}}, {useFindAndModify: false}).lean().then(function(funcionario){
-                        //     Funcionario.find({tarefas:req.params.id}).then(function(funcionarios){
-                        //         Tarefa.findOne({_id:req.params.id}).lean().then(function(tarefa){
-                        //             Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
-                                            
-
-                        //             async function secondFunction(){
-                        //                 var finishDay = momentBD(tarefa.dataPrevistaFim).format('DD')
-                        //                 var startDay = momentBD(tarefa.dataPrevistaInicio).format('DD')
-                        //                 var cost = tarefa.despesa;
-                                            
-                        //                 if(moment(tarefa.dataPrevistaInicio).isValid() && moment(tarefa.dataPrevistaFim).isValid()){
-                        //                     var expectedStartDateYear = moment(tarefa.dataPrevistaInicio).format("YYYY");
-                        //                     var expectedFinishDateYear = moment(tarefa.dataPrevistaFim).format("YYYY");
-
-                        //                     var holidays = [];
-                        //                     for(var i=expectedStartDateYear; i <= expectedFinishDateYear; i++){
-                        //                         var yearHolidays = hd.getHolidays(i);
-                        //                         for(var j=0; j<yearHolidays.length; j++){
-                        //                             holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
-                        //                         }
-                        //                     }
-                                    
-                        //                     momentBD.updateLocale('PT', {
-                        //                         holidays: holidays,
-                        //                         holidayFormat: 'YYYY-MM-DD',
-                        //                         workingWeekdays: [1, 2, 3, 4, 5]
-                        //                     });
-                                            
-                        //                     var days = momentBD(tarefa.dataPrevistaFim).businessDiff(moment(tarefa.dataPrevistaInicio));
-                        //                     var hours = momentBD(tarefa.dataPrevistaFim).diff(moment(tarefa.dataPrevistaInicio), 'days', true) % 1;
-                        //                     if(hours != 0 && days != 0){
-                        //                         days = days - 1;
-                        //                     }
-                        //                     days = days + hours;
-                        //                     if(startDay == finishDay)
-                        //                         for(var i=0; i<funcionarios.length; i++){
-                        //                             cost = cost + ((days * 24) * funcionarios[i].custo);
-                        //                         }
-                        //                     else{
-                        //                         var aux = finishDay - startDay;
-                        //                         for(var i=0; i<funcionarios.length; i++){
-                        //                             cost = cost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
-                        //                         }
-                        //                     }
-                        //                     var expectedFinishDate;
-                        //                     if(moment(obra.dataPrevistaFim).isValid()){
-                        //                         if(moment(tarefa.dataPrevistaFim).isAfter(obra.dataPrevistaFim)){
-                        //                             expectedFinishDate = tarefa.dataPrevistaFim;
-                        //                         }
-                        //                         else{
-                        //                             expectedFinishDate = obra.dataPrevistaFim;
-                        //                         }
-                        //                     }
-                        //                     else{
-                        //                         expectedFinishDate = tarefa.dataPrevistaFim;
-                        //                     }
-
-                        //                     Tarefa.find({ $and: [{obra:obra._id}, {$or: [{estado: "porAceitar"}, {estado:"associada"}, {estado:"recusada"}]}]}).lean().then(function(tarefas){
-                        //                         console.log(tarefas)
-                        //                         if(tarefas.length > 0){
-                        //                             Obra.findOneAndUpdate({_id:req.params.id}, {"$set": {"custo": cost, "dataPrevistaFim": expectedFinishDate}}, 
-                        //                                 {useFindAndModify: false}).lean().then(function(){
-                        //                                 req.flash("success_msg", "Tarefa submetida com sucesso")
-                        //                                 res.redirect("/tarefa/"+req.params.id);
-                        //                             }).catch(function(error){
-                        //                                 req.flash("error_msg", "Erro ao atualizar a obra.")
-                        //                                 res.redirect("/tarefa/"+req.params.id);
-                        //                             })
-                        //                         }
-                        //                         else{
-                        //                             Obra.findOneAndUpdate({_id:req.params.id}, {"$set": {"custo": cost, "dataPrevistaFim": expectedFinishDate, "estado": "aAguardarResposta"}}, 
-                        //                                 {useFindAndModify: false}).lean().then(function(){
-                        //                                 req.flash("e", "Tarefa submetida com sucesso")
-                        //                                 res.redirect("/tarefa/"+req.params.id);
-                        //                             }).catch(function(error){
-                        //                                 req.flash("error_msg", "Erro ao atualizar a obra.")
-                        //                                 res.redirect("/tarefa/"+req.params.id);
-                        //                             })
-                        //                         }
-                        //                     }).catch(function(error){
-                        //                         req.flash("error_msg", "Tarefas não encontradas.")
-                        //                         res.redirect("/tarefa/"+req.params.id)
-                        //                     })
-                        //                 }
-                        //                 else{
-                        //                     req.flash("error_msg", "Datas da tarefa inválidas.")
-                        //                     res.redirect("/tarefa/"+req.params.id);
-                        //                 }
-                        //             };
-                        //             secondFunction()  
-                        //         })
-                        //     })
-                        // }).catch(function(error){
-                        //     req.flash("error_msg", "Funcionários não encontrados.")
-                        //     res.redirect("/tarefa/"+req.params.id)
-                        // })
                     }).catch(function(error){
                         req.flash("error_msg", "Erro ao submeter a tarefa.")
                         res.redirect("/tarefa/"+req.params.id);
@@ -527,6 +423,43 @@ router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res
             }
         }).catch(function(error){
             req.flash("error_msg", "Não tem permissões para submeter a tarefa.")
+            res.redirect("/tarefa/"+req.params.id)
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/tarefa/"+req.params.id)
+    })
+})
+
+router.get('/tarefa/:id/comecar', authenticated, function asyncFunction(req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
+            if(tarefa.estado != "aceite"){
+                req.flash("error_msg", "Não pode começar esta tarefa. Verifique que a tarefa está aceite.")
+                res.redirect("/tarefa/"+req.params.id)
+            }
+            else{
+                Tarefa.findOneAndUpdate({_id:req.params.id},
+                    {"$set": {
+                        "estado": "emExecucao",
+                        "dataInicio": moment()
+                        }}, {useFindAndModify: false}).lean().then(function(){
+                        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                            if(obra.estado != "producao"){
+                                Obra.updateOne(
+                                    {"_id":tarefa.obra},
+                                    {$set: {estado : "producao", dataInicio: moment()}}).then()
+                            }
+                            req.flash("success_msg", "Tarefa iniciada com sucesso.")
+                            res.redirect("/tarefa/"+req.params.id);
+                        })
+                }).catch(function(error){
+                    req.flash("error_msg", "Erro ao começar a tarefa.")
+                    res.redirect("/tarefa/"+req.params.id);
+                })
+            }
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para começar a tarefa.")
             res.redirect("/tarefa/"+req.params.id)
         })
     }).catch(function(error){
