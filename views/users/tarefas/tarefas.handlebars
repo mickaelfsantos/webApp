@@ -176,7 +176,7 @@ calendarEl.style.display = "none";
 
   <div class="mt-5" id="infos" style="display: none;">
       <h4>Informações</h4>
-      Filtre por nome da tarefa. <br>
+      <span style="font-weight: bold;">Filtre por nome da tarefa. </span> <br>
       <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - tarefas associadas que estão por submeter a um chefe de equipa <br>
       <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - tarefas que estão à espera de serem aceites<br>
       <i class="fa fa-circle" style="color: #8e44ad;"></i> Datas previstas - tarefas aceites que estão à espera de serem iniciadas<br>
@@ -203,65 +203,7 @@ calendarEl.style.display = "none";
         $("#filtro tr").filter(function() {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
-      var calendarEl = document.getElementById('calendar');
-      calendarEl.innerHTML="";
-      var e = {{{ tarefasS }}};
-      var eventos = [];
-      for (var i = 0; i < e.length; i++) {
-        if(e[i].nome.includes(value))
-          eventos.push(e[i]);
-      }
-      for (var i = 0; i < eventos.length; i++) {
-        eventos[i].title = eventos[i].nome;
-        eventos[i].start = eventos[i].dataPrevistaInicio;
-        if (eventos[i].dataPrevistaFim == undefined) {
-          eventos[i].end = eventos[i].start;
-        }
-        else {
-          eventos[i].end = eventos[i].dataPrevistaFim
-        }
-        eventos[i].url = "/tarefa/" + eventos[i]._id;
-        
-        if (eventos[i].estado == "associada" || eventos[i].estado == "recusada")
-          eventos[i].color = '#D2691E';
-        else {
-          if (eventos[i].estado == "porAceitar")
-            eventos[i].color = '#008B8B';
-          else {
-            if(eventos[i].estado == "aceite"){
-              eventos[i].color = '#8e44ad';
-            }
-            else{
-              if(eventos[i].estado == "emExecucao"){
-                if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
-                  eventos[i].color = '#008000';
-                }
-                else{
-                  eventos[i].color = '#FF0000';
-                }
-              }
-              else{
-                  eventos[i].color = '#778899';
-              }
-            }
-          }
-        }
-      }
-
-      var calendar = new FullCalendar.Calendar(calendarEl, {
-        plugins: ['dayGrid'],
-        locale: 'pt',
-        header: { // layout header
-          left: '',
-          center: 'title',
-          right: 'prev, next'
-        },
-        displayEventTime: false,
-        events: eventos 
-      });
-
-
-      calendar.render();
+      calendar();
   }); 
   });
 
@@ -420,8 +362,13 @@ calendarEl.style.display = "none";
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
 
+    calendar();
+  }
+
+  function calendar(){
     var calendarEl = document.getElementById('calendar');
     var e = {{{ tarefasS }}};
+    calendarEl.innerHTML = "";
     var eventos = [];
     var value = $($("#inputFiltro")).val().toLowerCase();
     $("#filtro tr").filter(function () {
@@ -429,7 +376,7 @@ calendarEl.style.display = "none";
     });
     for (var i = 0; i < e.length; i++) {
       if(e[i].nome.includes(value))
-        eventos[i] = e[i];
+        eventos.push(e[i]);
     }
     for (var i = 0; i < eventos.length; i++) {
       eventos[i].title = eventos[i].nome;

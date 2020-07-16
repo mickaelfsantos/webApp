@@ -172,6 +172,8 @@ calendarEl.style.display = "none";
 
   <div class="mt-5" id="infos" style="display: none;">
       <h4>Informações</h4>
+      <span style="font-weight: bold;">Filtre por nome da obra. <br>
+      </span>
       <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - obras em pré-orçamento que ainda não têm data prevista de fim calculada <br>
       <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - obras por começar<br>
       <i class="fa fa-circle" style="color: #008000;"></i> Datas - obras em execução às quais estão dentro do prazo <br>
@@ -190,59 +192,7 @@ calendarEl.style.display = "none";
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
 
-      var calendarEl = document.getElementById('calendar');
-      var e = {{{ obrasS }}};
-      calendarEl.innerHTML="";
-      var eventos = [];
-      for (var i = 0; i < e.length; i++) {
-        if(e[i].nome.includes(value))
-          eventos.push(e[i]);
-      }
-      for (var i = 0; i < e.length; i++) {
-        eventos[i].title = eventos[i].nome;
-        eventos[i].start = eventos[i].dataPrevistaInicio;
-        if (eventos[i].dataPrevistaFim == undefined) {
-          eventos[i].end = eventos[i].start;
-        }
-        else {
-          eventos[i].end = eventos[i].dataPrevistaFim
-        }
-        eventos[i].url = "/obra/" + eventos[i]._id;
-        if (eventos[i].estado == "preOrcamento")
-          eventos[i].color = '#D2691E';
-        else {
-          if (eventos[i].estado == "preProducao" || eventos[i].estado == "aAguardarResposta")
-            eventos[i].color = '#008B8B';
-          else {
-            if(eventos[i].estado == "producao"){
-              if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
-                eventos[i].color = '#008000';
-              }
-              else{
-                eventos[i].color = '#FF0000';
-              }
-            }
-            else{
-                eventos[i].color = '#778899';
-            }
-          }
-        }
-      }
-
-      var calendar = new FullCalendar.Calendar(calendarEl, {
-        plugins: ['dayGrid'],
-        locale: 'pt',
-        header: { // layout header
-          left: '',
-          center: 'title',
-          right: 'prev, next'
-        },
-        displayEventTime: false,
-        events: eventos
-      });
-
-
-      calendar.render();
+      calendar();
     });
   });
 
@@ -294,18 +244,23 @@ calendarEl.style.display = "none";
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
+    calendar();
+  }
+
+  function calendar(){
     var value = $($("#inputFiltro")).val().toLowerCase();
       $("#filtro tr").filter(function () {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
-    var calendarEl = document.getElementById('calendar');
+      var calendarEl = document.getElementById('calendar');
       var e = {{{ obrasS }}};
+      calendarEl.innerHTML = "";
       var eventos = [];
       for (var i = 0; i < e.length; i++) {
         if(e[i].nome.includes(value))
           eventos.push(e[i]);
       }
-      for (var i = 0; i < e.length; i++) {
+      for (var i = 0; i < eventos.length; i++) {
         eventos[i].title = eventos[i].nome;
         eventos[i].start = eventos[i].dataPrevistaInicio;
         if (eventos[i].dataPrevistaFim == undefined) {
