@@ -103,6 +103,8 @@
                         return "Em execução"
                     case "finalizada":
                         return "Finalizada"
+                    case "preProducao":
+                        return "A aguardar datas"
                     default:
                         return "Erro";
                 }
@@ -162,7 +164,7 @@
                     return options.fn(this)
                 }
                 return options.inverse(this);
-            },
+            }
 
         }
     })

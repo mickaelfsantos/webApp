@@ -17,20 +17,30 @@ const Requisicao = new Schema({
         ref: "Funcionario"
     },
 
-    dataInicio: {
+    dataPrevistaInicio: {
         type: Date,
         required: true
+    },
+
+    dataPrevistaFim: {
+        type: Date,
+        required: true
+    },
+
+    dataInicio: {
+        type: Date,
+        default: null
     },
 
     dataFim: {
         type: Date,
-        required: true
+        default: null
     },
 
-    estado: { //1- à espera da resposta do cliente, 2- cliente confirma, está à espera da data de incio, 3-em execução, 4-finalizada
+    estado: {
         type: String,
-        enum: ['porFazer', 'aceite', 'emExecucao', 'finalizada'],
-        default: 'porFazer'
+        enum: ['preProducao', 'emExecucao', 'finalizada'],
+        default: 'preProducao'
     }
 
 })

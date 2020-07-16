@@ -38,17 +38,19 @@
       {{#ifUR}}
       <ul class="sidebar-nav" id="sidebar">
         <li class="sub-sidebar-brand">
-          <a class="list-group-item list-group-item-action bg-dark dropdown-toggle" role="button">Máquinas</a>
-          <ul class="sub-menu">
-            <li class="sub-sub-sidebar-brand"><a href="/obras"
-                class="list-group-item list-group-item-action bg-dark">Ver máquinas</a></li>
-            <li class="sub-sub-sidebar-brand"><a href="/obras/add"
-                class="list-group-item list-group-item-action bg-dark">Nova máquina</a></li>
-          </ul>
+          <a class="list-group-item list-group-item-action bg-dark" href="/maquinas">Máquinas</a>
         </li>
       </ul>
       {{else}}
       {{/ifUR}}
+
+      <ul class="sidebar-nav" id="sidebar">
+        <li class="sub-sidebar-brand">
+          <a class="list-group-item list-group-item-action bg-dark" href="/requisicoes">Requisições</a>
+        </li>
+      </ul>
+
+
       <a href="#" class="list-group-item list-group-item-action bg-dark">Status</a>
     </div>
   </div>

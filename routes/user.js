@@ -13,10 +13,12 @@ const { data } = require('jquery');
     require("../models/Tarefa")
     require("../models/Funcionario")
     require("../models/Requisicao")
+    require("../models/Maquina")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
     const Funcionario = mongoose.model("funcionarios")
-    const Requicisao = mongoose.model("requisicoes")
+    const Requisicao = mongoose.model("requisicoes")
+    const Maquina = mongoose.model("maquinas")
 
 
 router.get('/login', function(req, res){
@@ -205,7 +207,8 @@ router.get('/obra/:id', authenticated, function(req, res){
 router.get('/tarefas', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.find({_id:funcionario.tarefas}).lean().then(function(tarefas){
-            res.render("users/tarefas/tarefas", {tarefas: tarefas})
+            var tarefasS = JSON.stringify(tarefas);
+            res.render("users/tarefas/tarefas", {tarefas: tarefas, tarefasS:tarefasS})
         }).catch(function(erro){
             req.flash("error_msg", "Tarefas não encontradas")
             res.redirect("/dashboard");
@@ -340,7 +343,8 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
                     var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
                     var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
-                    res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                    var funcionariosSelecionados = JSON.stringify(req.body.funcionarios); 
+                    res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
                             funcionarios : f})
                 }).catch(function(error){
                     req.flash("error_msg", "Funcionários não encontrados.")
@@ -468,6 +472,122 @@ router.get('/tarefa/:id/comecar', authenticated, function asyncFunction(req, res
     })
 })
 
+router.get('/tarefa/:id/requisitarMaquina', authenticated, function (req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
+            if(tarefa.estado != "associada" && tarefa.estado != "recusada"){
+                req.flash("error_msg", "Não pode requisitar máquinas para esta tarefa. Verifique que a tarefa está em fase de orçamentação.")
+                res.redirect("/tarefa/"+req.params.id)
+            }
+            else{
+                Maquina.find().lean().then(function(maquinas){
+                    res.render("users/requisicoes/novaRequisicao", {tarefa:tarefa, maquinas:maquinas})
+                }).catch(function(error){
+                    req.flash("error_msg", "Máquinas não encontradas.")
+                    res.redirect("/tarefa/"+req.params.id)
+                })
+            }
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para requisitar máquinas para esta tarefa.")
+            res.redirect("/tarefas/")
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard")
+    })
+})
+
+router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({$and: [{_id:req.params.id}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
+            Maquina.find().lean().then(function(maquinas){
+                var erros = [];
+                if(!req.body.dataPrevistaInicio || !req.body.dataPrevistaFim){
+                    erros.push({texto: "Datas obrigatórias. Preencha data prevista de início e data prevista de fim."})
+                }
+
+                if(erros.length>0){
+                    res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                }
+                else{
+                        Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
+                            Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
+                                    var today = moment().format("YYYY-MM-DD HH:mm");
+                                    var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                    var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                                    var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                    
+                                    dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
+                                    dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
+        
+                                    if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
+                                        if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true || moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                            erros.push({texto: "Data inválida. Data tem que ser superior à data de inicio da tarefa e a data de fim tem que ser superior à data de inicio da requisição."})
+                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                        }
+                                        else{
+                                            var invalid = false;
+                                            for(var i=0; i<requisicoes.length; i++){
+                                                if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                    invalid = true;
+                                                    break;
+                                                }
+                                                if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                                    invalid = true;
+                                                    break;  
+                                                }
+                
+                                                if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                                    invalid = true;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            if(invalid){
+                                                erros.push({texto: "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições -> Vista calendário)."})
+                                                res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                            }
+                                            else{
+                                                var novaRequisicao = {
+                                                    maquina: maquina._id,
+                                                    funcionario : funcionario._id,
+                                                    tarefa: tarefa._id,
+                                                    dataPrevistaFim: dataPrevistaFim,
+                                                    dataPrevistaInicio: dataPrevistaInicio
+                                                }
+                                                new Requisicao(novaRequisicao).save().then();
+                                                req.flash("success_msg", "Requisição concluída com sucesso.")
+                                                res.redirect("/tarefa/"+req.params.id);
+                                            }
+                                        }
+                                    }
+                                    else{
+                                        erros.push({texto: "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim."})
+                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                    }
+                                }).catch(function(error){
+                                    req.flash("error_msg", "Tarefas não encontradas.")
+                                    res.redirect("/tarefa/"+req.params.id)
+                                })
+                            }).catch(function(error){
+                                req.flash("error_msg", "Requisições não encontradas.")
+                                res.redirect("/tarefa/"+req.params.id)
+                            })
+                }
+            }).catch(function(error){
+                req.flash("error_msg", "Máquinas não encontradas.")
+                res.redirect("/tarefa/"+req.params.id)
+            })
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para requisitar máquinas nesta tarefa.")
+            res.redirect("/tarefas")
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard")
+    })
+})
+
 router.get('/perfil', authenticated, function(req, res){
     Funcionario.findOne({ _id: req.user.id}).lean().then(function(funcionario){
         res.render("users/perfil/perfil", {funcionario:funcionario})
@@ -562,8 +682,27 @@ router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
 })
 
 router.get('/requisicoes', authenticated, function(req, res){
-    Requicisao.find().lean.then(function(requisicoes){
-        res.render("users/requisicoes/requisicoes", {requisicoes:requisicoes})
+    var reques = [];
+    Requisicao.find({}).lean().then(function(requisicoes){
+        for(var i=0; i<requisicoes.length; i++){
+            reques.push(requisicoes[i]);
+        }
+        async function f(){
+           for(var i=0; i<reques.length; i++){
+                Tarefa.findOne({_id:reques[i].tarefa}).then(function(tarefa){
+                    reques[i].tarefaNome = tarefa.nome;
+                })
+                Funcionario.findOne({_id:reques[i].funcionario}).then(function(funcionario){
+                    reques[i].funcionarioNome = funcionario.nome;
+                })
+                await Maquina.findOne({_id:reques[i].maquina}).then(function(maquina){
+                    reques[i].maquinaNome = maquina.nome;
+                })
+            }
+            var requisicoesS = JSON.stringify(reques);
+            res.render("users/requisicoes/requisicoes", {requisicoes:reques, requisicoesS:requisicoesS})
+        }
+        f();
     }).catch(function(error){
         req.flash("error_msg", "Requisições não encontradas.")
         res.redirect('/dashboard')

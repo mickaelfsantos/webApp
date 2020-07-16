@@ -1,5 +1,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
 
 <div class="container-fluid pr-4 pl-4">
 
@@ -93,20 +94,32 @@
 
     var ctxD = document.getElementById("doughnutChartO").getContext('2d');
     var myLineChart = new Chart(ctxD, {
-    type: 'doughnut',
-    data: {
-        labels: ["Pré-orçamento", "A aguardar resposta", "Pré-produção", "Produção", "Finalizada"],
-        datasets: [{
-            data: [preOrcamento, aAguardarResposta, preProducao, producao, finalizada],
-            backgroundColor: ["#949FB1", "#46BFBD", "#FDB45C", "#4D5360", "#228B22"],
-            hoverBackgroundColor: ["#A8B3C5", "#5AD3D1" , "#FFC870", "#616774", "#006400"] 
-        }]
-    },
-    options: {
-        maintainAspectRatio : false,
-        responsive: true
-    }
+        type: 'doughnut',
+        data: {
+            labels: ["Pré-orçamento", "A aguardar resposta", "Pré-produção", "Produção", "Finalizada"],
+            datasets: [{
+                data: [preOrcamento, aAguardarResposta, preProducao, producao, finalizada],
+                backgroundColor: ["#949FB1", "#46BFBD", "#FDB45C", "#4D5360", "#228B22"],
+                hoverBackgroundColor: ["#A8B3C5", "#5AD3D1" , "#FFC870", "#616774", "#006400"] 
+            }]
+        },
+        options: {
+            maintainAspectRatio : false,
+            responsive: true
+            {{!-- bezierCurve : false,
+            animation: {
+                onComplete: done
+            } --}}
+        }
     });
+
+    {{!-- function done(){
+        var canvas = document.getElementById('doughnutChartO');
+        var imgData = canvas.toDataURL("image/png", 1.0).replace("image/png", "image/octet-stream");
+        window.location.href=imgData;
+    } --}}
+    
+
 
     var ctxD = document.getElementById("doughnutChartT").getContext('2d');
     var myLineChart = new Chart(ctxD, {

@@ -92,6 +92,52 @@ calendarEl.style.display = "none";
 });*/
 
 
+
+  {{!-- document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    var e = {{{ requisicoesS }}};
+    var eventos = [];
+    for (var i = 0; i < e.length; i++) {
+      eventos[i] = e[i];
+    }
+    for (var i = 0; i < e.length; i++) {
+      eventos[i].title = eventos[i].tarefaNome;
+      eventos[i].start = eventos[i].dataPrevistaInicio;
+      eventos[i].end = eventos[i].dataPrevistaFim;
+      if (eventos[i].estado == "preProducao")
+        eventos[i].color = '#D2691E';
+      else {
+          if(eventos[i].estado == "emExecucao"){
+            if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
+              eventos[i].color = '#008000';
+            }
+            else{
+              eventos[i].color = '#FF0000';
+            }
+          }
+          else{
+              eventos[i].color = '#778899';
+          }
+      }
+    }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      plugins: ['dayGrid'],
+      locale: 'pt',
+      header: { // layout header
+        left: '',
+        center: 'title',
+        right: 'prev, next'
+      },
+      displayEventTime:true,
+      displayEventEnd: true,
+      events: eventos
+    });
+
+
+    calendar.render();
+    calendarEl.style.display = "none";
+  }); --}}
 </script>
 </style>
 
@@ -100,14 +146,13 @@ calendarEl.style.display = "none";
 
   <div class="row">
     <div class="col-4">
-      <h2>Lista de obras</h2>
+      <h2>Lista de requisições</h2>
     </div>
 
     {{#ifUR}}
       <div class="col-8 text-right">
-        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddObra()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Obra</button>  
-        <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
-      </div>
+        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddObra()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova requisição</button>  
+    </div>
     {{/ifUR}}
   </div>
   <hr>
@@ -133,31 +178,28 @@ calendarEl.style.display = "none";
 
 
   <div id="lista">
-    {{#if obras}}
+    {{#if requisicoes}}
     <table class="mt-5" id="myTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)" style="width: 20%;">Nome <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTableDatas(1)" style="width: 24%;">Datas Previstas <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTableDatas(2)" style="width: 24%;">Datas <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(3)" style="width: 22%;">Estado <i class="fa fa-angle-down"> </i></th>
-          {{#ifImAdmin}}
-          <th onclick="sortTablePrecos(4)" style="width: 10%;">Orçamento <i class="fa fa-angle-down"> </i>
-            {{/ifImAdmin}}
-          </th>
+          <th onclick="sortTable(0)" style="width: 13%;">Máquina <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(1)" style="width: 13%;">Tarefa <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(2)" style="width: 13%;">Requisitante <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(3)" style="width: 24%;">Datas Previstas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(4)" style="width: 24%;">Datas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(5)" style="width: 13%;">Estado <i class="fa fa-angle-down"> </i></th>
         </tr>
       </thead>
 
       <tbody id="filtro">
-        {{#each obras}}
-        <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaObra(this)">
-          <td>{{nome}}</td>
+        {{#each requisicoes}}
+        <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaRequisicao(this)">
+          <td>{{maquinaNome}}</td>
+          <td>{{tarefaNome}}</td>
+          <td>{{funcionarioNome}}</td>
           <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
           <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
-          <td>{{estadoToString estado}}</td>
-          {{#ifImAdmin}}
-          <td>{{precoToString orcamento}}</td>
-          {{/ifImAdmin}}
+          <td>{{estadoToStringOD estado}}</td>
         </tr>
         {{else}}
 
@@ -172,6 +214,7 @@ calendarEl.style.display = "none";
 
   <div class="mt-5" id="infos" style="display: none;">
       <h4>Informações</h4>
+      Filtre por nome da máquina. <br>
       <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - obras em pré-orçamento que ainda não têm data prevista de fim calculada <br>
       <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - obras por começar<br>
       <i class="fa fa-circle" style="color: #008000;"></i> Datas - obras em execução às quais estão dentro do prazo <br>
@@ -191,30 +234,21 @@ calendarEl.style.display = "none";
       });
 
       var calendarEl = document.getElementById('calendar');
-      var e = {{{ obrasS }}};
       calendarEl.innerHTML="";
+      var e = {{{ requisicoesS }}};
       var eventos = [];
       for (var i = 0; i < e.length; i++) {
-        if(e[i].nome.includes(value))
+        if(e[i].maquinaNome.includes(value))
           eventos.push(e[i]);
       }
-      for (var i = 0; i < e.length; i++) {
-        eventos[i].title = eventos[i].nome;
+      for (var i = 0; i < eventos.length; i++) {
+        eventos[i].title = eventos[i].maquinaNome;
         eventos[i].start = eventos[i].dataPrevistaInicio;
-        if (eventos[i].dataPrevistaFim == undefined) {
-          eventos[i].end = eventos[i].start;
-        }
-        else {
-          eventos[i].end = eventos[i].dataPrevistaFim
-        }
-        eventos[i].url = "/obra/" + eventos[i]._id;
-        if (eventos[i].estado == "preOrcamento")
+        eventos[i].end = eventos[i].dataPrevistaFim;
+        if (eventos[i].estado == "preProducao")
           eventos[i].color = '#D2691E';
         else {
-          if (eventos[i].estado == "preProducao" || eventos[i].estado == "aAguardarResposta")
-            eventos[i].color = '#008B8B';
-          else {
-            if(eventos[i].estado == "producao"){
+            if(eventos[i].estado == "emExecucao"){
               if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
                 eventos[i].color = '#008000';
               }
@@ -225,7 +259,6 @@ calendarEl.style.display = "none";
             else{
                 eventos[i].color = '#778899';
             }
-          }
         }
       }
 
@@ -237,30 +270,17 @@ calendarEl.style.display = "none";
           center: 'title',
           right: 'prev, next'
         },
-        displayEventTime: false,
+        displayEventTime:true,
+        displayEventEnd: true,
         events: eventos
       });
-
 
       calendar.render();
     });
   });
 
-  function saltaParaObra(handle) {
-    window.location.href = "/obra/" + handle.dataset.name;
-  }
-
-  function saltaParaDownloadReport(handle) {
-    window.location.href = "/obras/downloadReport";
-  }
-
-
-  function saltaParaAddObra(handle) {
-    window.location.href = "/obras/add";
-  }
-
-  window.onload = function () {
-    history.replaceState({}, null, '/obras')
+  function saltaParaRequisicao(handle) {
+    window.location.href = "/requisicao/" + handle.dataset.name;
   }
 
   function lista() {
@@ -294,34 +314,27 @@ calendarEl.style.display = "none";
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
-    var value = $($("#inputFiltro")).val().toLowerCase();
+
+    var calendarEl = document.getElementById('calendar');
+      calendarEl.innerHTML="";
+      var e = {{{ requisicoesS }}};
+      var eventos = [];
+      var value = $($("#inputFiltro")).val().toLowerCase();
       $("#filtro tr").filter(function () {
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
-    var calendarEl = document.getElementById('calendar');
-      var e = {{{ obrasS }}};
-      var eventos = [];
       for (var i = 0; i < e.length; i++) {
-        if(e[i].nome.includes(value))
+        if(e[i].maquinaNome.includes(value))
           eventos.push(e[i]);
       }
-      for (var i = 0; i < e.length; i++) {
-        eventos[i].title = eventos[i].nome;
+      for (var i = 0; i < eventos.length; i++) {
+        eventos[i].title = eventos[i].maquinaNome;
         eventos[i].start = eventos[i].dataPrevistaInicio;
-        if (eventos[i].dataPrevistaFim == undefined) {
-          eventos[i].end = eventos[i].start;
-        }
-        else {
-          eventos[i].end = eventos[i].dataPrevistaFim
-        }
-        eventos[i].url = "/obra/" + eventos[i]._id;
-        if (eventos[i].estado == "preOrcamento")
+        eventos[i].end = eventos[i].dataPrevistaFim;
+        if (eventos[i].estado == "preProducao")
           eventos[i].color = '#D2691E';
         else {
-          if (eventos[i].estado == "preProducao" || eventos[i].estado == "aAguardarResposta")
-            eventos[i].color = '#008B8B';
-          else {
-            if(eventos[i].estado == "producao"){
+            if(eventos[i].estado == "emExecucao"){
               if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
                 eventos[i].color = '#008000';
               }
@@ -332,7 +345,6 @@ calendarEl.style.display = "none";
             else{
                 eventos[i].color = '#778899';
             }
-          }
         }
       }
 
@@ -344,10 +356,10 @@ calendarEl.style.display = "none";
           center: 'title',
           right: 'prev, next'
         },
-        displayEventTime: false,
+        displayEventTime:true,
+        displayEventEnd: true,
         events: eventos
       });
-
 
       calendar.render();
   }

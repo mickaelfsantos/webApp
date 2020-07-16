@@ -1,22 +1,31 @@
 <div class="container-fluid pl-4 pr-4">
-  
+
     {{#each erros}}
         <div class="alert alert-danger">{{texto}}</div>
     {{else}}
 
     {{/each}}
+    
     <h2>Nova tarefa</h2>
-    <h5 id="nomeObra">Obra {{obra.nome}}</h5>
     <div class="card mt-4">
         <div class="card-body">
             <label style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-            <form action="" name="getTarefa" method="POST">
-                <input type="hidden" name="id" id="id" value="{{obra._id}}"> 
+            <form action="/tarefas/addTarefa" name="getTarefa" method="POST">
                 <label for="nome">Nome*</label>
                 <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4" required>
 
                 <label for="descricao">Descrição*</label>
                 <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+
+                <div class="form-group">
+                    <label for="obra">Obra a que esta tarefa pertence*</label>
+                    <select class="form-control" id="obras" name="obras" required>
+                        {{#each obras}}
+                            <option id="{{nome}}">{{nome}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
 
                 <div class="form-group">
                     <label for="funcionarios">Funcionarios a associar* (Tecla ctrl pressionada se pretender selecionar vários)</label>
@@ -46,7 +55,7 @@
                 
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
-                    <button type="button" onclick="saltaParaObra()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                    <button type="button" onclick="saltaParaTarefas()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
                 </div>
                 </form>
         </div>
@@ -54,11 +63,6 @@
 </div>
 
 <script>  
-    window.onload = function() {
-        var obra = document.getElementById('id').getAttribute("value");
-        document.getTarefa.action = "/obra/"+obra+"/addTarefa";
-    };  
-
     var imp = document.getElementById('importancia').getAttribute("value");
     if(imp == "baixa"){
         document.getElementById("baixa").setAttribute("selected", "selected")
@@ -82,9 +86,11 @@
             document.getElementById(funcionariosSelecionados[i]).setAttribute("selected", "selected");
         }
     }
+    
+    var obra = {{{obra}}};
+    document.getElementById(obra.nome).setAttribute("selected", "selected");
 
-    function saltaParaObra(){
-        var obra = document.getElementById('id').getAttribute("value");
-        window.location.href = "/obra/"+obra;
+    function saltaParaTarefas(){
+        window.location.href = "/tarefas";
     }
 </script>

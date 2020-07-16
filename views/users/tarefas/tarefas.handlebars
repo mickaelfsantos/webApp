@@ -1,3 +1,99 @@
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery.min.js'></script>
+<script src="http://fullcalendar.io/js/fullcalendar-2.1.1/lib/jquery-ui.custom.min.js"></script>
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/fullcalendar.min.js'></script>
+
+<link href='fullcalendar-4.4.2/packages/core/main.css' rel='stylesheet' />
+<link href='fullcalendar-4.4.2/packages/daygrid/main.css' rel='stylesheet' />
+<link href='fullcalendar-4.4.2/packages/bootstrap/main.css' rel='stylesheet' />
+{{!-- <link href='lib/main.css' rel='stylesheet' /> --}}
+
+<script src='fullcalendar-4.4.2/packages/core/main.js'></script>
+<script src='fullcalendar-4.4.2/packages/daygrid/main.js'></script>
+<script src='fullcalendar-4.4.2/packages/bootstrap/main.js'></script>
+{{!-- <script src='lib/main2.js'></script>  --}}
+
+<script>
+  {{!-- document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('gantt');
+
+  var e = {{{tarefasS}}};
+    var resources = [];
+    for(var i=0; i<e.length; i++){
+      resources[i] = e[i];
+    }
+    for(var i=0; i<e.length; i++){
+      resources[i].tittle = resources[i].nome;
+    }
+
+var calendar = new FullCalendar.Calendar(calendarEl, {
+  now: '2020-06-07',
+  scrollTime: '00:00', // undo default 6am scrollTime
+  selectable: true,
+  aspectRatio: 1.8,
+  headerToolbar: {
+    left: 'today prev,next',
+    center: 'title',
+    right: 'resourceTimelineDay,resourceTimelineThreeDays,timeGridWeek'
+  },
+  initialView: 'resourceTimelineDay',
+  views: {
+    resourceTimelineThreeDays: {
+      type: 'resourceTimeline',
+      duration: { days: 3 },
+      buttonText: '3 days'
+    }
+  },
+  resourceAreaHeaderContent: 'Rooms',
+  resources: [
+    { id: 'a', title: 'Auditorium A' },
+    { id: 'b', title: 'Auditorium B', eventColor: 'green' },
+    { id: 'c', title: 'Auditorium C', eventColor: 'orange' },
+    { id: 'd', title: 'Auditorium D', children: [
+      { id: 'd1', title: 'Room D1' },
+      { id: 'd2', title: 'Room D2' }
+    ] },
+    { id: 'e', title: 'Auditorium E' },
+    { id: 'f', title: 'Auditorium F', eventColor: 'red' },
+    { id: 'g', title: 'Auditorium G' },
+    { id: 'h', title: 'Auditorium H' },
+    { id: 'i', title: 'Auditorium I' },
+    { id: 'j', title: 'Auditorium J' },
+    { id: 'k', title: 'Auditorium K' },
+    { id: 'l', title: 'Auditorium L' },
+    { id: 'm', title: 'Auditorium M' },
+    { id: 'n', title: 'Auditorium N' },
+    { id: 'o', title: 'Auditorium O' },
+    { id: 'p', title: 'Auditorium P' },
+    { id: 'q', title: 'Auditorium Q' },
+    { id: 'r', title: 'Auditorium R' },
+    { id: 's', title: 'Auditorium S' },
+    { id: 't', title: 'Auditorium T' },
+    { id: 'u', title: 'Auditorium U' },
+    { id: 'v', title: 'Auditorium V' },
+    { id: 'w', title: 'Auditorium W' },
+    { id: 'x', title: 'Auditorium X' },
+    { id: 'y', title: 'Auditorium Y' },
+    { id: 'z', title: 'Auditorium Z' }
+  ],
+  events: [
+    { id: '1', resourceId: 'b', start: '2020-06-07T02:00:00', end: '2020-06-07T07:00:00', title: 'event 1' },
+    { id: '2', resourceId: 'c', start: '2020-06-07T05:00:00', end: '2020-06-07T22:00:00', title: 'event 2' },
+    { id: '3', resourceId: 'd', start: '2020-06-06', end: '2020-06-08', title: 'event 3' },
+    { id: '4', resourceId: 'e', start: '2020-06-07T03:00:00', end: '2020-06-07T08:00:00', title: 'event 4' },
+    { id: '5', resourceId: 'f', start: '2020-06-07T00:30:00', end: '2020-06-07T02:30:00', title: 'event 5' }
+  ]
+});
+
+calendar.render();
+calendarEl.style.display = "none";
+}); --}}
+
+</script>
+</style>
+
+
 <div class="container-fluid pl-4 pr-4">
 
   {{#each erros}}
@@ -14,17 +110,19 @@
       </div>
 
       {{#ifUR}}
-      <div class="col-8 text-right">
-        <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
-      </div>
-    {{/ifUR}}
+        <div class="col-8 text-right">
+          <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
+        </div>
+      {{/ifUR}}
   </div>
   <hr>
   <br>
 
+  {{!-- tarefas no calendario --}}
+
 
   <nav id="navbar">
-    <ul class="nav nav-tabs">
+    <ul class="nav nav-tabs" id="nav-tabs">
       <li class="nav-item">
         <a class="nav-link active" onclick="lista()" style="cursor: pointer;">Lista</a>
       </li>
@@ -76,7 +174,18 @@
     {{/if}}
   </div>
 
-  <div id="calendar">
+  <div class="mt-5" id="infos" style="display: none;">
+      <h4>Informações</h4>
+      Filtre por nome da tarefa. <br>
+      <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - tarefas associadas que estão por submeter a um chefe de equipa <br>
+      <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - tarefas que estão à espera de serem aceites<br>
+      <i class="fa fa-circle" style="color: #8e44ad;"></i> Datas previstas - tarefas aceites que estão à espera de serem iniciadas<br>
+      <i class="fa fa-circle" style="color: #008000;"></i> Datas - tarefas em execução às quais estão dentro do prazo <br>
+      <i class="fa fa-circle" style="color: #FF0000;"></i> Datas - tarefas em execução às quais já passaram o prazo final <br>
+      <i class="fa fa-circle" style="color: #778899;"></i> Datas - tarefas concluídas <br>
+  </div>
+
+  <div id="calendar" style="display: none;">
 
   </div>
 
@@ -89,23 +198,85 @@
 
 <script>
   $(document).ready(function(){
-  $("#inputFiltro").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#filtro tr").filter(function() {
-      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-    });
+    $("#inputFiltro").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+        $("#filtro tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+      var calendarEl = document.getElementById('calendar');
+      calendarEl.innerHTML="";
+      var e = {{{ tarefasS }}};
+      var eventos = [];
+      for (var i = 0; i < e.length; i++) {
+        if(e[i].nome.includes(value))
+          eventos.push(e[i]);
+      }
+      for (var i = 0; i < eventos.length; i++) {
+        eventos[i].title = eventos[i].nome;
+        eventos[i].start = eventos[i].dataPrevistaInicio;
+        if (eventos[i].dataPrevistaFim == undefined) {
+          eventos[i].end = eventos[i].start;
+        }
+        else {
+          eventos[i].end = eventos[i].dataPrevistaFim
+        }
+        eventos[i].url = "/tarefa/" + eventos[i]._id;
+        
+        if (eventos[i].estado == "associada" || eventos[i].estado == "recusada")
+          eventos[i].color = '#D2691E';
+        else {
+          if (eventos[i].estado == "porAceitar")
+            eventos[i].color = '#008B8B';
+          else {
+            if(eventos[i].estado == "aceite"){
+              eventos[i].color = '#8e44ad';
+            }
+            else{
+              if(eventos[i].estado == "emExecucao"){
+                if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
+                  eventos[i].color = '#008000';
+                }
+                else{
+                  eventos[i].color = '#FF0000';
+                }
+              }
+              else{
+                  eventos[i].color = '#778899';
+              }
+            }
+          }
+        }
+      }
+
+      var calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: ['dayGrid'],
+        locale: 'pt',
+        header: { // layout header
+          left: '',
+          center: 'title',
+          right: 'prev, next'
+        },
+        displayEventTime: false,
+        events: eventos 
+      });
+
+
+      calendar.render();
+  }); 
   });
-  
-});
 
 
   function saltaParaTarefa(handle) {
-        window.location.href = "/tarefa/"+handle.dataset.name;
-    } 
+    window.location.href = "/tarefa/"+handle.dataset.name;
+  } 
 
-    window.onload = function() {
-        history.replaceState({}, null, "/tarefas")
-    };
+  function saltaParaAddTarefa(){
+    window.location.href = "/tarefas/addTarefa";
+  }
+
+  window.onload = function() {
+    history.replaceState({}, null, "/tarefas")
+  };
 
   function sortTable(n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -217,16 +388,18 @@
   } 
 
 
-function lista() {
-    
+  function lista() {
+
     var lista = document.getElementById("lista");
     var calendario = document.getElementById("calendar");
     var gantt = document.getElementById("gantt");
+    var infos = document.getElementById("infos");
+    infos.style.display = "none";
     lista.style.display = "block";
     calendario.style.display = "none";
     gantt.style.display = "none";
 
-    var navbar = document.getElementById("navbar");
+    var navbar = document.getElementById("nav-tabs");
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
@@ -236,28 +409,95 @@ function lista() {
     var lista = document.getElementById("lista");
     var calendario = document.getElementById("calendar");
     var gantt = document.getElementById("gantt");
+    var infos = document.getElementById("infos");
+    infos.style.display = "block";
     lista.style.display = "none";
     calendario.style.display = "block";
     gantt.style.display = "none";
-    
-    var navbar = document.getElementById("navbar");
+
+    var navbar = document.getElementById("nav-tabs");
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link active")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link")
+
+    var calendarEl = document.getElementById('calendar');
+    var e = {{{ tarefasS }}};
+    var eventos = [];
+    var value = $($("#inputFiltro")).val().toLowerCase();
+    $("#filtro tr").filter(function () {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+    for (var i = 0; i < e.length; i++) {
+      if(e[i].nome.includes(value))
+        eventos[i] = e[i];
+    }
+    for (var i = 0; i < eventos.length; i++) {
+      eventos[i].title = eventos[i].nome;
+      eventos[i].start = eventos[i].dataPrevistaInicio;
+      if (eventos[i].dataPrevistaFim == undefined) {
+        eventos[i].end = eventos[i].start;
+      }
+      else {
+        eventos[i].end = eventos[i].dataPrevistaFim
+      }
+      eventos[i].url = "/tarefa/" + eventos[i]._id;
+      
+      if (eventos[i].estado == "associada" || eventos[i].estado == "recusada")
+        eventos[i].color = '#D2691E';
+      else {
+        if (eventos[i].estado == "porAceitar")
+          eventos[i].color = '#008B8B';
+        else {
+          if(eventos[i].estado == "aceite"){
+            eventos[i].color = '#8e44ad';
+          }
+          else{
+            if(eventos[i].estado == "emExecucao"){
+              if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
+                eventos[i].color = '#008000';
+              }
+              else{
+                eventos[i].color = '#FF0000';
+              }
+            }
+            else{
+                eventos[i].color = '#778899';
+            }
+          }
+        }
+      }
+    }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      plugins: ['dayGrid'],
+      locale: 'pt',
+      header: { // layout header
+        left: '',
+        center: 'title',
+        right: 'prev, next'
+      },
+      displayEventTime: false,
+      events: eventos 
+    });
+
+
+    calendar.render();
   }
 
   function gantt() {
-      var lista = document.getElementById("lista");
+    var lista = document.getElementById("lista");
     var calendario = document.getElementById("calendar");
     var gantt = document.getElementById("gantt");
+    var infos = document.getElementById("infos");
+    infos.style.display = "none";
     lista.style.display = "none";
     calendario.style.display = "none";
     gantt.style.display = "block";
-    
-    var navbar = document.getElementById("navbar");
+
+    var navbar = document.getElementById("nav-tabs");
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link active")
-    }
+  }
 
 </script>

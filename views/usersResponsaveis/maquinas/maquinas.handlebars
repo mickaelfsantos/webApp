@@ -1,7 +1,23 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
+  {{#each erros}}
+      <div class="alert alert-danger">{{texto}}</div>
+  {{else}}
 
-  <h2>Lista de máquinas</h2>
+  {{/each}}
+  
+  <div class="row">
+    <div class="col-4">
+      <h2>Lista de máquinas</h2>
+    </div>
+
+    {{#ifUR}}
+    <div class="col-8 text-right">
+      <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaNovaMaquina()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Máquina</button>  
+    </div>
+    {{/ifUR}}
+  </div>
   <hr>
+  <br>
 
   <div class="row">
       <div class="col-6 mt-4" style="float:none;margin:auto;">
@@ -46,8 +62,12 @@
 
 
   function saltaParaMaquina(handle) {
-        window.location.href = "/maquina/"+handle.dataset.name;
-    } 
+    window.location.href = "/maquina/"+handle.dataset.name;
+  } 
+
+  function saltaParaNovaMaquina(handle) {
+    window.location.href = "/maquinas/add";
+  }
 
     window.onload = function() {
         history.replaceState({}, null, "/maquinas")

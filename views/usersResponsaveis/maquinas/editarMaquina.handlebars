@@ -1,5 +1,11 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
+    
+    {{#each erros}}
+        <div class="alert alert-danger">{{texto}}</div>
+    {{else}}
 
+    {{/each}}
+    
     <h2 id="nomeMaquina">Editar máquina {{maquina.nome}}</h2>
     
     <div class="card mt-4">
@@ -20,7 +26,10 @@
                 {{else}}
                 {{/ifImAdmin}}
                 
-                <button type="submit" class="btn btn-dark mt-3">Concluir</button>
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaMaquina()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                </div>
             </form>
         </div>
     </div>
@@ -29,5 +38,10 @@
  <script>
     var maquina = document.getElementById('id').getAttribute("value");
     document.getMaquina.action = "/maquina/"+maquina+"/edit";
+
+    function saltaParaMaquina(){
+        var maquina = document.getElementById('id').getAttribute("value");
+        window.location = "/maquina/"+maquina;
+    }
 
  </script>

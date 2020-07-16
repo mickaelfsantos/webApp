@@ -1,27 +1,22 @@
-<div class="container-fluid mt-4">
+<div class="container-fluid pl-4 pr-4">
 
     <div class="row">
-        <div class="col-6">
+        <div class="col-4">
             <h2>Máquina</h2>
         </div>
-        <div class="col-6 text-right">
-            <ul class="navbar-nav mr-auto">
-            <li class="nav-item dropdown">
-                <a class="nav-link" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-navicon fa-2x"></i>
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" onclick="saltaParaEditar()" style="cursor: pointer;">Editar</a>
-                </div>
-            </li>
-            </ul>
+
+        {{#ifUR}}
+        <div class="col-8 text-right">
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+            <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaRemover()" style="cursor: pointer;"><i class="fa fa-remove"></i> Remover</button>
         </div>
+        {{/ifUR}}
     </div>
     <hr>
 
         
     <input type="hidden" id="id" name="id" value="{{maquina._id}}">
-    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+    <div class="row mt-4 col-12" id="infoHover">
         <div class="col-3 p-3 text-left">
             <h6 class="blockquote m-0">Nome</h6>
         </div>
@@ -30,7 +25,7 @@
         </div>
     </div>
 
-    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+    <div class="row mt-4 col-12" id="infoHover">
         <div class="col-3 p-3 text-left">
             <h6 class="blockquote m-0">Departamento</h6>
         </div>
@@ -41,7 +36,7 @@
     </div>
 
     {{#ifImAdmin}}
-    <div class="row mt-4 col-12" onmouseover="setColor(this)" onmouseout="setColor2(this)">
+    <div class="row mt-4 col-12" id="infoHover">
         <div class="col-3 p-3 text-left">
             <h6 class="blockquote m-0">Custo</h6>
         </div>
@@ -56,18 +51,11 @@
 
 <script>
 
-    function setColor(handle){
-        handle.style.backgroundColor = "rgb(95, 158, 160, 0.3)";
-    }
-
-    function setColor2(handle){
-        handle.style.backgroundColor = "white";
-    }
-
-    function saltaParaTras() {
-        window.location.href = "/maquinas";
-    }
     
+    function saltaParaRemover(){
+        maquina = document.getElementById('id').getAttribute("value");
+        window.location.href = "/maquina/"+maquina+"/remove";
+    }
     function saltaParaEditar() {
         maquina = document.getElementById('id').getAttribute("value");
         window.location.href = "/maquina/"+maquina+"/edit";
