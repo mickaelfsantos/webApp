@@ -472,6 +472,53 @@ router.get('/tarefa/:id/comecar', authenticated, function asyncFunction(req, res
     })
 })
 
+router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
+            if(tarefa.estado != "emExecucao"){
+                req.flash("error_msg", "Não pode começar esta tarefa. Verifique que a tarefa está em execução.")
+                res.redirect("/tarefa/"+req.params.id)
+            }
+            else{
+                Tarefa.findOneAndUpdate({_id:req.params.id},
+                    {"$set": {
+                        "estado": "finalizada",
+                        "dataFim": moment()
+                        }}, {useFindAndModify: false}).lean().then(function(){
+                        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                            Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
+                                if(tarefas.length != 0){
+                                    req.flash("error_msg", "Olá.")
+                                    res.redirect("/tarefa/"+req.params.id);
+                                }
+                                else{
+                                    req.flash("success_msg", "Tarefa terminada com sucesso.")
+                                    res.redirect("/tarefa/"+req.params.id);
+                                }                             
+                            }).catch(function(error){
+                                console.log(error)
+                                req.flash("error_msg", "Tarefas não encontradas.")
+                                res.redirect("/tarefa/"+req.params.id);
+                            })
+                        }).catch(function(error){
+                            req.flash("error_msg", "Obra não encontrada.")
+                            res.redirect("/tarefa/"+req.params.id);
+                        })
+                }).catch(function(error){
+                    req.flash("error_msg", "Erro ao terminar a tarefa.")
+                    res.redirect("/tarefa/"+req.params.id);
+                })
+            }
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para começar a tarefa.")
+            res.redirect("/tarefa/"+req.params.id)
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/tarefa/"+req.params.id)
+    })
+})
+
 router.get('/tarefa/:id/requisitarMaquina', authenticated, function (req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){

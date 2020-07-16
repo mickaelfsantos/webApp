@@ -159,6 +159,27 @@
                 return options.inverse(this);
             },
 
+            ifValidar: function(estado, options){
+                if(estado === "porAceitar"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
+            ifTerminar: function(estado, options){
+                if(estado === "emExecucao"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
+            ifCanStart: function(estado, options){
+                if(estado != "aAguardarResposta"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
             ifWaitForClient: function(estado, options){
                 if(estado === "aAguardarResposta"){
                     return options.fn(this)

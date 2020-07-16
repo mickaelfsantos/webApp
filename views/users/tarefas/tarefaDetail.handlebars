@@ -9,13 +9,23 @@
             {{#ifSubmeteu tarefa.estado}}
                     <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaValidar()" style="cursor: pointer;"><i class="fa fa-share-square"></i> Submeter Tarefa Para Validação</button>
                     {{else}}
-                    {{#ifComecar tarefa.estado}}
-                        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar Tarefa</button>
-                    {{else}}
+                    {{#ifValidar tarefa.estado}}
                         {{#ifUR}}
                             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaResponder()" style="cursor: pointer;"><i class="fa fa-hourglass-end"></i> Responder à Submissão</button>
                         {{/ifUR}}
-                    {{/ifComecar}}
+                        {{else}}
+                        {{#ifCanStart obra.estado}}
+                            {{#ifComecar tarefa.estado}}
+                                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar Tarefa</button>
+                            {{else}}
+                                {{#ifTerminar tarefa.estado}}
+                                    <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaTerminar()" style="cursor: pointer;"><i class="fa fa-play"></i> Terminar Tarefa</button>
+                                {{/ifTerminar}}
+                            {{/ifComecar}}
+                        {{else}}
+                        {{/ifCanStart}}
+                    {{/ifValidar}}
+                    
             {{/ifSubmeteu}}
             {{#ifImAdmin}}
                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadTarefaReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
@@ -162,6 +172,11 @@
     function saltaParaDownloadTarefaReport() {
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/downloadReport";
+    }
+
+    function saltaParaTerminar(){
+        tarefa = document.getElementById('id').getAttribute("value");
+        window.location.href = "/tarefa/"+tarefa+"/terminar";
     }
     
 </script>
