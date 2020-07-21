@@ -1,3 +1,4 @@
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
 <div class="container-fluid pl-4 pr-4">
     <div class="row">
         <div class="col-4">
@@ -123,11 +124,11 @@
                 <table class="mt-5 mb-5" id="myTable">
                     <thead>
                     <tr>
-                        <th onclick="sortTable(0)">Nome <i class="float-righ fa fa-sort"> </i></th>
-                        <th onclick="sortTable(1)">Data prevista de inicio <i class="fa fa-sort"> </i></th>
-                        <th onclick="sortTable(2)">Data prevista de fim <i class="fa fa-sort"> </i></th>
-                        <th onclick="sortTable(3)">Estado <i class="fa fa-sort"> </i></th>
-                        <th onclick="sortTable2(4)">Progresso <i class="fa fa-sort"> </i>
+                        <th onclick="sortTable(0)">Nome <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(1)">Data prevista de inicio <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(2)">Data prevista de fim <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTable(3)">Estado <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTable2(4)">Progresso <i class="fa fa-angle-down"> </i>
                         </th>
                     </tr>
                     </thead>
@@ -202,39 +203,50 @@
         
             while (switching) {
             
-            switching = false;
-            rows = table.rows;
-            
-            for (i = 1; i < (rows.length - 1); i++) {
+                switching = false;
+                rows = table.rows;
                 
-                shouldSwitch = false;
-                
-                x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 1].getElementsByTagName("TD")[n];
-                
-                if (dir == "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch= true;
-                    break;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    
+                    shouldSwitch = false;
+                    
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    
+                    if (dir == "asc") {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        shouldSwitch= true;
+                        break;
+                    }
+                    } else if (dir == "desc") {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                    }
                 }
-                } else if (dir == "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                    }
                 }
             }
-            if (shouldSwitch) {
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                switching = true;
-                switchcount ++;
-            } else {
-                if (switchcount == 0 && dir == "asc") {
-                dir = "desc";
-                switching = true;
-                }
+
+
+            for (var i = 0; i < 5; i++) {
+            if (i != n)
+                table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
             }
-            }
+
+            if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+            else
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
         } 
 
         function sortTable2(n) {
@@ -246,33 +258,91 @@
         
             while (switching) {
             
+                switching = false;
+                rows = table.rows;
+                
+                for (i = 1; i < (rows.length - 1); i++) {
+                    
+                    shouldSwitch = false;
+                    
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    var xN = parseInt(x.getElementsByTagName("div")[1].getAttribute("id"))
+                    var yN = parseInt(y.getElementsByTagName("div")[1].getAttribute("id"))
+                    if (dir == "asc") {
+                    if (xN > yN) {
+                        shouldSwitch= true;
+                        break;
+                    }
+                    } else if (dir == "desc") {
+                    if (xN < yN) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                    }
+                }
+            }
+
+            for (var i = 0; i < 5; i++) {
+                if (i != n)
+                    table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+            }
+
+            if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+                table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+            else
+                table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+        } 
+
+        
+        function sortTableDatas(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("myTable");
+            switching = true;
+
+            dir = "asc";
+
+            while (switching) {
+
             switching = false;
             rows = table.rows;
-            
+
             for (i = 1; i < (rows.length - 1); i++) {
-                
+
                 shouldSwitch = false;
-                
+
                 x = rows[i].getElementsByTagName("TD")[n];
                 y = rows[i + 1].getElementsByTagName("TD")[n];
-                var xN = parseInt(x.getElementsByTagName("div")[1].getAttribute("id"))
-                var yN = parseInt(y.getElementsByTagName("div")[1].getAttribute("id"))
+                const xDate = moment(x.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+                const yDate = moment(y.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+                if(moment(xDate).isValid() && moment(yDate).isValid){
                 if (dir == "asc") {
-                if (xN > yN) {
-                    shouldSwitch= true;
-                    break;
-                }
-                } else if (dir == "desc") {
-                if (xN < yN) {
+                    if (moment(yDate).isBefore(xDate)) {
                     shouldSwitch = true;
                     break;
+                    }
+                } else if (dir == "desc") {
+                    if (moment(yDate).isAfter(xDate)) {
+                    shouldSwitch = true;
+                    break;
+                    }
                 }
-                }
+                }        
             }
             if (shouldSwitch) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
-                switchcount ++;
+                switchcount++;
             } else {
                 if (switchcount == 0 && dir == "asc") {
                 dir = "desc";
@@ -280,5 +350,15 @@
                 }
             }
             }
-        } 
+
+            for (var i = 0; i < 5; i++) {
+            if (i != n)
+                table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+            }
+
+            if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+            else
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+        }
    </script>

@@ -1,3 +1,5 @@
+<script src='http://fullcalendar.io/js/fullcalendar-2.1.1/lib/moment.min.js'></script>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <div class="container-fluid pl-4 pr-4">
 
     <div class="row">
@@ -5,7 +7,10 @@
             <h2>Tarefa</h2>
         </div>
         <div class="col-8 text-right">
-            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+            {{#ifTerminou tarefa.estado}}
+            {{else}}
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+            {{/ifTerminou}}
             {{#ifSubmeteu tarefa.estado}}
                     <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaValidar()" style="cursor: pointer;"><i class="fa fa-share-square"></i> Submeter Tarefa Para Validação</button>
                     {{else}}
@@ -30,7 +35,9 @@
             {{#ifImAdmin}}
                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadTarefaReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
             {{/ifImAdmin}}
-            <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaRequisitar()" style="cursor: pointer;"><i class="fa fa-calendar-plus-o"></i> Requisitar Máquina</button>
+            {{#ifSubmeteu tarefa.estado}}
+                <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaRequisitar()" style="cursor: pointer;"><i class="fa fa-calendar-plus-o"></i> Requisitar Máquina</button>
+            {{/ifSubmeteu}}
         </div>
 
     </div>
@@ -106,6 +113,18 @@
                     <label for="estado" id="estado" class="m-0">{{estadoToString tarefa.estado}}</label>
                 </div>
             </div>
+
+            {{#ifRecusada tarefa.estado}}
+                <div class="row mt-4 col-12" id="infoHover">
+                    <div class="col-3 p-3 text-left">
+                        <h6 class="blockquote m-0">Justificação</h6>
+                    </div>
+
+                    <div class="col-9 p-3">
+                        <label for="justificacao" id="justificacao" class="m-0">{{tarefa.justificacao}}</label>
+                    </div>
+                </div>
+            {{/ifRecusada}}
             
             <div class="row mt-4 col-12" id="infoHover">
                 <div class="col-3 p-3 text-left">
@@ -127,7 +146,7 @@
                     <h6 class="blockquote m-0">Datas previstas</h6>
                 </div>
                 <div class="col-9 p-3">
-                        {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}
+                        {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFimComRequisicoes}}
                 </div>            
             </div>
 
@@ -141,9 +160,122 @@
                 </div>
             </div>
 
+            <div class="row mt-5 text-center">
+                <div class="col-12">
+                    <h6 class="blockquote">Requisições</h6>
+                </div>
+            </div>
+
+            {{#if requisicoes}}
+                <table class="mt-5 mb-5" id="myTable">
+                    <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Máquina <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTable(1)">Requisitante <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(2)">Datas previstas <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(3)">Datas <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTable(4)">Estado <i class="fa fa-angle-down"> </i>
+                        </th>
+                    </tr>
+                    </thead>
+            
+                    <tbody id="filtro">
+                        {{#each requisicoes}}
+                            <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
+                                <td>{{maquinaNome}}</td>
+                                <td>{{funcionarioNome}}</td>
+                                <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                                <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                                <td>{{estadoToStringOD estado}}</td>
+                            </tr>
+                        {{else}}
+
+                        {{/each}}
+                    </tbody>
+                </table>
+                {{else}}
+                <div class="row text-center mt-4 mb-5">
+                    <div class="col-12 font-weight-bold">Sem requisicoes associadas à tarefa</div>
+                </div>
+            {{/if}}  
+
+            <div class="row mt-5 text-center">
+                <div class="col-12">
+                    <h6 class="blockquote">Gráficos</h6>
+                </div>
+            </div>
+            
+                <div id='myDiv'></div>
+            
+
 </div>
 <script>
+    var tarefa = {{{t}}};
+
+    if(!moment(tarefa.dataPrevistaInicio).isValid()){
+        var trace1 = {
+        x: [],
+        type: 'box',
+        name: 'Datas Previstas'
+        };
+    }
+    else{
+        if(moment(tarefa.dataPrevistaInicio).isValid() && !moment(tarefa.dataPrevistaFim).isValid()){
+            var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("DD/MM/YYYY HH:mm")
+            var trace1 = {
+            x: [dataPrevistaInicio],
+            type: 'box',
+            name: 'Datas Previstas'
+            };
+        }
+        else{
+            var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("DD/MM/YYYY HH:mm")
+            var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("DD/MM/YYYY HH:mm")
+            var trace1 = {
+            x: [dataPrevistaInicio, dataPrevistaInicio, dataPrevistaInicio, dataPrevistaFim, dataPrevistaFim],
+            type: 'box',
+            name: 'Datas Previstas'
+            };
+        }
+    }
     
+
+    if(!moment(tarefa.dataInicio).isValid()){
+        var trace2 = {
+        x: [],
+        type: 'box',
+        name: 'Datas'
+        };
+    }
+    else{
+        if(moment(tarefa.dataInicio).isValid() && !moment(tarefa.dataFim).isValid()){
+            var dataInicio = moment(tarefa.dataInicio).format("DD/MM/YYYY HH:mm")
+            var trace2 = {
+            x: [dataInicio],
+            type: 'box',
+            name: 'Datas'
+            };
+        }
+        else{
+            var dataInicio = moment(tarefa.dataInicio).format("DD/MM/YYYY HH:mm")
+            var dataFim = moment(tarefa.dataFim).format("DD/MM/YYYY HH:mm")
+            var trace2 = {
+            x: [dataInicio, dataInicio, dataInicio, dataFim, dataFim],
+            type: 'box',
+            name: 'Datas'
+            };
+        }
+    }
+
+    var data = [trace1, trace2];
+
+    var layout = {
+        title: 'Desvios de datas',
+        hovermode:false
+    };
+
+    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true});
+
     function saltaParaEditar() {
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/edit";
@@ -178,6 +310,118 @@
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/terminar";
     }
+
+    function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("myTable");
+            switching = true;
+        
+            dir = "asc"; 
+        
+            while (switching) {
+            
+                switching = false;
+                rows = table.rows;
+                
+                for (i = 1; i < (rows.length - 1); i++) {
+                    
+                    shouldSwitch = false;
+                    
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    
+                    if (dir == "asc") {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        shouldSwitch= true;
+                        break;
+                    }
+                    } else if (dir == "desc") {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                    }
+                }
+            }
+
+
+            for (var i = 0; i < 5; i++) {
+            if (i != n)
+                table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+            }
+
+            if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+            else
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+        } 
+
+        function sortTableDatas(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("myTable");
+            switching = true;
+
+            dir = "asc";
+
+            while (switching) {
+
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < (rows.length - 1); i++) {
+
+                shouldSwitch = false;
+
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                const xDate = moment(x.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+                const yDate = moment(y.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+                if(moment(xDate).isValid() && moment(yDate).isValid){
+                if (dir == "asc") {
+                    if (moment(yDate).isBefore(xDate)) {
+                    shouldSwitch = true;
+                    break;
+                    }
+                } else if (dir == "desc") {
+                    if (moment(yDate).isAfter(xDate)) {
+                    shouldSwitch = true;
+                    break;
+                    }
+                }
+                }        
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+                }
+            }
+            }
+
+            for (var i = 0; i < 5; i++) {
+            if (i != n)
+                table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+            }
+
+            if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+            else
+            table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+        }
     
 </script>
  

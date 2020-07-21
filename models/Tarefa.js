@@ -23,12 +23,22 @@ const Tarefa = new Schema({
         default: null
     },
 
+    dataPrevistaFimComRequisicoes: {
+        type: Date,
+        default: null
+    },    
+
     dataInicio: {
         type: Date,
         default: null
     },
 
     dataFim: {
+        type: Date,
+        default: null
+    },
+
+    dataFimComRequisicoes: {
         type: Date,
         default: null
     },
@@ -64,15 +74,21 @@ const Tarefa = new Schema({
 
     despesa:{
         type:Number,
-        max:100,
-        min:0,
         default: 0
     },
 
     orcamento:{
         type:Number,
-        max:100,
-        min:0,
+        default: 0
+    },
+
+    despesaFinal: {
+        type: Number,
+        default: 0
+    },
+
+    custoFinal: {
+        type: Number,
         default: 0
     },
 

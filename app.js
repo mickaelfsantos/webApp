@@ -126,7 +126,7 @@
             precoToString: function(numero){
                 if(numero == 0)
                     return "Por definir";
-                return numero+"€";
+                return parseFloat(numero).toFixed(2)+"€";
             },
 
             ifUR: function(options){
@@ -174,7 +174,7 @@
             },
 
             ifCanStart: function(estado, options){
-                if(estado != "aAguardarResposta"){
+                if(estado != "aAguardarResposta" && estado != "preOrcamento"){
                     return options.fn(this)
                 }
                 return options.inverse(this);
@@ -182,6 +182,20 @@
 
             ifWaitForClient: function(estado, options){
                 if(estado === "aAguardarResposta"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
+            ifTerminou: function(estado, options){
+                if(estado === "finalizada"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
+            ifRecusada: function(estado, options){
+                if(estado === "recusada"){
                     return options.fn(this)
                 }
                 return options.inverse(this);

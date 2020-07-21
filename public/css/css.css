@@ -32,6 +32,7 @@ th {
 tbody > #row:hover {
   background-color: #45a8ac;
   color: white;
+  cursor: pointer;
 }
 
 th,

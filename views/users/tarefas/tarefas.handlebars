@@ -145,8 +145,8 @@ calendarEl.style.display = "none";
         <thead>
           <tr>
             <th onclick="sortTable(0)">Nome <i class="fa fa-angle-down"> </i></th>
-            <th onclick="sortTable(1)">Data de inicio <i class="fa fa-angle-down"> </i></th>
-            <th onclick="sortTable(2)">Data de fim <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTableDatas(1)">Datas previstas <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTableDatas(2)">Datas <i class="fa fa-angle-down"> </i></th>
             <th onclick="sortTable(3)">Estado <i class="fa fa-angle-down"> </i></th>
             <th onclick="sortTable2(4)">Progresso <i class="fa fa-angle-down"> </i></th>
           </tr>
@@ -180,8 +180,8 @@ calendarEl.style.display = "none";
       <i class="fa fa-circle" style="color: #D2691E;"></i> Datas previstas - tarefas associadas que estão por submeter a um chefe de equipa <br>
       <i class="fa fa-circle" style="color: #008B8B;"></i> Datas previstas - tarefas que estão à espera de serem aceites<br>
       <i class="fa fa-circle" style="color: #8e44ad;"></i> Datas previstas - tarefas aceites que estão à espera de serem iniciadas<br>
-      <i class="fa fa-circle" style="color: #008000;"></i> Datas - tarefas em execução às quais estão dentro do prazo <br>
-      <i class="fa fa-circle" style="color: #FF0000;"></i> Datas - tarefas em execução às quais já passaram o prazo final <br>
+      <i class="fa fa-circle" style="color: #008000;"></i> Datas - tarefas em execução às quais estão dentro do prazo previsto<br>
+      <i class="fa fa-circle" style="color: #FF0000;"></i> Datas - tarefas em execução às quais já passaram o prazo final previsto<br>
       <i class="fa fa-circle" style="color: #778899;"></i> Datas - tarefas concluídas <br>
   </div>
 
@@ -330,6 +330,63 @@ calendarEl.style.display = "none";
   } 
 
 
+function sortTableDatas(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+
+    dir = "asc";
+
+    while (switching) {
+
+      switching = false;
+      rows = table.rows;
+
+      for (i = 1; i < (rows.length - 1); i++) {
+
+        shouldSwitch = false;
+
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        const xDate = moment(x.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+        const yDate = moment(y.innerHTML,'DD/MM/YYYY HH:mm').format('YYYY-MM-DD HH:mm');
+        if(moment(xDate).isValid() && moment(yDate).isValid){
+          if (dir == "asc") {
+            if (moment(yDate).isBefore(xDate)) {
+              shouldSwitch = true;
+              break;
+            }
+          } else if (dir == "desc") {
+            if (moment(yDate).isAfter(xDate)) {
+              shouldSwitch = true;
+              break;
+            }
+          }
+        }        
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+
+    for (var i = 0; i < 5; i++) {
+      if (i != n)
+        table.getElementsByTagName("th")[i].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down")
+    }
+
+    if (table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].getAttribute("class") == "fa fa-angle-down")
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-up");
+    else
+      table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
+  }
+
   function lista() {
 
     var lista = document.getElementById("lista");
@@ -447,4 +504,5 @@ calendarEl.style.display = "none";
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link active")
   }
 
+  
 </script>
