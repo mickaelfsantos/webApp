@@ -419,6 +419,7 @@ router.get('/obras/downloadReport', authenticated, admin, async function asyncFu
                     html.lastIndexOf("<br id=\"finish\">")
                 );
                 pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
+                    console.log(reposta)
                     if(err){
                         req.flash("error_msg", "Erro ao criar relatório de obras.")
                         res.redirect("/obras")
