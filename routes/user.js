@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs')
 const passport = require('passport')
 const {authenticated} = require('../helpers/userRole');
 const fs = require('fs');
-const formidable = require('formidable');
+const nodemailer = require('nodemailer');
 
 
 //models
@@ -189,11 +189,21 @@ router.get('/obras', authenticated, function(req, res){
     
 })
 
+router.post('/obra/:id', function(req, res) {
+    var base64Data = req.body.imgBase64.replace(/^data:image\/png;base64,/, "");
+    fs.writeFile("img/obra"+req.params.id+".png", base64Data, 'base64', function(err) {
+        if(err){
+           console.log(err);
+         }
+    });
+})
+
 router.get('/obra/:id', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
             Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-                res.render("users/obras/obraDetail", {obra:obra, tarefas:tarefas, user:req.user})
+                var tarefasS = JSON.stringify(tarefas);
+                res.render("users/obras/obraDetail", {obra:obra, tarefasS:tarefasS, tarefas:tarefas, user:req.user})
             }).catch(function(error){
                 req.flash("error_msg", "Tarefas não encontradas")
                 res.redirect("/obras")
@@ -793,19 +803,42 @@ router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (
                                         }
                                         else{
                                             var invalid = false;
+                                            var elimina = false;
+                                            var paraEliminar = [];
                                             for(var i=0; i<requisicoes.length; i++){
+                                                var data = moment().add(7, 'days')
                                                 if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
-                                                    invalid = true;
-                                                    break;
+                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
                                                 }
                                                 if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                    invalid = true;
-                                                    break;  
+                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
                                                 }
                 
                                                 if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                    invalid = true;
-                                                    break;
+                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                if(elimina){
+                                                    paraEliminar.push(requisicoes[i]);
+                                                    elimina = false;
                                                 }
                                             }
                                             
@@ -814,6 +847,30 @@ router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (
                                                 res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
                                             }
                                             else{
+                                                var transporter = nodemailer.createTransport({
+                                                    service: 'gmail',
+                                                    auth: {
+                                                           user: 'webappisec@gmail.com',
+                                                           pass: 'mickaelsantos'
+                                                       }
+                                                   });
+                                                for(var i=0; i<paraEliminar.length; i++){
+                                                    var mailOptions = {
+                                                        from: '"WebApp" webappisec@gmail.com',
+                                                        to: 'mickaelsantos2008@hotmail.com',
+                                                        subject: 'Cancelamento de requisição.',
+                                                        text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
+                                                            moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
+                                                            moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
+                                                      };
+                                                      
+                                                      transporter.sendMail(mailOptions, function(error, info){
+                                                        if (error)
+                                                          console.log(error);
+                                                      });
+                                                    Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
+                                                }
+
                                                 var novaRequisicao = {
                                                     maquina: maquina._id,
                                                     funcionario : funcionario._id,

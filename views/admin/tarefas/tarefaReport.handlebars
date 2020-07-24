@@ -1,3 +1,4 @@
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <div class="container-fluid mt-4">
     <div id="comeca" style="font-family: Palatino Linotype; padding:5%">
         <div class="row">
@@ -60,7 +61,70 @@
             <br>
             <br>
         {{/if}}
+
+        <div id='myDiv'></div>
     </div>
 
+<script>
+
+
+    var trace1 = {
+        x: [3, 3, 3, 4, 4],
+        type: 'box',
+        name: 'Datas'
+    };
+
+    var trace2 = {
+        x: [2, 2, 2, 3, 3],
+        type: 'box',
+        name: 'Datas'
+    };
+
+    var data = [trace1, trace2];
+
+    var layout = {
+        title: 'Desvios de datas',
+        hovermode:false
+    };
+
+    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true});
+
+
+    {{!-- if(!moment(tarefa.dataInicio).isValid()){
+        var trace2 = {
+        x: [],
+        type: 'box',
+        name: 'Datas'
+        };
+    }
+    else{
+        if(moment(tarefa.dataInicio).isValid() && !moment(tarefa.dataFim).isValid()){
+            var dataInicio = moment(tarefa.dataInicio).format("DD/MM/YYYY HH:mm")
+            var trace2 = {
+            x: [dataInicio],
+            type: 'box',
+            name: 'Datas'
+            };
+        }
+        else{
+            var dataInicio = moment(tarefa.dataInicio).format("DD/MM/YYYY HH:mm")
+            var dataFim = moment(tarefa.dataFim).format("DD/MM/YYYY HH:mm")
+            var trace2 = {
+            x: [dataInicio, dataInicio, dataInicio, dataFim, dataFim],
+            type: 'box',
+            name: 'Datas'
+            };
+        }
+    }
+
+    var data = [trace1, trace2];
+
+    var layout = {
+        title: 'Desvios de datas',
+        hovermode:false
+    };
+
+    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true}); --}}
+</script>
     <br id="finish">
 </div>

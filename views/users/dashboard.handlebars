@@ -41,6 +41,7 @@
             </div>
         </div>
     </div>
+
 </div>
 
 
@@ -105,21 +106,13 @@
         },
         options: {
             maintainAspectRatio : false,
-            responsive: true
-            {{!-- bezierCurve : false,
-            animation: {
-                onComplete: done
-            } --}}
+            responsive: true,
+            //bezierCurve : false,
+            //animation: {
+                //onComplete: done
+            //}
         }
     });
-
-    {{!-- function done(){
-        var canvas = document.getElementById('doughnutChartO');
-        var imgData = canvas.toDataURL("image/png", 1.0).replace("image/png", "image/octet-stream");
-        window.location.href=imgData;
-    } --}}
-    
-
 
     var ctxD = document.getElementById("doughnutChartT").getContext('2d');
     var myLineChart = new Chart(ctxD, {
@@ -137,6 +130,7 @@
         responsive: true
     }
     });
+
 
 </script>
 

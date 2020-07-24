@@ -13,8 +13,7 @@
     const passport = require('passport')
     const { use } = require('passport')
     require('./config/auth')(passport)
-    const fs = require('fs')
-    
+    const db = require('./config/db')
 
 //Configurações
     var u;
@@ -212,7 +211,7 @@
     
     //Mongoose
         mongoose.Promise = global.Promise
-        mongoose.connect("mongodb://localhost/webApp", {useCreateIndex: true, useNewUrlParser:true, useUnifiedTopology: true}).then(function(){
+        mongoose.connect(db.mongoURI, {useCreateIndex: true, useNewUrlParser:true, useUnifiedTopology: true}).then(function(){
             console.log("MongoDB: conectado");
         }).catch(function(erro){
             console.log("MongoDB: erro - "+erro);
@@ -224,7 +223,7 @@
 
 
 //Outros
-const PORT = 8081;
+const PORT = process.env.PORT || 8081;
 app.listen(PORT, function(){
     console.log("Servidor a rodar")
 })
