@@ -127,7 +127,8 @@ router.post('/registo', function asyncFunction(req, res){
                             req.flash("success_msg", "Registo concluído com sucesso.")
                             res.redirect("/login");
                         }).catch(function(erro){
-                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
+                            console.log(erro)
+                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.1")
                             res.redirect("/registo");
                         })
                     })
