@@ -402,34 +402,37 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
 router.get('/obras/downloadReport', authenticated, admin, async function asyncFunction(req, res){
     Obra.find({}).lean().then(function(obras){
         Tarefa.find({}).lean().then(function(tarefas){
-            var o = obras;
-            for(var i=0; i<o.length; i++){
-                o[i].tarefas = [];
-            }
-            for(var i=0; i<o.length; i++){
-                for(var j=0; j<tarefas.length; j++){
-                    if(tarefas[j].obra.equals(o[i]._id)){
-                        o[i].tarefas.push(tarefas[j])
-                    }
-                }
-            }
-            res.render("admin/obras/obrasReport", {obras:o}, function(err, html){
-                var mySubString = html.substring(
-                    html.lastIndexOf("<div id=\"comeca\""),
-                    html.lastIndexOf("<br id=\"finish\">")
-                );
-                pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
-                    console.log(reposta)
-                    if(err){
-                        req.flash("error_msg", "Erro ao criar relatório de obras.")
-                        res.redirect("/obras")
-                    }
-                    else{
-                        const file = `${__dirname}\\..\\reports\\obrasReport.pdf`;
-                        res.download(file);
-                    }
-                })
-            })
+            const file = `${__dirname}\\..\\reports\\obrasReport.pdf`;
+            res.download(file);
+            // var o = obras;
+            // for(var i=0; i<o.length; i++){
+            //     o[i].tarefas = [];
+            // }
+            // for(var i=0; i<o.length; i++){
+            //     for(var j=0; j<tarefas.length; j++){
+            //         if(tarefas[j].obra.equals(o[i]._id)){
+            //             o[i].tarefas.push(tarefas[j])
+            //         }
+            //     }
+            // }
+            // res.render("admin/obras/obrasReport", {obras:o}, function(err, html){
+            //     var mySubString = html.substring(
+            //         html.lastIndexOf("<div id=\"comeca\""),
+            //         html.lastIndexOf("<br id=\"finish\">")
+            //     );
+            //     pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
+            //         console.log(reposta)
+            //         //AQUI
+            //         if(err){
+            //             req.flash("error_msg", "Erro ao criar relatório de obras.")
+            //             res.redirect("/obras")
+            //         }
+            //         else{
+            //             const file = `${__dirname}\\..\\reports\\obrasReport.pdf`;
+            //             res.download(file);
+            //         }
+            //     })
+            // })
         }).catch(function(error){
             req.flash("error_msg", "Erro ao encontrar as tarefas.")
             res.redirect("/obras")

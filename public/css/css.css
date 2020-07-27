@@ -23,6 +23,8 @@ table {
   border-spacing: 0;
   width: 100%;
   border: 1px solid #ddd;
+  overflow: auto;
+  white-space: nowrap;
 }
 
 th {
@@ -158,7 +160,7 @@ thead > tr > th {
 
 
 
-@media (min-width: 300px) {
+@media (min-width: 760px) {
   #sidebar-wrapper {
     margin-left: 0;
   }
