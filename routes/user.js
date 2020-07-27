@@ -192,7 +192,7 @@ router.get('/obras', authenticated, function(req, res){
 
 router.post('/obra/:id', function(req, res) {
     var base64Data = req.body.imgBase64.replace(/^data:image\/png;base64,/, "");
-    fs.writeFile("img/obra"+req.params.id+".png", base64Data, 'base64', function(err) {
+    fs.writeFile("graficos/obra"+req.params.id+".png", base64Data, 'base64', function(err) {
         if(err){
            console.log(err);
          }
@@ -530,6 +530,7 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                 Tarefa.findOneAndUpdate({_id:req.params.id},
                     {"$set": {
                         "estado": "finalizada",
+                        "progresso": 100,
                         "dataFim": moment()
                         }}, {useFindAndModify: false}).lean().then(function(){
                         Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){

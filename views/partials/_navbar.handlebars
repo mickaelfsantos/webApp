@@ -50,8 +50,14 @@
         </li>
       </ul>
 
-
-      <a href="#" class="list-group-item list-group-item-action bg-dark">Status</a>
+      {{#ifImAdmin}}
+      <ul class="sidebar-nav" id="sidebar">
+        <li class="sub-sidebar-brand">
+          <a class="list-group-item list-group-item-action bg-dark" href="/funcionarios">Funcionários</a>
+        </li>
+      </ul>
+      {{else}}
+      {{/ifImAdmin}}
     </div>
   </div>
   <div id="page-content-wrapper">

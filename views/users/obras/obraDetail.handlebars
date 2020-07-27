@@ -5,12 +5,12 @@
 
 <div class="container-fluid pl-4 pr-4">
     <div class="row">
-        <div class="col-4">
+        <div class="col-sd-4">
             <h2>Obra</h2>
         </div>
 
         {{#ifUR}}
-        <div class="col-8 text-right">
+        <div class="col-sd-8 text-right">
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Orçamento</button> 
@@ -27,11 +27,11 @@
     <hr>
 
             <input type="hidden" id="id" name="id" value="{{obra._id}}">
-            <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+            <div class="row mt-4" id="infoHover">
+                <div class="col-sd-3 p-3 text-left">
                     <h6 class="blockquote m-0" id="texto">Nome</h6>
                 </div>
-                <div class="col-9 p-3" id="texto">
+                <div class="col-sd-9 p-3" id="texto">
                     <label for="nome" id="nomeObra" class="m-0">{{obra.nome}}</label>
                 </div>
             </div>
@@ -381,8 +381,8 @@
             table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
         }
 
-    var tarefas = {{{tarefasS}}};
-    var dentroPrazo = 0, foraPrazo = 0;
+     var tarefas = {{{tarefasS}}};
+    var dentroPrazo = 0, foraPrazo = 0, maior;
     for(var i=0; i<tarefas.length; i++){
         if(moment(tarefas[i].dataPrevistaFim).isAfter(tarefas[i].dataFim)){
             dentroPrazo++;
@@ -391,6 +391,11 @@
             foraPrazo++;
         }
     }
+
+    if(dentroPrazo > foraPrazo)
+        maior = dentroPrazo+1;
+    else
+        maior = foraPrazo+1;
         
     var areaChartData = {
       labels  : ['Dentro de prazo', 'Fora de prazo'],
@@ -427,6 +432,8 @@
         }],
         yAxes: [{
             ticks: {
+                stepSize: 1,
+                max: maior,
                 beginAtZero: true
             }
         }]
@@ -443,20 +450,17 @@
       options: barChartOptions      
     })
     
-    
-
-    
     var canvas = document.getElementById('grafico'); 
     var dataURL = canvas.toDataURL(); 
     faz(dataURL);
 
     function faz(dataURL){
         $.ajax({
-        type: "POST",
-        url: "/obra/"+document.getElementById('id').getAttribute("value"),
-        data: { 
-            imgBase64: dataURL
-        }
-    })
+            type: "POST",
+            url: "/obra/"+document.getElementById('id').getAttribute("value"),
+            data: { 
+                imgBase64: dataURL
+            }
+        })
     }
    </script>

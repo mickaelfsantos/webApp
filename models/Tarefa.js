@@ -96,12 +96,7 @@ const Tarefa = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Obra",
         required: true
-    },
-
-    materiais: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Material"
-    }]
+    }
 })
 
 mongoose.model("tarefas", Tarefa)

@@ -211,7 +211,7 @@
 
 </div>
 <script>
-    var tarefa = {{{t}}};
+    {{!-- var tarefa = {{{t}}};
 
     if(!moment(tarefa.dataPrevistaInicio).isValid()){
         var trace1 = {
@@ -275,7 +275,7 @@
         hovermode:false
     };
 
-    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true});
+    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true}); --}}
 
     function saltaParaEditar() {
         tarefa = document.getElementById('id').getAttribute("value");

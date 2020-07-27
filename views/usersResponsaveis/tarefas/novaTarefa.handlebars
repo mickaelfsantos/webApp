@@ -74,12 +74,14 @@
     }
 
     var funcionariosSelecionados = {{{funcionariosSelecionados}}};
-    if(funcionariosSelecionados[0].length == 1){
-        document.getElementById(funcionariosSelecionados).setAttribute("selected", "selected");
-    }
-    else{
-        for(var i=0; i<funcionariosSelecionados.length; i++){
-            document.getElementById(funcionariosSelecionados[i]).setAttribute("selected", "selected");
+    if(funcionariosSelecionados){
+        if(funcionariosSelecionados[0].length == 1){
+            document.getElementById(funcionariosSelecionados).setAttribute("selected", "selected");
+        }
+        else{
+            for(var i=0; i<funcionariosSelecionados.length; i++){
+                document.getElementById(funcionariosSelecionados[i]).setAttribute("selected", "selected");
+            }
         }
     }
 

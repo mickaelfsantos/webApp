@@ -118,7 +118,8 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
 router.get('/obra/:id/addTarefa', authenticated, userResponsavel, function(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         Funcionario.find({}).then(function(funcionarios){
-            res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
+            var funcionariosSelecionados = JSON.stringify(null);
+            res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
         }).catch(function(err){
             req.flash("error_msg", "Funcionários não encontrados.")
             res.redirect('/obra/'+req.params.id);
@@ -487,7 +488,7 @@ router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyn
                         res.redirect("/obra/"+req.params.id)
                     }
                     else{
-                        const file = `${__dirname}\\..\\reports\\obra`+ req.params.id +`ClientReport.pdf`;
+                        const file = path.resolve('reports/obra'+req.params.id+'ClientReport.pdf');
                         res.download(file);
                     }
                 })
@@ -731,21 +732,39 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                         })
                                                     }
                                                     else{
-                                                        Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate, 
-                                                            "estado": "aAguardarResposta", "orcamento" : cost + cost * (obra.percentagemLucro / 100)}}, 
-                                                            {useFindAndModify: false}).lean().then(function(obra){
-                                                            if(obra == null){  
-                                                                req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                        if(obra.estado == "preOrcamento"){
+                                                            Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate, 
+                                                                "estado": "aAguardarResposta", "orcamento" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                                {useFindAndModify: false}).lean().then(function(obra){
+                                                                if(obra == null){  
+                                                                    req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                }
+                                                                else{
+                                                                    req.flash("success_msg", "Tarefa validada com sucesso")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                }
+                                                            }).catch(function(error){
+                                                                req.flash("error_msg", "Erro ao atualizar a obra.")
                                                                 res.redirect("/tarefa/"+req.params.id);
-                                                            }
-                                                            else{
-                                                                req.flash("success_msg", "Tarefa validada com sucesso")
+                                                            })
+                                                        }
+                                                        else{
+                                                            Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate}}, 
+                                                                {useFindAndModify: false}).lean().then(function(obra){
+                                                                if(obra == null){  
+                                                                    req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                }
+                                                                else{
+                                                                    req.flash("success_msg", "Tarefa validada com sucesso")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                }
+                                                            }).catch(function(error){
+                                                                req.flash("error_msg", "Erro ao atualizar a obra.")
                                                                 res.redirect("/tarefa/"+req.params.id);
-                                                            }
-                                                        }).catch(function(error){
-                                                            req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                            res.redirect("/tarefa/"+req.params.id);
-                                                        })
+                                                            })
+                                                        }
                                                     }
                                                 }).catch(function(error){
                                                     req.flash("error_msg", "Tarefas não encontradas.")
@@ -836,7 +855,7 @@ router.get('/tarefa/:id/downloadReport', authenticated, admin, function asyncFun
                             res.redirect("/tarefa/"+req.params.id)
                         }
                         else{
-                            const file = `${__dirname}\\..\\reports\\tarefa`+ req.params.id +`Report.pdf`;
+                            const file = path.resolve('reports/tarefa'+req.params.id+'Report.pdf');
                             res.download(file);
                         }
                     })
@@ -1064,7 +1083,7 @@ router.get('/funcionario/:id/edit', authenticated, admin, function(req, res){
     })
 })
 
-router.post('/funcionario/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){
+router.post('/funcionario/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){ 
     
     var erros = []
 

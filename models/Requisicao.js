@@ -58,7 +58,27 @@ const Requisicao = new Schema({
         type: String,
         enum: ['preProducao', 'emExecucao', 'finalizada'],
         default: 'preProducao'
-    }
+    },
+
+    despesa:{
+        type:Number,
+        default: 0
+    },
+
+    orcamento:{
+        type:Number,
+        default: 0
+    },
+
+    despesaFinal: {
+        type: Number,
+        default: 0
+    },
+
+    custoFinal: {
+        type: Number,
+        default: 0
+    },
 
 })
 
