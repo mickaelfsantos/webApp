@@ -145,12 +145,12 @@ calendarEl.style.display = "none";
   
 
   <div class="row">
-    <div class="col-4">
+    <div class="col-md-4">
       <h2>Lista de requisições</h2>
     </div>
 
     {{#ifUR}}
-      <div class="col-8 text-right">
+      <div class="col-md-8 text-right">
         <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddObra()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova requisição</button>  
     </div>
     {{/ifUR}}
@@ -179,22 +179,22 @@ calendarEl.style.display = "none";
 
   <div id="lista">
     {{#if requisicoes}}
-    <table class="mt-5" id="myTable">
+    <table class="mt-5 table" id="myTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)" style="width: 13%;">Máquina <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(1)" style="width: 13%;">Tarefa <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(2)" style="width: 13%;">Requisitante <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTableDatas(3)" style="width: 24%;">Datas Previstas <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTableDatas(4)" style="width: 24%;">Datas <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(5)" style="width: 13%;">Estado <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(0)" scope="col">Máquina <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(1)" scope="col">Tarefa <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(2)" scope="col">Requisitante <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(3)" scope="col">Datas Previstas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(4)" scope="col">Datas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(5)" scope="col">Estado <i class="fa fa-angle-down"> </i></th>
         </tr>
       </thead>
 
       <tbody id="filtro">
         {{#each requisicoes}}
         <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaRequisicao(this)">
-          <td>{{maquinaNome}}</td>
+          <td scope="row">{{maquinaNome}}</td>
           <td>{{tarefaNome}}</td>
           <td>{{funcionarioNome}}</td>
           <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>

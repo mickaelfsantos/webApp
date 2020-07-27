@@ -76,21 +76,21 @@
                 </div>
 
                 <div class="row mt-4 col-12" id="infoHover">
-                    <div class="col-3 p-3 text-left">
+                    <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Orçamento</h6>
                     </div>
                     
-                    <div class="col-9 p-3">
+                    <div class="col-md-9 p-3">
                         <label for="nome" id="nomeObra" class="m-0">{{precoToString obra.orcamento}}</label>
                     </div>
                 </div>
 
                 <div class="row mt-4 col-12" id="infoHover">
-                    <div class="col-3 p-3 text-left">
+                    <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Custo final</h6>
                     </div>
 
-                    <div class="col-9 p-3">
+                    <div class="col-md-9 p-3">
                         <label for="estado" id="estado" class="m-0">{{precoToString obra.custoFinal}}</label>
                     </div>
                 </div>
@@ -99,21 +99,21 @@
             
             <div class="row mt-4 col-12" id="infoHover">
                 
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
                 </div>
                 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}
                 </div>
             </div>
 
 
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}
                 </div>
             </div>
@@ -133,20 +133,21 @@
             {{/ifTerminou}}
 
             <div class="row mt-5 text-center">
-                <div class="col-12">
+                <div class="col-md-12">
                     <h6 class="blockquote">Tarefas</h6>
                 </div>
             </div>
 
             {{#if tarefas}}
-                <table class="mt-5 mb-5" id="myTable">
+            <div style="overflow-x:auto; display:block; white-space: nowrap;">
+                <table class="mt-5 mb-5 table" id="myTable">
                     <thead>
                     <tr>
-                        <th onclick="sortTable(0)">Nome <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTableDatas(1)">Data prevista de inicio <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTableDatas(2)">Data prevista de fim <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTable(3)">Estado <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTable2(4)">Progresso <i class="fa fa-angle-down"> </i>
+                        <th onclick="sortTable(0)" scope="col">Nome <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(1)" scope="col">Data prevista de inicio <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(2)" scope="col">Data prevista de fim <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTable(3)" scope="col">Estado <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTable2(4)" scope="col">Progresso <i class="fa fa-angle-down"> </i>
                         </th>
                     </tr>
                     </thead>
@@ -154,7 +155,7 @@
                     <tbody id="filtro">
                         {{#each tarefas}}
                             <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
-                                <td>{{nome}}</td>
+                                <td scope="row">{{nome}}</td>
                                 <td>{{dateToString dataPrevistaInicio}}</td>
                                 <td>{{dateToString dataPrevistaFim}}</td>
                                 <td>{{estadoToStringOD estado}}</td>
@@ -173,6 +174,7 @@
                 <div class="row text-center mt-4 mb-5">
                     <div class="col-12 font-weight-bold">Sem tarefas associadas à obra</div>
                 </div>
+            </div>
             {{/if}}
 
 </div>
@@ -381,7 +383,7 @@
             table.getElementsByTagName("th")[n].getElementsByTagName("i")[0].setAttribute("class", "fa fa-angle-down");
         }
 
-     var tarefas = {{{tarefasS}}};
+    var tarefas = {{{tarefasS}}};
     var dentroPrazo = 0, foraPrazo = 0, maior;
     for(var i=0; i<tarefas.length; i++){
         if(moment(tarefas[i].dataPrevistaFim).isAfter(tarefas[i].dataFim)){

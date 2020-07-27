@@ -6,12 +6,12 @@
   {{/each}}
   
   <div class="row">
-    <div class="col-4">
+    <div class="col-md-4">
       <h2>Lista de máquinas</h2>
     </div>
 
     {{#ifUR}}
-    <div class="col-8 text-right">
+    <div class="col-md-8 text-right">
       <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaNovaMaquina()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Máquina</button>  
     </div>
     {{/ifUR}}
@@ -20,24 +20,25 @@
   <br>
 
   <div class="row">
-      <div class="col-6 mt-4" style="float:none;margin:auto;">
+      <div class="col-md-6 mt-4" style="float:none;margin:auto;">
           <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
       </div>
   </div>
 
   {{#if maquinas}}
-    <table class="mt-5" id="myTable">
+  <div id="lista">
+    <table class="mt-5 table" id="myTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)">Nome</th>
-          <th onclick="sortTable(1)">Departamento</th>
+          <th onclick="sortTable(0)" scope="col">Nome</th>
+          <th onclick="sortTable(1)" scope="col">Departamento</th>
         </tr>
       </thead>
       
       <tbody id="filtro">
         {{#each maquinas}}
           <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaMaquina(this)">
-              <td>{{nome}}</td>
+              <td scope="row">{{nome}}</td>
               <td>{{departamento}}</td>
           </tr>
         {{else}}
@@ -45,6 +46,7 @@
         {{/each}}
       </tbody>
     </table>
+  </div>
   {{else}}
   {{/if}}
 </div>

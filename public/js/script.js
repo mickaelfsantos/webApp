@@ -5,6 +5,4 @@ jQuery(function ($) {
   if($(window).width() < 760){
     $(".d-flex").removeClass("toggled")
   }
-
-
 });

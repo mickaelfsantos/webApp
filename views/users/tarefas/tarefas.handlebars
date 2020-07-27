@@ -105,12 +105,12 @@ calendarEl.style.display = "none";
 
 
   <div class="row">
-      <div class="col-4">
+      <div class="col-md-4">
         <h2>Lista de tarefas</h2>
       </div>
 
       {{#ifUR}}
-        <div class="col-8 text-right">
+        <div class="col-md-8 text-right">
           <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
         </div>
       {{/ifUR}}
@@ -141,21 +141,21 @@ calendarEl.style.display = "none";
 
   <div id="lista">
     {{#if tarefas}}
-      <table class="mt-5" id="myTable">
+      <table class="mt-5 table" id="myTable">
         <thead>
           <tr>
-            <th onclick="sortTable(0)">Nome <i class="fa fa-angle-down"> </i></th>
-            <th onclick="sortTableDatas(1)">Datas previstas <i class="fa fa-angle-down"> </i></th>
-            <th onclick="sortTableDatas(2)">Datas <i class="fa fa-angle-down"> </i></th>
-            <th onclick="sortTable(3)">Estado <i class="fa fa-angle-down"> </i></th>
-            <th onclick="sortTable2(4)">Progresso <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable(0)" scope="col">Nome <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTableDatas(1)" scope="col">Datas previstas <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTableDatas(2)" scope="col">Datas <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable(3)" scope="col">Estado <i class="fa fa-angle-down"> </i></th>
+            <th onclick="sortTable2(4)" scope="col">Progresso <i class="fa fa-angle-down"> </i></th>
           </tr>
         </thead>
         
         <tbody id="filtro">
           {{#each tarefas}}
             <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
-                <td>{{nome}}</td>
+                <td scope="row">{{nome}}</td>
                 <td>{{dateToString dataInicio}}</td>
                 <td>{{dateToString dataFim}}</td>
                 <td>{{estadoToString estado}}</td>

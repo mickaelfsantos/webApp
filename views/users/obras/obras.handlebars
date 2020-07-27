@@ -132,17 +132,17 @@ calendarEl.style.display = "none";
   </nav>
 
 
-  <div id="lista" style="overflow-x:auto;">
+  <div id="lista" style="overflow-x:auto; display:block; white-space: nowrap;">
     {{#if obras}}
     <table class="mt-5 table" id="myTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)" scope="col">Nome <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTableDatas(1)" scope="col">Datas Previstas <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTableDatas(2)" scope="col">Datas <i class="fa fa-angle-down"> </i></th>
-          <th onclick="sortTable(3)" scope="col">Estado <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(0)" style="width: 20%;">Nome <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(1)" style="width: 24%;">Datas Previstas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTableDatas(2)" style="width: 24%;">Datas <i class="fa fa-angle-down"> </i></th>
+          <th onclick="sortTable(3)" style="width: 24%;">Estado <i class="fa fa-angle-down"> </i></th>
           {{#ifImAdmin}}
-          <th onclick="sortTablePrecos(4)" scope="col">Orçamento <i class="fa fa-angle-down"> </i>
+          <th onclick="sortTablePrecos(4)" style="width: 10%;">Orçamento <i class="fa fa-angle-down"> </i>
             {{/ifImAdmin}}
           </th>
         </tr>
@@ -151,7 +151,7 @@ calendarEl.style.display = "none";
       <tbody id="filtro">
         {{#each obras}}
         <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaObra(this)">
-          <td scope="row">{{nome}}</td>
+          <td>{{nome}}</td>
           <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
           <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
           <td>{{estadoToString estado}}</td>

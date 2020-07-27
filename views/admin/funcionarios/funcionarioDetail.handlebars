@@ -1,9 +1,9 @@
 <div class="container-fluid pr-4 pl-4">
     <div class="row">
-        <div class="col-4">
+        <div class="col-md-4">
             <h2>Funcionário</h2>
         </div>
-        <div class="col-8 text-right">
+        <div class="col-md-8 text-right">
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
             <button type="button" class="btn btn-light btn-outline-info mr" onclick="saltaParaRemover()" style="cursor: pointer;"><i class="fa fa-remove"></i> Remover</button>
         </div>
@@ -12,64 +12,64 @@
 
     <input type="hidden" id="id" name="id" value="{{funcionario._id}}">
     <div class="row mt-4 col-12" id="infoHover">
-        <div class="col-3 p-3 text-left">
+        <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Nome</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="nomeFuncionario" class="m-0">{{funcionario.nome}}</label>
         </div>
     </div>
 
     <div class="row mt-4 col-12" id="infoHover">
-        <div class="col-3 p-3 text-left"> 
+        <div class="col-md-3 p-3 text-left"> 
             <h6 class="blockquote m-0">Email</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="email" class="m-0">{{funcionario.email}}</label>
         </div>
     </div>
 
     <div class="row mt-4 col-12" id="infoHover">
-        <div class="col-3 p-3 text-left">
+        <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Departamento</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="departamento" class="m-0">{{funcionario.departamento}}</label>
         </div>
     </div>
 
     <div class="row mt-4 col-12" id="infoHover">
-        <div class="col-3 p-3 text-left">
+        <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Equipa</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="equipa" class="m-0">{{funcionario.equipa}}</label>
         </div>
     </div>
 
     <div class="row mt-4 col-12" id="infoHover">
-        <div class="col-3 p-3 text-left">
+        <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Função</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="funcao" class="m-0">{{funcionario.funcao}}</label>
         </div>
     </div>
 
     <div class="row mt-4 col-12" id="infosHover">
-        <div class="col-3 p-3 text-left">
+        <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Custo por hora</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="custo" class="m-0">{{funcionario.custo}}€</label>
         </div>
     </div>
 
     <div class="row mt-4 col-12" id="infosHover">
-        <div class="col-3 p-3 text-left">
+        <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Cargo</h6>
         </div>
-        <div class="col-9 p-3">
+        <div class="col-md-9 p-3">
             <label for="nome" id="cargo" class="m-0">{{cargoToString funcionario.role}}</label>
         </div>
     </div>

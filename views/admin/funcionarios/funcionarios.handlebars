@@ -10,33 +10,35 @@
     <hr>
 
     <div class="row">
-        <div class="col-6 mt-4" style="float:none;margin:auto;">
+        <div class="col-md-6 mt-4" style="float:none;margin:auto;">
             <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
         </div>
     </div>
 
     {{#if funcionarios}}
-    <table class="mt-5" id="myTable">
-        <thead>
-        <tr>
-            <th onclick="sortTable(0)">Nome</th>
-            <th onclick="sortTable(1)">Departamento</th>
-            <th onclick="sortTable(2)">Cargo</th>
-        </tr>
-        </thead>
-        
-        <tbody id="filtro">
-        {{#each funcionarios}}
-            <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaFuncionario(this)">
-                <td>{{nome}}</td>
-                <td>{{departamento}}</td>
-                <td>{{cargoToString role}}</td>
+    <div id="lista">
+        <table class="mt-5 table" id="myTable">
+            <thead>
+            <tr>
+                <th onclick="sortTable(0)" scope="col">Nome</th>
+                <th onclick="sortTable(1)" scope="col">Departamento</th>
+                <th onclick="sortTable(2)" scope="col">Cargo</th>
             </tr>
-        {{else}}
+            </thead>
+            
+            <tbody id="filtro">
+            {{#each funcionarios}}
+                <tr style="cursor: pointer;" id="row" data-name="{{_id}}" onclick="saltaParaFuncionario(this)">
+                    <td scope="row">{{nome}}</td>
+                    <td>{{departamento}}</td>
+                    <td>{{cargoToString role}}</td>
+                </tr>
+            {{else}}
 
-        {{/each}}
-        </tbody>
-    </table>
+            {{/each}}
+            </tbody>
+        </table>
+    </div>
     {{else}}
     {{/if}}
 </div>

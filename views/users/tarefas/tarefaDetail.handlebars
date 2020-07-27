@@ -4,10 +4,10 @@
 <div class="container-fluid pl-4 pr-4">
 
     <div class="row">
-        <div class="col-4">
+        <div class="col-md-4">
             <h2>Tarefa</h2>
         </div>
-        <div class="col-8 text-right">
+        <div class="col-md-8 text-right">
             {{#ifTerminou tarefa.estado}}
             {{else}}
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
@@ -45,94 +45,94 @@
     <hr>
 
         <div class="row col-12 mt-4" id="infoHover">
-            <div class="col-3 p-3 text-left">
+            <div class="col-md-3 p-3 text-left">
                 <h6 class="blockquote m-0">Obra</h6>
             </div>
-            <div class="col-9 p-3">
+            <div class="col-md-9 p-3">
                 <label for="nome" id="nomeObra" class="m-0">{{obra.nome}}</label>
             </div>
         </div>
             <input type="hidden" id="id" name="id" value="{{tarefa._id}}">
             <div class="row col-12 mt-4" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Nome</h6>
                 </div>
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     <label for="nome" id="nomeTarefa" class="m-0">{{tarefa.nome}}</label>
                 </div>
             </div>
 
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Descrição</h6>
                 </div>
 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     <label for="descricao" id="descricao" class="m-0">{{tarefa.descricao}}</label>
                 </div>
             </div>
 
             {{#ifImAdmin}}
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Despesa</h6>
                 </div>
 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     <label for="descricao" id="descricao" class="m-0">{{precoToString tarefa.despesa}}</label>
                 </div>
             </div>
 
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Orçamento</h6>
                 </div>
 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     <label for="descricao" id="descricao" class="m-0">{{precoToString tarefa.orcamento}}</label>
                 </div>
             </div>
             {{/ifImAdmin}}
 
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Importância</h6>
                 </div>
 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     <label for="descricao" id="descricao" class="m-0">{{tarefa.importancia}}</label>
                 </div>
             </div>
 
 
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Estado</h6>
                 </div>
 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     <label for="estado" id="estado" class="m-0">{{estadoToString tarefa.estado}}</label>
                 </div>
             </div>
 
             {{#ifRecusada tarefa.estado}}
                 <div class="row mt-4 col-12" id="infoHover">
-                    <div class="col-3 p-3 text-left">
+                    <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Justificação</h6>
                     </div>
 
-                    <div class="col-9 p-3">
+                    <div class="col-md-9 p-3">
                         <label for="justificacao" id="justificacao" class="m-0">{{tarefa.justificacao}}</label>
                     </div>
                 </div>
             {{/ifRecusada}}
             
             <div class="row mt-4 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Funcionários</h6>
                 </div>
     
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     {{#each funcionarios}}
                         <label for="funcionarios" id="funcionarios">{{nome}}</label><br>
                     {{else}}
@@ -143,60 +143,62 @@
 
             <div class="row mt-4 col-12" id="infoHover">
                 
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
                 </div>
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                         {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFimComRequisicoes}}
                 </div>            
             </div>
 
             <div class="row mt-4 mb-5 col-12" id="infoHover">
-                <div class="col-3 p-3 text-left">
+                <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>
                 
-                <div class="col-9 p-3">
+                <div class="col-md-9 p-3">
                     {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}
                 </div>
             </div>
 
             <div class="row mt-5 text-center">
-                <div class="col-12">
+                <div class="col-md-12">
                     <h6 class="blockquote">Requisições</h6>
                 </div>
             </div>
 
             {{#if requisicoes}}
-                <table class="mt-5 mb-5" id="myTable">
-                    <thead>
-                    <tr>
-                        <th onclick="sortTable(0)">Máquina <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTable(1)">Requisitante <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTableDatas(2)">Datas previstas <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTableDatas(3)">Datas <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTable(4)">Estado <i class="fa fa-angle-down"> </i>
-                        </th>
-                    </tr>
-                    </thead>
-            
-                    <tbody id="filtro">
-                        {{#each requisicoes}}
-                            <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
-                                <td>{{maquinaNome}}</td>
-                                <td>{{funcionarioNome}}</td>
-                                <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                                <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
-                                <td>{{estadoToStringOD estado}}</td>
-                            </tr>
-                        {{else}}
+                <div id="lista">
+                    <table class="mt-5 mb-5 table" id="myTable">
+                        <thead>
+                        <tr>
+                            <th onclick="sortTable(0)" scope="col">Máquina <i class="fa fa-angle-down"> </i></th>
+                            <th onclick="sortTable(1)" scope="col">Requisitante <i class="fa fa-angle-down"> </i></th>
+                            <th onclick="sortTableDatas(2)" scope="col">Datas previstas <i class="fa fa-angle-down"> </i></th>
+                            <th onclick="sortTableDatas(3)" scope="col">Datas <i class="fa fa-angle-down"> </i></th>
+                            <th onclick="sortTable(4)" scope="col">Estado <i class="fa fa-angle-down"> </i>
+                            </th>
+                        </tr>
+                        </thead>
+                
+                        <tbody id="filtro">
+                            {{#each requisicoes}}
+                                <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
+                                    <td scope="row">{{maquinaNome}}</td>
+                                    <td>{{funcionarioNome}}</td>
+                                    <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                                    <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                                    <td>{{estadoToStringOD estado}}</td>
+                                </tr>
+                            {{else}}
 
-                        {{/each}}
-                    </tbody>
-                </table>
-                {{else}}
-                <div class="row text-center mt-4 mb-5">
-                    <div class="col-12 font-weight-bold">Sem requisicoes associadas à tarefa</div>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                    {{else}}
+                    <div class="row text-center mt-4 mb-5">
+                        <div class="col-12 font-weight-bold">Sem requisicoes associadas à tarefa</div>
+                    </div>
                 </div>
             {{/if}}  
 
