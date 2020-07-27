@@ -402,7 +402,7 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
 router.get('/obras/downloadReport', authenticated, admin, async function asyncFunction(req, res){
     Obra.find({}).lean().then(function(obras){
         Tarefa.find({}).lean().then(function(tarefas){
-            const file = __dirname + "../reports/obrasReport.pdf";
+            const file = path.join(__dirname, "..\\reports\\obrasReport.pdf");
             res.download(file);
             // var o = obras;
             // for(var i=0; i<o.length; i++){
