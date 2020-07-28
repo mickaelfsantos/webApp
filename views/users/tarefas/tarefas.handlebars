@@ -156,8 +156,8 @@ calendarEl.style.display = "none";
           {{#each tarefas}}
             <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
                 <td scope="row">{{nome}}</td>
-                <td>{{dateToString dataInicio}}</td>
-                <td>{{dateToString dataFim}}</td>
+                <td>{{dateToString dataPrevistaInicio}} - {{dateToString2 dataPrevistaFim requisicoes}}</td>
+                <td>{{dateToString dataInicio}} - {{dateToString2Finais dataFim requisicoes}}</td>
                 <td>{{estadoToString estado}}</td>
                 <td>
                   <div class="progress">

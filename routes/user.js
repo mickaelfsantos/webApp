@@ -11,6 +11,14 @@ const passport = require('passport')
 const {authenticated} = require('../helpers/userRole');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
+const formidable = require('formidable');
+const multer = require("multer");
+const path = require('path');
+
+const targetPath = path.resolve('public/img');
+const upload = multer({
+    dest: targetPath
+  });
 
 
 //models
@@ -203,8 +211,21 @@ router.get('/obra/:id', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
             Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-                var tarefasS = JSON.stringify(tarefas);
-                res.render("users/obras/obraDetail", {obra:obra, tarefasS:tarefasS, tarefas:tarefas, user:req.user})
+                async function obtemRequisicoes(){
+                    var t = [];
+                    for(var i=0; i<tarefas.length; i++){
+                        t.push(tarefas[i]);
+                        t[i].requisicoes = [];
+                        await Requisicao.find({tarefa:tarefas[i]._id}).then(function(requisicoes){
+                            for(var j=0; j<requisicoes.length; j++){
+                                t[i].requisicoes.push(requisicoes[j])
+                            }
+                        })
+                    }
+                    var tarefasS = JSON.stringify(t);
+                    res.render("users/obras/obraDetail", {obra:obra, tarefasS:tarefasS, tarefas:t, user:req.user})
+                }
+                obtemRequisicoes();
             }).catch(function(error){
                 req.flash("error_msg", "Tarefas não encontradas")
                 res.redirect("/obras")
@@ -223,8 +244,19 @@ router.get('/obra/:id', authenticated, function(req, res){
 router.get('/tarefas', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.find({_id:funcionario.tarefas}).lean().then(function(tarefas){
-            var tarefasS = JSON.stringify(tarefas);
-            res.render("users/tarefas/tarefas", {tarefas: tarefas, tarefasS:tarefasS})
+            async function obtemDados(){
+                var t = [];
+                for(var i=0; i<tarefas.length; i++){
+                    t.push(tarefas[i])
+                    t[i].requisicoes = [];
+                    await Requisicao.find({tarefa:tarefas[i].id}).then(function(requisicoes){
+                        t[i].requisicoes = requisicoes;
+                    })
+                }
+                var tarefasS = JSON.stringify(t);
+                res.render("users/tarefas/tarefas", {tarefas: t, tarefasS:tarefasS})
+            }
+            obtemDados();
         }).catch(function(erro){
             req.flash("error_msg", "Tarefas não encontradas")
             res.redirect("/dashboard");
@@ -241,8 +273,21 @@ router.get('/tarefa/:id', authenticated, function(req, res){
             Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
                 Funcionario.find({tarefas:tarefa._id}).lean().then(function(funcionarios){
                     Requisicao.find({tarefa:tarefa._id}).lean().then(function(requisicoes){
+                        var reques = [];
+                        async function obtemDados(){
+                            for(var i=0; i<requisicoes.length; i++){
+                                reques.push(requisicoes[i]);
+                                Funcionario.findOne({_id:requisicoes[i].funcionario}).lean().then(function (funcionario){
+                                    reques[i].funcionarioNome = funcionario.nome;
+                                })
+                                await Maquina.findOne({_id:requisicoes[i].maquina}).lean().then(function(maquina){
+                                    reques[i].maquinaNome = maquina.nome;
+                                })
+                            }
+                        }
+                        obtemDados();
                         var t = JSON.stringify(tarefa);
-                        res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, t:t, funcionarios:funcionarios, requisicoes:requisicoes})
+                        res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, t:t, funcionarios:funcionarios, requisicoes:reques})
                     }).catch(function(error){
                         req.flash("error_msg", "Requisições não encontradas.")
                         res.redirect("/tarefas")
@@ -387,25 +432,16 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     }
                     tarefa.dataPrevistaInicio = req.body.dataPrevistaInicio;
                     tarefa.dataPrevistaFim = req.body.dataPrevistaFim;
-
-                    var dataPrevistaFimComRequisicoes;
-                    if(moment(tarefa.dataPrevistaFimComRequisicoes).isValid()){
-                        dataPrevistaFimComRequisicoes = moment(tarefa.dataPrevistaFimComRequisicoes).format("YYYY-MM-DDTHH:mm");
-                        if(moment(dataPrevistaFimComRequisicoes).isBefore(tarefa.dataPrevistaFim)){
-                            dataPrevistaFimComRequisicoes = tarefa.dataPrevistaFim;
-                        }
+                    if(moment(tarefa.dataPrevistaInicio).isBefore(moment())){
+                        tarefa.dataPrevistaInicio = moment();
                     }
-                    else{
-                        dataPrevistaFimComRequisicoes = tarefa.dataPrevistaFim;
-                    }
-        
+                    
                     Tarefa.findOneAndUpdate({_id:req.params.id}, 
                         {"$set": {
                             "nome": tarefa.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                             "descricao": tarefa.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                             "dataPrevistaInicio": tarefa.dataPrevistaInicio,
                             "dataPrevistaFim": tarefa.dataPrevistaFim,
-                            "dataPrevistaFimComRequisicoes": dataPrevistaFimComRequisicoes,
                             "importancia": tarefa.importancia,
                             "progresso": tarefa.progresso
                           }}, {useFindAndModify: false}).then(function(tarefa){
@@ -445,14 +481,19 @@ router.get('/tarefa/:id/validar', authenticated, function asyncFunction(req, res
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
             if(tarefa.dataPrevistaFim == "Invalid date" || typeof tarefa.dataPrevistaFim == undefined || tarefa.dataPrevistaFim == null){
-                if(tarefa.dataPrevistaFimComRequisicoes == "Invalid date" || typeof tarefa.dataPrevistaFimComRequisicoes == undefined || tarefa.dataPrevistaFimComRequisicoes == null){
+                Requisicao.findOne({tarefa:tarefa._id}).lean().then(function(requisicao){
+                    if(requisicao){ 
+                        req.flash("error_msg", "Impossível validar tarefa. A data prevista de fim é relativa às requisições de máquinas para esta tarefa. Preencha a data prevista de fim da própria tarefa para a submeter (Opção \"Editar\"). Se não for necessário mão de obra para a realização da tarefa, preencha a data prevista de fim com a data da data prevista de inicio.")
+                        res.redirect("/tarefa/"+req.params.id)
+                    }
+                    else{
+                        req.flash("error_msg", "Impossível validar tarefa, uma vez que esta não tem data prevista de fim.")
+                        res.redirect("/tarefa/"+req.params.id)
+                    }
+                }).catch(function(error){
                     req.flash("error_msg", "Impossível validar tarefa, uma vez que esta não tem data prevista de fim.")
                     res.redirect("/tarefa/"+req.params.id)
-                }
-                else{
-                    req.flash("error_msg", "Impossível validar tarefa. A data prevista de fim é relativa às requisições de máquinas para esta tarefa. Preencha a data prevista de fim da própria tarefa para a submeter (Opção \"Editar\"). Se não for necessário mão de obra para a realização da tarefa, preencha a data prevista de fim com a data da data prevista de inicio.")
-                    res.redirect("/tarefa/"+req.params.id)
-                }
+                })
             }
             else{
                 if(tarefa.estado != "associada" && tarefa.estado != "recusada"){
@@ -523,7 +564,7 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({ $and: [{_id:req.params.id}, {_id : funcionario.tarefas}]}).lean().then(function(tarefa){
             if(tarefa.estado != "emExecucao"){
-                req.flash("error_msg", "Não pode começar esta tarefa. Verifique que a tarefa está em execução.")
+                req.flash("error_msg", "Não pode terminar esta tarefa. Verifique que a tarefa está em execução.")
                 res.redirect("/tarefa/"+req.params.id)
             }
             else{
@@ -785,134 +826,127 @@ router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (
                     res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
                 }
                 else{
-                        Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
-                            Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
-                                    var today = moment().format("YYYY-MM-DD HH:mm");
-                                    var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                                    var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
-                                    var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                    Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
+                        Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
+                            var today = moment().format("YYYY-MM-DD HH:mm");
+                            var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                            var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                            var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                                     
                                     
-                                    dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
-                                    dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
+                            dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
+                            dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
         
-                                    if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
-                                        if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true || moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
-                                            
-                                            var dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                                            erros.push({texto: "Data inválida. Data tem que ser superior à data de inicio da tarefa e a data de fim tem que ser superior à data de inicio da requisição."})
-                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
-                                        }
-                                        else{
-                                            var invalid = false;
-                                            var elimina = false;
-                                            var paraEliminar = [];
-                                            for(var i=0; i<requisicoes.length; i++){
-                                                var data = moment().add(7, 'days')
-                                                if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
-                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                        elimina = true;
-                                                    }
-                                                    else{
-                                                        invalid = true;
-                                                        break;
-                                                    }
-                                                }
-                                                if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                        elimina = true;
-                                                    }
-                                                    else{
-                                                        invalid = true;
-                                                        break;
-                                                    }
-                                                }
-                
-                                                if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                        elimina = true;
-                                                    }
-                                                    else{
-                                                        invalid = true;
-                                                        break;
-                                                    }
-                                                }
-
-                                                if(elimina){
-                                                    paraEliminar.push(requisicoes[i]);
-                                                    elimina = false;
-                                                }
-                                            }
-                                            
-                                            if(invalid){
-                                                erros.push({texto: "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário)."})
-                                                res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                            if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
+                                if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true || moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                
+                                    var dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                    erros.push({texto: "Data inválida. Data tem que ser superior à data de inicio da tarefa e a data de fim tem que ser superior à data de inicio da requisição."})
+                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
+                                }
+                                else{
+                                    var invalid = false;
+                                    var elimina = false;
+                                    var paraEliminar = [];
+                                    for(var i=0; i<requisicoes.length; i++){
+                                        var data = moment().add(7, 'days')
+                                        if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                            if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                elimina = true;
                                             }
                                             else{
-                                                var transporter = nodemailer.createTransport({
-                                                    service: 'gmail',
-                                                    auth: {
-                                                           user: 'webappisec@gmail.com',
-                                                           pass: 'mickaelsantos'
-                                                       }
-                                                   });
-                                                for(var i=0; i<paraEliminar.length; i++){
+                                                invalid = true;
+                                                break;
+                                            }
+                                        }
+                                        if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                            if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                elimina = true;
+                                            }
+                                            else{
+                                                invalid = true;
+                                                break;
+                                            }
+                                        }
+                
+                                        if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                            if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                elimina = true;
+                                            }
+                                            else{
+                                                invalid = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if(elimina){
+                                            paraEliminar.push(requisicoes[i]);
+                                            elimina = false;
+                                        }
+                                    }
+                                            
+                                    if(invalid){
+                                        erros.push({texto: "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário)."})
+                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                    }
+                                    else{
+                                        var transporter = nodemailer.createTransport({
+                                            service: 'gmail',
+                                            auth: {
+                                                user: 'webappisec@gmail.com',
+                                                pass: 'mickaelsantos'
+                                            }
+                                        });
+
+                                        async function enviaMails(){
+                                            for(var i=0; i<paraEliminar.length; i++){
+                                                await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
                                                     var mailOptions = {
                                                         from: '"WebApp" webappisec@gmail.com',
-                                                        to: 'mickaelsantos2008@hotmail.com',
+                                                        to: funcionario.email,
                                                         subject: 'Cancelamento de requisição.',
                                                         text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
                                                             moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
                                                             moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
-                                                      };
-                                                      
-                                                      transporter.sendMail(mailOptions, function(error, info){
-                                                        if (error)
-                                                          console.log(error);
-                                                      });
-                                                    Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
-                                                }
-
-                                                var novaRequisicao = {
-                                                    maquina: maquina._id,
-                                                    funcionario : funcionario._id,
-                                                    tarefa: tarefa._id,
-                                                    tarefaNome: tarefa.nome,
-                                                    maquinaNome: maquina.nome,
-                                                    funcionarioNome: funcionario.nome,
-                                                    descricao:descricao,
-                                                    dataPrevistaFim: req.body.dataPrevistaFim,
-                                                    dataPrevistaInicio: req.body.dataPrevistaInicio
-                                                }
-                                                new Requisicao(novaRequisicao).save().then();
-
-                                                if(!moment(tarefa.dataPrevistaFimComRequisicoes).isValid() || moment(dataPrevistaFim).isAfter(tarefa.dataPrevistaFimComRequisicoes)){
-                                                    Tarefa.updateOne(
-                                                        {"_id":tarefa._id},
-                                                        {$set: {dataPrevistaFimComRequisicoes : dataPrevistaFim}},
-                                                        ).catch(function(erro){
-                                                            req.flash("error_msg", "Erro ao atualizar a tarefa.")
-                                                            res.redirect('/tarefa/'+req.params.id);
+                                                        };
+                                                              
+                                                        transporter.sendMail(mailOptions, function(error, info){
+                                                            if (error)
+                                                                console.log(error);
                                                         });
-                                                }
-                                                
-                                                req.flash("success_msg", "Requisição concluída com sucesso.")
-                                                res.redirect("/tarefa/"+req.params.id);
+                                                    Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
+                                                })
                                             }
+    
+                                            var novaRequisicao = {
+                                                maquina: maquina._id,
+                                                funcionario : funcionario._id,
+                                                tarefa: tarefa._id,
+                                                descricao:descricao,
+                                                dataPrevistaFim: req.body.dataPrevistaFim,
+                                                dataPrevistaInicio: req.body.dataPrevistaInicio
+                                            }
+                                            new Requisicao(novaRequisicao).save().then();
+    
+                                            req.flash("success_msg", "Requisição concluída com sucesso.")
+                                            res.redirect("/tarefa/"+req.params.id);
                                         }
+                                        enviaMails();
                                     }
-                                    else{
-                                        erros.push({texto: "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim."})
-                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
-                                    }
-                                }).catch(function(error){
-                                    req.flash("error_msg", "Tarefas não encontradas.")
-                                    res.redirect("/tarefa/"+req.params.id)
-                                })
-                            }).catch(function(error){
-                                req.flash("error_msg", "Requisições não encontradas.")
-                                res.redirect("/tarefa/"+req.params.id)
-                            })
+                                }
+                            }
+                            else{
+                                erros.push({texto: "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim."})
+                                res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                            } 
+                        }).catch(function(error){
+                            req.flash("error_msg", "Tarefas não encontradas.")
+                            res.redirect("/tarefa/"+req.params.id)
+                        })
+                    }).catch(function(error){
+                        req.flash("error_msg", "Requisições não encontradas.")
+                        res.redirect("/tarefa/"+req.params.id)
+                    })
                 }
             }).catch(function(error){
                 req.flash("error_msg", "Máquinas não encontradas.")
@@ -977,17 +1011,7 @@ router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
         }         
     }
 
-    // var form = new formidable.IncomingForm();
-    // form.parse(req, function (err, fields, files) {
-    //     var oldpath = files.filetoupload.path;
-    //     var newpath = 'C:/Users/Mickaël/Desktop/' + files.filetoupload.name;
-    //     fs.rename(oldpath, newpath, function (err) {
-    //         if (err) throw err;
-    //         res.write('File uploaded and moved!');
-    //         res.end();
-    //     });
-    // });
-
+    
     if(erros.length > 0){
         Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
             res.render("users/perfil/editarPerfil", {erros:erros, funcionario:funcionario})
@@ -1032,13 +1056,344 @@ router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
     }
 })
 
+router.post('/perfil/editFoto', upload.single("file"), authenticated, function asyncFunction(req, res) {
+    
+    const tempPath = req.file.path;
+
+    fs.rename(tempPath, targetPath+"/"+req.user.id + path.extname(req.file.originalname).toLowerCase(), function(err) {
+        if (err) 
+            console.log('ERROR: ' + err);
+        Funcionario.findOneAndUpdate({_id:req.user.id}, 
+            {"$set": {"foto":  "/img/"+req.user.id+path.extname(req.file.originalname).toLowerCase()}}, 
+            {useFindAndModify: false}).then(function(funcionario){
+                req.flash("success_msg", "Foto de perfil alterada com sucesso.")
+                res.redirect("/perfil")
+        })
+    });
+})
+
 router.get('/requisicoes', authenticated, function(req, res){
     Requisicao.find({}).lean().then(function(requisicoes){
-        var requisicoesS = JSON.stringify(requisicoes);
-        res.render("users/requisicoes/requisicoes", {requisicoes:requisicoes, requisicoesS:requisicoesS})
+        var reques = [];
+        async function obtemDados(){
+            for(var i=0; i<requisicoes.length; i++){
+                reques.push(requisicoes[i]);
+                Tarefa.findOne({_id:requisicoes[i].tarefa}).then(function(tarefa){
+                    reques[i].tarefaNome = tarefa.nome;
+                })
+                Funcionario.findOne({_id:requisicoes[i].funcionario}).then(function (funcionario){
+                    reques[i].funcionarioNome = funcionario.nome;
+                })
+                await Maquina.findOne({_id:requisicoes[i].maquina}).then(function(maquina){
+                    reques[i].maquinaNome = maquina.nome;
+                })
+            }
+            var requisicoesS = JSON.stringify(reques);
+            res.render("users/requisicoes/requisicoes", {requisicoes:reques, requisicoesS:requisicoesS})
+        }
+        obtemDados();
     }).catch(function(error){
         req.flash("error_msg", "Requisições não encontradas.")
         res.redirect('/dashboard')
+    })
+})
+
+router.get('/requisicao/:id', authenticated, function(req, res){
+    Requisicao.findOne({_id:req.params.id}).lean().then(function(requisicao){
+        Funcionario.findOne({_id:requisicao.funcionario}).lean().then(function(funcionario){
+            Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
+                Maquina.findOne({_id:requisicao.maquina}).lean().then(function(maquina){
+                    res.render("users/requisicoes/requisicaoDetails", {requisicao:requisicao, tarefa:tarefa, funcionario:funcionario, maquina:maquina})
+                }).catch(function (error){
+                    req.flash("error_msg", "Máquina não encontrada.")
+                    res.redirect("/requisicoes")
+                })
+            }).catch(function (error){
+                req.flash("error_msg", "Tarefa não encontrada.")
+                res.redirect("/requisicoes")
+            })
+        }).catch(function (error){
+            req.flash("error_msg", "Funcionário não encontrado.")
+            res.redirect("/requisicoes")
+        })
+    }).catch(function (error){
+        req.flash("error_msg", "Requisição não encontrado.")
+        res.redirect("/requisicoes")
+    })
+})
+
+router.get('/requisicao/:id', authenticated, function(req, res){
+    Requisicao.findOne({_id:req.params.id}).lean().then(function(requisicao){
+        Funcionario.findOne({_id:requisicao.funcionario}).lean().then(function(funcionario){
+            Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
+                Maquina.findOne({_id:requisicao.maquina}).lean().then(function(maquina){
+                    res.render("users/requisicoes/requisicaoDetails", {requisicao:requisicao, tarefa:tarefa, funcionario:funcionario, maquina:maquina})
+                }).catch(function (error){
+                    req.flash("error_msg", "Máquina não encontrada.")
+                    res.redirect("/requisicoes")
+                })
+            }).catch(function (error){
+                req.flash("error_msg", "Tarefa não encontrada.")
+                res.redirect("/requisicoes")
+            })
+        }).catch(function (error){
+            req.flash("error_msg", "Funcionário não encontrado.")
+            res.redirect("/requisicoes")
+        })
+    }).catch(function (error){
+        req.flash("error_msg", "Requisição não encontrado.")
+        res.redirect("/requisicoes")
+    })
+})
+
+router.get('/requisicao/:id/comecar', authenticated, function asyncFunction(req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Requisicao.findOne({ $and: [{_id:req.params.id}, {funcionario : funcionario._id}]}).lean().then(function(requisicao){
+            Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
+                if(tarefa.estado != "aceite" && tarefa.estado != "emExecucao"){
+                    req.flash("error_msg", "Não pode começar a utilizar a máquina. Verifique que a tarefa está aceite ou em execução.")
+                    res.redirect("/requisicao/"+req.params.id)
+                }
+                else{
+                    Requisicao.findOneAndUpdate({_id:req.params.id},
+                        {"$set": {
+                            "estado": "emExecucao",
+                            "dataInicio": moment()
+                            }}, {useFindAndModify: false}).lean().then(function(){
+                            Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                                if(obra.estado != "producao"){
+                                    Obra.updateOne(
+                                        {"_id":tarefa.obra},
+                                        {$set: {estado : "producao", dataInicio: moment()}}).then()
+                                }
+                                req.flash("success_msg", "Utilização da máquina iniciada com sucesso.")
+                                res.redirect("/requisicao/"+req.params.id);
+                            })
+                    }).catch(function(error){
+                        req.flash("error_msg", "Erro ao iniciar a utilização da máquina.")
+                        res.redirect("/requisicao/"+req.params.id);
+                    })
+                }
+            }).catch(function(error){
+                req.flash("error_msg", "Tarefa não encontrada.")
+                res.redirect("/requisicao/"+req.params.id)
+            })
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para começar a utilização da máquina.")
+            res.redirect("/requisicao/"+req.params.id);
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/tarefa/"+req.params.id)
+    })
+})
+
+router.get('/requisicao/:id/terminar', authenticated, function asyncFunction(req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Requisicao.findOne({ $and: [{_id:req.params.id}, {funcionario : funcionario._id}]}).lean().then(function(requisicao){
+            if(requisicao.estado != "emExecucao"){
+                req.flash("error_msg", "Não pode terminar esta tarefa. Verifique que a tarefa está em execução.")
+                res.redirect("/requisicao/"+req.params.id)
+            }
+            else{
+                Requisicao.findOneAndUpdate({_id:req.params.id},
+                    {"$set": {
+                        "estado": "finalizada",
+                        "dataFim": moment()
+                        }}, {useFindAndModify: false}).lean().then(function(){
+                            Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
+                                Funcionario.find({tarefas:tarefa._id}).then(function(funcionarios){
+                                        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                                            Requisicao.find({tarefa:tarefa._id}).then(function(requisicoes){
+                                                async function secondFunction(){
+                                                    var cost = obra.despesaFinal;
+                                                    var issueCost = 0;                                          
+                                                        
+                                                    if(moment(tarefa.dataInicio).isValid() && moment(tarefa.dataFim).isValid()){
+                                                        var issueStartDateYear = moment(tarefa.dataInicio).format("YYYY");
+                                                        var issueFinishDateYear = moment(tarefa.dataFim).format("YYYY");
+        
+                                                        var holidays = [];
+                                                        for(var i=issueStartDateYear; i <= issueFinishDateYear; i++){
+                                                            var yearHolidays = hd.getHolidays(i);
+                                                            for(var j=0; j<yearHolidays.length; j++){
+                                                                holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
+                                                            }
+                                                        }
+        
+                                                        var requestStartDateYear; 
+                                                        var requestFinishDateYear;
+                                                        for(var i=0; i<requisicoes.length; i++){
+                                                            requestStartDateYear = moment(requisicoes[i].dataInicio).format("YYYY");
+                                                            requestFinishDateYear = moment(requisicoes[i].dataFim).format("YYYY");
+                                                            if(requestStartDateYear < issueStartDateYear){
+                                                                var holidaysAux = [];
+                                                                for(var j=requestStartDateYear; j < issueStartDateYear; j++){
+                                                                    var yearHolidays = hd.getHolidays(j);
+                                                                    for(var l=0; l<yearHolidays.length; l++){
+                                                                        holidaysAux.push(moment(yearHolidays[l].date).format("YYYY-MM-DD"));
+                                                                    }
+                                                                }
+        
+                                                                for(var j=0; j<holidays.length; j++){
+                                                                    holidaysAux.push(holidays[j]);
+                                                                }
+        
+                                                                holidays = holidaysAux;
+                                                            }
+                                                            if(requestFinishDateYear > issueFinishDateYear){
+                                                                for(var j=issueFinishDateYear; j < requestFinishDateYear; j++){
+                                                                    var yearHolidays = hd.getHolidays(j);
+                                                                    for(var l=0; l<yearHolidays.length; l++){
+                                                                        holidays.push(moment(yearHolidays[l].date).format("YYYY-MM-DD"));
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                
+                                                        momentBD.updateLocale('PT', {
+                                                            holidays: holidays,
+                                                            holidayFormat: 'YYYY-MM-DD',
+                                                            workingWeekdays: [1, 2, 3, 4, 5]
+                                                        });
+                                                        
+                                                        var days = momentBD(tarefa.dataFim).businessDiff(moment(tarefa.dataInicio));
+                                                        var daysAux = days;
+                                                        var hours = momentBD(tarefa.dataFim).diff(moment(tarefa.dataInicio), 'days', true) % 1;
+                                                        if(hours != 0 && days != 0){
+                                                            days = days - 1;
+                                                        }
+                                                        days = days + hours;
+                                                        if(daysAux == 0){
+                                                            for(var i=0; i<funcionarios.length; i++){
+                                                                cost = cost + ((days * 24) * funcionarios[i].custo);
+                                                                issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
+                                                            }
+                                                        }
+                                                        else{
+                                                            for(var i=0; i<funcionarios.length; i++){
+                                                                cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                                issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                            }
+                                                        }
+        
+                                                        for(var i=0; i<requisicoes.length; i++){
+                                                            var days = momentBD(requisicoes[i].dataFim).businessDiff(moment(requisicoes[i].dataInicio));
+                                                            var daysAux = days;
+                                                            var hours = momentBD(requisicoes[i].dataFim).diff(moment(requisicoes[i].dataInicio), 'days', true) % 1;
+                                                            if(hours != 0 && days != 0){
+                                                                days = days - 1;
+                                                            }
+                                                            days = days + hours;
+                                                            if(daysAux == 0){
+                                                                console.log(requisicoes[i].maquina)
+                                                                await Maquina.findOne({_id:requisicoes[i].maquina}).then(function (maquina) {
+                                                                    cost = cost + ((days * 24) * maquina.custo);
+                                                                })
+                                                                
+                                                            }
+                                                            else{
+                                                                await Maquina.findOne({id:requisicoes[i].maquina}).then(function (maquina) {
+                                                                    cost = cost + ((days * 24 - (daysAux * 16)) * maquina.custo);
+                                                                })
+                                                            }
+                                                        }                                                
+                                                        
+                                                        var finishDate;
+                                                        if(moment(obra.dataFim).isValid()){
+                                                            if(moment(tarefa.dataFim).isAfter(obra.dataFim)){
+                                                                finishDate = tarefa.dataFim;
+                                                            }
+                                                            else{
+                                                                finishDate = obra.dataFim;
+                                                            }
+                                                        }
+                                                        else{
+                                                            finishDate = tarefa.dataFim;
+                                                        }
+                                                        Tarefa.findOneAndUpdate({_id:req.params.id},
+                                                            {"$set": {
+                                                                "despesaFinal": issueCost,
+                                                                "custoFinal":issueCost + issueCost * (obra.percentagemLucro/100)
+                                                            }}, {useFindAndModify: false}).then()
+        
+                                                        
+                                                        Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
+                                                            if(tarefas.length > 0){
+                                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                                "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
+                                                                    if(obra == null){  
+                                                                        req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    }
+                                                                    else{
+                                                                        req.flash("success_msg", "Tarefa terminada com sucesso")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    }
+                                                                    
+                                                                }).catch(function(error){
+                                                                    console.log(error)
+                                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                })
+                                                            }
+                                                            else{
+                                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                                    "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                                    {useFindAndModify: false}).lean().then(function(obra){
+                                                                    if(obra == null){  
+                                                                        req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    }
+                                                                    else{
+                                                                        req.flash("success_msg", "Tarefa validada com sucesso")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    }
+                                                                }).catch(function(error){
+                                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                })
+                                                            }
+                                                        }).catch(function(error){
+                                                            req.flash("error_msg", "Tarefas não encontradas.")
+                                                            res.redirect("/tarefa/"+req.params.id)
+                                                        })
+                                                    }
+                                                    else{
+                                                        req.flash("error_msg", "Datas da tarefa inválidas.")
+                                                        res.redirect("/tarefa/"+req.params.id);
+                                                    }
+                                                };
+                                                secondFunction()
+                                            }).catch(function (error) {
+                                                req.flash("error_msg", "Requisições não encontradas.")
+                                                res.redirect("/tarefa"+req.params.id)
+                                            })
+                                        }).catch(function(error){
+                                            req.flash("error_msg", "Obra não encontrada.")
+                                            res.redirect("/tarefa/"+req.params.id)
+                                        })
+                                    
+                                }).catch(function(error){
+                                    req.flash("error_msg", "Funcionários não encontrados.")
+                                    res.redirect("/requisicao/"+req.params.id)
+                                })
+                            }).catch(function(error){
+                                req.flash("error_msg", "Tarefa não encontrada.")
+                                res.redirect("/requisicao/"+req.params.id)
+                            })
+                }).catch(function(error){
+                    req.flash("error_msg", "Erro ao terminar a utilização da máquina.")
+                    res.redirect("/requisicao/"+req.params.id);
+                })
+            }
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para terminar a utilização.")
+            res.redirect("/requisicao/"+req.params.id)
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/requisicao/"+req.params.id)
     })
 })
 

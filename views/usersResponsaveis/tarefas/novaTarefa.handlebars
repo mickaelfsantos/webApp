@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" type="text/css"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.js"></script>
+
 <div class="container-fluid pl-4 pr-4">
   
     {{#each erros}}
@@ -18,11 +21,10 @@
                 <label for="descricao">Descrição*</label>
                 <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
 
-                <div class="form-group">
-                    <label for="funcionarios">Funcionarios a associar* (Tecla ctrl pressionada se pretender selecionar vários)</label>
-                    <select multiple class="form-control" id="funcionarios" name="funcionarios" required>
+                <div class="form-group mb-4">
+                    <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios" required>
                         {{#each funcionarios}}
-                            <option value="{{nome}}" id="{{nome}}">{{nome}}</option>
+                            <option value="{{nome}}" id="{{nome}}" data-img="{{foto}}">{{nome}}</option>
                         {{/each}}
                     </select>
                 </div>
@@ -89,4 +91,13 @@
         var obra = document.getElementById('id').getAttribute("value");
         window.location.href = "/obra/"+obra;
     }
+
+    $('.multiselect').multiselect({
+        enableHTML: true,
+        nonSelectedText:'Funcionários a associar à tarefa',
+        buttonWidth: '300px',
+        optionLabel: function(element) {
+            return '<img src="'+$(element).attr('data-img')+'" class="avatar"> '+$(element).text();
+        }
+});
 </script>

@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" type="text/css"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.js"></script>
+
 <div class="container-fluid mt-4 pl-4 pr-4">
       
     {{#each erros}}
@@ -20,18 +23,17 @@
                 <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3">{{obra.descricao}}</textarea>
 
 
-                <div class="form-group">
-                    <label for="funcionarios">Dar permissão de intervir na obra (Tecla ctrl pressionada se pretender selecionar vários)</label>
-                    <select multiple class="form-control" id="funcionarios" name="funcionarios">
-                    {{#each funcionarios}}
-                        <option value="{{nome}}" id="{{nome}}">{{nome}}</option>
-                    {{/each}}
+                <div class="form-group mb-4">
+                        <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios">
+                        {{#each funcionarios}}
+                            <option value="{{nome}}" id="{{nome}}" data-img="{{foto}}">{{nome}}</option>
+                        {{/each}}
                     </select>
-                </div>
-                            
+                </div>                            
     
                 {{#ifImAdmin}}
                     <label for="percentagem">Percentagem de lucro (%)*</label>
+                    <input type="hidden" value={{obra.despesa}} id="despesa">
                     <input type="text" id="percentagem" name="percentagemLucro" value="{{obra.percentagemLucro}}" class="form-control mb-4" onchange="calcula(this)">
                     <label for="preco" id="preco" value="{{obra.despesa}}">Preço: {{obra.orcamento}}€</label>
                     <br>
@@ -48,10 +50,19 @@
 </div>
                     
  <script>
+     $('.multiselect').multiselect({
+        enableHTML: true,
+        nonSelectedText:'Dar permissão de intervir na obra',
+        buttonWidth: '300px',
+        optionLabel: function(element) {
+            return '<img src="'+$(element).attr('data-img')+'" class="avatar"> '+$(element).text();
+        }
+    });
+
      function calcula(handle){
-         var despesa = parseInt(document.getElementById("preco").getAttribute("value"));
+         var despesa = parseFloat(document.getElementById("despesa").getAttribute("value"));
          var per = document.getElementById("percentagem").value;
-         var calculo = despesa + despesa * per / 100;
+         var calculo = despesa + (despesa * per) / 100;
          if(calculo < despesa)
             calculo = despesa;
          document.getElementById('preco').innerHTML = 'Preço: '+calculo+'€';

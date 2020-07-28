@@ -21,12 +21,7 @@ const Tarefa = new Schema({
     dataPrevistaFim: {
         type: Date,
         default: null
-    },
-
-    dataPrevistaFimComRequisicoes: {
-        type: Date,
-        default: null
-    },    
+    },   
 
     dataInicio: {
         type: Date,

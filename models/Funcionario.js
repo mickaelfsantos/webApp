@@ -33,6 +33,11 @@ const Funcionario = new Schema({
         required: true
     },
 
+    foto:{
+        type: String,
+        default: "/img/default.png"
+    },
+
     custo: {
         type:Number,
         default: 0

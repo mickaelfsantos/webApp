@@ -139,13 +139,13 @@
             </div>
 
             {{#if tarefas}}
-            <div style="overflow-x:auto; display:block; white-space: nowrap;">
+            <div id="lista">
                 <table class="mt-5 mb-5 table" id="myTable">
                     <thead>
                     <tr>
                         <th onclick="sortTable(0)" scope="col">Nome <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTableDatas(1)" scope="col">Data prevista de inicio <i class="fa fa-angle-down"> </i></th>
-                        <th onclick="sortTableDatas(2)" scope="col">Data prevista de fim <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(1)" scope="col">Datas previstas <i class="fa fa-angle-down"> </i></th>
+                        <th onclick="sortTableDatas(2)" scope="col">Datas <i class="fa fa-angle-down"> </i></th>
                         <th onclick="sortTable(3)" scope="col">Estado <i class="fa fa-angle-down"> </i></th>
                         <th onclick="sortTable2(4)" scope="col">Progresso <i class="fa fa-angle-down"> </i>
                         </th>
@@ -156,8 +156,8 @@
                         {{#each tarefas}}
                             <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
                                 <td scope="row">{{nome}}</td>
-                                <td>{{dateToString dataPrevistaInicio}}</td>
-                                <td>{{dateToString dataPrevistaFim}}</td>
+                                <td>{{dateToString dataPrevistaInicio}} - {{dateToString2 dataPrevistaFim requisicoes}}</td>
+                                <td>{{dateToString dataInicio}} - {{dateToString2Finais dataFim requisicoes}}</td>
                                 <td>{{estadoToStringOD estado}}</td>
                                 <td>
                                     <div class="progress">

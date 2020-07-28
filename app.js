@@ -36,6 +36,7 @@
             res.locals.user = req.user
             if(req.user != undefined){
                 res.locals.nome = req.user.nome;
+                res.locals.foto = req.user.foto;
                 res.locals.role = req.user.role
                 u=res.locals.user;
             }
@@ -57,6 +58,82 @@
                 if(d == "Invalid date" || typeof data == undefined)
                     return "Não definido"
                 return d;
+            },
+
+            dateToString2: function(data, requisicoes){
+                var d = moment(data).format("YYYY-MM-DD HH:mm");
+                var dataMaior = null;
+                var dataMaiorString = null;
+                if(requisicoes.length != 0){
+                    dataMaior = moment(requisicoes[0].dataPrevistaFim).format("YYYY-MM-DD HH:mm");
+                    dataMaiorString = moment(requisicoes[0].dataPrevistaFim).format("DD/MM/YYYY HH:mm")
+                    for(var i=1; i<requisicoes.length; i++){
+                        var dataProx = moment(requisicoes[i].dataPrevistaFim).format("YYYY-MM-DD HH:mm");
+                        if(moment(dataProx).isValid() && moment(dataProx).isAfter(dataMaior)){
+                            dataMaior = dataProx;
+                            dataMaiorString = moment(requisicoes[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm");
+                        }
+                    }
+                }
+
+                if(d == "Invalid date" || typeof d == undefined){
+                    if(dataMaior == "Invalid date" || typeof dataMaior == undefined || dataMaior == null){
+                        return "Não definido"
+                    }
+                    return dataMaiorString;
+                }
+                else{
+                    if(dataMaior == "Invalid date" || typeof dataMaior == undefined || dataMaior == null){
+                        return moment(data).format("DD/MM/YYYY HH:mm");
+                    }
+                    if(moment(d).isAfter(dataMaior) == true){
+                        return moment(data).format("DD/MM/YYYY HH:mm");
+                    }
+                    return dataMaiorString;
+                }
+            },
+
+            dateToString2Finais: function(data, requisicoes){
+                var d = moment(data).format("YYYY-MM-DD HH:mm");
+                var dataMaior = null;
+                var dataMaiorString = null;
+                if(requisicoes.length != 0){
+                    dataMaior = moment(requisicoes[0].dataFim).format("YYYY-MM-DD HH:mm");
+                    dataMaiorString = moment(requisicoes[0].dataFim).format("DD/MM/YYYY HH:mm")
+                    for(var i=1; i<requisicoes.length; i++){
+                        var dataProx = moment(requisicoes[i].dataFim).format("YYYY-MM-DD HH:mm");
+                        if(moment(dataProx).isValid() && moment(dataProx).isAfter(dataMaior)){
+                            dataMaior = dataProx;
+                            dataMaiorString = moment(requisicoes[i].dataFim).format("DD/MM/YYYY HH:mm");
+                        }
+                    }
+                }
+
+                if(d == "Invalid date" || typeof d == undefined){
+                    if(dataMaior == "Invalid date" || typeof dataMaior == undefined || dataMaior == null){
+                        return "Não definido"
+                    }
+                    return dataMaiorString;
+                }
+                else{
+                    if(dataMaior == "Invalid date" || typeof dataMaior == undefined || dataMaior == null){
+                        return moment(data).format("DD/MM/YYYY HH:mm");
+                    }
+                    if(moment(d).isAfter(dataMaior) == true){
+                        return moment(data).format("DD/MM/YYYY HH:mm");
+                    }
+                    return dataMaiorString;
+                }
+            },
+            estadoToStringRequisicao: function(estado){
+                switch(estado){
+                    case "preProducao":
+                        return "Pré-produção. A aguardar datas."
+                    case "emExecucao":
+                        return "Requisição em execução."
+                    case "finalizada":
+                        return "Finalizada."
+                }
             },
         
             estadoToString: function(estado){

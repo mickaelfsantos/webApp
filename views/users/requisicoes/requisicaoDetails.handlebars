@@ -1,0 +1,112 @@
+<div class="container-fluid pl-4 pr-4">
+
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Requisição</h2>
+        </div>
+        <div class="col-md-8 text-right">
+            {{#ifComecar tarefa.estado}}
+                {{#ifTerminar requisicao.estado}}
+                    <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaTerminar()" style="cursor: pointer;"><i class="fa fa-play"></i> Terminar Utilização</button>
+                {{/ifTerminar}}
+                {{else}}
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar Utilização</button>
+            {{/ifComecar}}
+        </div>
+
+    </div>
+    <hr>
+        <div class="row col-12 mt-4" id="infoHover">
+            <div class="col-md-3 p-3 text-left">
+                <h6 class="blockquote m-0">Tarefa</h6>
+            </div>
+            <div class="col-md-9 p-3">
+                <label for="nome" id="nomeTarefa" class="m-0">{{tarefa.nome}}</label>
+            </div>
+        </div>
+            <div class="row col-12 mt-4" id="infoHover">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Máquina</h6>
+                </div>
+                <div class="col-md-9 p-3">
+                    <label for="nome" id="nomeMáquina" class="m-0">{{maquina.nome}}</label>
+                </div>
+            </div>
+
+            <div class="row mt-4 col-12" id="infoHover">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Requisitante</h6>
+                </div>
+
+                <div class="col-md-9 p-3">
+                    <label for="funcionario" id="funcionario" class="m-0">{{funcionario.nome}}</label>
+                </div>
+            </div>
+
+            <div class="row mt-4 col-12" id="infoHover">
+                
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Datas previstas</h6>
+                </div>
+                <div class="col-md-9 p-3">
+                        {{dateToString requisicao.dataPrevistaInicio}} - {{dateToString requisicao.dataPrevistaFim}}
+                </div>            
+            </div>
+
+            <div class="row mt-4 col-12" id="infoHover">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Datas</h6>
+                </div>
+                
+                <div class="col-md-9 p-3">
+                    {{dateToString requisicao.dataInicio}} - {{dateToString requisicao.dataFim}}
+                </div>
+            </div>
+
+            {{#ifImAdmin}}
+            <div class="row mt-4 col-12" id="infoHover">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Despesa</h6>
+                </div>
+
+                <div class="col-md-9 p-3">
+                    <label for="descricao" id="descricao" class="m-0">{{precoToString requisicao.despesa}}</label>
+                </div>
+            </div>
+
+            <div class="row mt-4 col-12" id="infoHover">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Orçamento</h6>
+                </div>
+
+                <div class="col-md-9 p-3">
+                    <label for="descricao" id="descricao" class="m-0">{{precoToString requisicao.orcamento}}</label>
+                </div>
+            </div>
+            {{/ifImAdmin}}
+
+            
+            <div class="row mt-4 col-12" id="infoHover">
+                <input type="hidden" id="id" value="{{requisicao._id}}">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Estado</h6>
+                </div>
+
+                <div class="col-md-9 p-3">
+                    <label for="estado" id="estado" class="m-0">{{estadoToStringRequisicao requisicao.estado}}</label>
+                </div>
+            </div>
+
+</div>
+
+<script>
+    function saltaParaComecar() {
+        requisicao = document.getElementById('id').getAttribute("value");
+        window.location.href = "/requisicao/"+requisicao+"/comecar";
+    }
+
+    function saltaParaTerminar() {
+        requisicao = document.getElementById('id').getAttribute("value");
+        window.location.href = "/requisicao/"+requisicao+"/terminar";
+    }
+</script>

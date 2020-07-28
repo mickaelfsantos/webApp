@@ -11,6 +11,7 @@ const userRole = require('../helpers/userRole');
 const pdf = require("html-pdf")
 const fs = require("fs")
 const path = require("path")
+const formidable = require('formidable');
 
 //models
     require("../models/Obra")
@@ -419,6 +420,11 @@ router.get('/obras/downloadReport', authenticated, admin, async function asyncFu
                     html.lastIndexOf("<div id=\"comeca\""),
                     html.lastIndexOf("<br id=\"finish\">")
                 );
+                
+                const imagem = path.resolve('/img/isec.jpg');
+                console.log(imagem);
+                
+                mySubString = mySubString + "<img src='file://" + imagem + "' />"
                 pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
                     if(err){
                         req.flash("error_msg", "Erro ao criar relatório de obras.")
@@ -602,8 +608,8 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                     Requisicao.find({tarefa:tarefa._id}).then(function(requisicoes){
                                         async function secondFunction(){
                                             var cost = obra.despesa;
-                                            var issueCost = 0;                                          
-                                                
+                                            var issueCost = 0;
+
                                             if(moment(tarefa.dataPrevistaInicio).isValid() && moment(tarefa.dataPrevistaFim).isValid()){
                                                 var expectedIssueStartDateYear = moment(tarefa.dataPrevistaInicio).format("YYYY");
                                                 var expectedIssueFinishDateYear = moment(tarefa.dataPrevistaFim).format("YYYY");
@@ -671,8 +677,16 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                         issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
                                                     }
                                                 }
+                                                var expectedFinishDate = tarefa.dataPrevistaFim;
 
                                                 for(var i=0; i<requisicoes.length; i++){
+                                                    
+                                                    var data = moment(requisicoes[i].dataPrevistaFim).format("YYYY-MM-DD HH:mm");
+                                                    if(moment(data).isAfter(expectedFinishDate)){
+                                                        expectedFinishDate = data;
+                                                    }
+                                                    
+                                                    var requestCost = 0;
                                                     var days = momentBD(requisicoes[i].dataPrevistaFim).businessDiff(moment(requisicoes[i].dataPrevistaInicio));
                                                     var daysAux = days;
                                                     var hours = momentBD(requisicoes[i].dataPrevistaFim).diff(moment(requisicoes[i].dataPrevistaInicio), 'days', true) % 1;
@@ -681,37 +695,35 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                     }
                                                     days = days + hours;
                                                     if(daysAux == 0){
-                                                        console.log(requisicoes[i].maquina)
                                                         await Maquina.findOne({_id:requisicoes[i].maquina}).then(function (maquina) {
                                                             cost = cost + ((days * 24) * maquina.custo);
+                                                            requestCost = requestCost + ((days * 24) * maquina.custo);
                                                         })
                                                         
                                                     }
                                                     else{
-                                                        await Maquina.findOne({id:requisicoes[i].maquina}).then(function (maquina) {
+                                                        await Maquina.findOne({_id:requisicoes[i].maquina}).then(function (maquina) {
                                                             cost = cost + ((days * 24 - (daysAux * 16)) * maquina.custo);
+                                                            requestCost = requestCost + ((days * 24 - (daysAux * 16)) * maquina.custo);
                                                         })
                                                     }
+
+                                                    await Requisicao.findOneAndUpdate({_id:requisicoes[i].id},
+                                                        {"$set": {
+                                                            "despesa": requestCost,
+                                                            "orcamento":requestCost + requestCost * (obra.percentagemLucro/100)
+                                                        }}, {useFindAndModify: false}).then()
                                                 }                                                
                                                 
-                                                var expectedFinishDate;
-                                                if(moment(obra.dataPrevistaFim).isValid()){
-                                                    if(moment(tarefa.dataPrevistaFim).isAfter(obra.dataPrevistaFim)){
-                                                        expectedFinishDate = tarefa.dataPrevistaFim;
-                                                    }
-                                                    else{
-                                                        expectedFinishDate = obra.dataPrevistaFim;
-                                                    }
+                                                if(moment(obra.dataPrevistaFim).isValid() && moment(expectedFinishDate).isBefore(obra.dataPrevistaFim)){
+                                                    expectedFinishDate = obra.dataPrevistaFim;
                                                 }
-                                                else{
-                                                    expectedFinishDate = tarefa.dataPrevistaFim;
-                                                }
+                                                
                                                 Tarefa.findOneAndUpdate({_id:req.params.id},
                                                     {"$set": {
                                                         "despesa": issueCost,
                                                         "orcamento":issueCost + issueCost * (obra.percentagemLucro/100)
                                                     }}, {useFindAndModify: false}).then()
-
                                                 Tarefa.find({ $and: [{obra:obra._id}, {$or: [{estado: "porAceitar"}, {estado:"associada"}, {estado:"recusada"}]}]}).lean().then(function(tarefas){
                                                     if(tarefas.length > 0){
                                                         Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate, 
@@ -1119,6 +1131,18 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
             role = "userResponsavel"
         if(role == "Administrador")
             role = "admin"
+        
+        console.log(req.body.foto);
+        // var form = new formidable.IncomingForm();
+        //     form.parse(req.body.foto, function (err, fields, files) {
+        //     var oldpath = files.filetoupload.path;
+        //     var newpath = 'C:/Users/Mickaël/Desktop' + files.filetoupload.name;
+        //     fs.rename(oldpath, newpath, function (err) {
+        //         if (err) throw err;
+        //         res.write('File uploaded and moved!');
+        //         res.end();
+        //     });
+        // });
 
         Funcionario.findOneAndUpdate({_id:req.params.id},
             {"$set": {

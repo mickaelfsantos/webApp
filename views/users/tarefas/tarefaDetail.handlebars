@@ -134,7 +134,9 @@
     
                 <div class="col-md-9 p-3">
                     {{#each funcionarios}}
+                        <img src="{{foto}}" class="avatar">
                         <label for="funcionarios" id="funcionarios">{{nome}}</label><br>
+                        <br>
                     {{else}}
                     {{/each}}    
                 </div>
@@ -147,7 +149,7 @@
                     <h6 class="blockquote m-0">Datas previstas</h6>
                 </div>
                 <div class="col-md-9 p-3">
-                        {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFimComRequisicoes}}
+                        {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString2 tarefa.dataPrevistaFim requisicoes}}
                 </div>            
             </div>
 
@@ -157,7 +159,7 @@
                 </div>
                 
                 <div class="col-md-9 p-3">
-                    {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}
+                    {{dateToString tarefa.dataInicio}} - {{dateToString2Finais tarefa.dataFim requisicoes}}
                 </div>
             </div>
 
@@ -183,7 +185,7 @@
                 
                         <tbody id="filtro">
                             {{#each requisicoes}}
-                                <tr id="row" data-name="{{_id}}" onclick="saltaParaTarefa(this)">
+                                <tr id="row" data-name="{{_id}}" onclick="saltaParaRequisicao(this)">
                                     <td scope="row">{{maquinaNome}}</td>
                                     <td>{{funcionarioNome}}</td>
                                     <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
@@ -312,6 +314,10 @@
     function saltaParaTerminar(){
         tarefa = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+tarefa+"/terminar";
+    }
+
+    function saltaParaRequisicao(handle){
+        window.location.href = "/requisicao/"+handle.dataset.name;
     }
 
     function sortTable(n) {

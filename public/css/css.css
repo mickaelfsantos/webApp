@@ -173,6 +173,26 @@ thead > tr > th {
   white-space: nowrap;
 }
 
+.avatar{
+  vertical-align: middle; 
+  width: 40px; 
+  height: 40px; 
+  border-radius: 50%;
+}
+
+#profileName:hover{
+  background-color: #171e25;
+}
+
+.multiselect-container {
+  width: max-content;
+}
+
+button.multiselect {
+  background-color: initial;
+  border: 1px solid #ced4da;
+}
+
 
 @media (min-width: 760px) {
   #wrapper.toggled #sidebar-wrapper {
