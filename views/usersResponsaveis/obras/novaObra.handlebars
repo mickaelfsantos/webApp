@@ -1,28 +1,50 @@
-<div class="container-fluid pl-4 pr-4">
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
-    
+<div class="container-fluid pl-4 pr-4">    
     <h2>Nova obra</h2>
     <div class="card mt-4">
         <div class="card-body">
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
             <form action="/obras/add" method="POST">
+                
                 <label for="nome">Nome*</label>
-                <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control" required>
+                {{#if erros.nome}}
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control is-invalid" required>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nome}}
+                    </div>
+                {{else}}
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control mb-4" required>
+                {{/if}}
                 
 
-                <label for="descricao" class="mt-4">Descrição*</label>
-                <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
-
-                <label for="dataPrevistaInicio">Data prevista para inicio</label>
-                <div class="row">
-                    <div class="col-3">
-                        <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                <label for="descricao">Descrição*</label>
+                {{#if erros.descricao}}
+                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.descricao}}
                     </div>
-                </div>
+                {{else}}
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                {{/if}}
+                
+                <label for="dataPrevistaInicio">Data prevista para inicio</label>
+                
+                {{#if erros.datas}}
+                    <div class="row">
+                        <div class="col-3">
+                            <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control is-invalid">
+                            <div class="invalid-feedback mb-4">
+                                {{erros.datas}}
+                            </div>
+                        </div>
+                    </div>
+                {{else}}
+                    <div class="row">
+                        <div class="col-3">
+                            <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                        </div>
+                    </div>
+                {{/if}}
+                
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
                     <button type="button" onclick="saltaParaObras()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>

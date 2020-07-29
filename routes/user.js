@@ -51,67 +51,74 @@ router.get('/registo', function(req, res){
 })
 
 router.post('/registo', function asyncFunction(req, res){
-    var erros = []
+    var erros = new Object();
     var nomeF;
     var funcao;
     var departamento;
     var equipa;
 
     if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){
-        erros.push({texto: "Nome obrigatório."})
+        erros.nome = "Nome obrigatório.";
     }
     else{
         nomeF = req.body.nome;
     }
 
+    if(!req.body.email || typeof req.body.email === undefined || req.body.email === null){
+        erros.email = "Email obrigatório.";
+        email=""
+    }
+    else{
+        email = req.body.email;
+    }
+
     if(!req.body.funcao || typeof req.body.funcao === undefined || req.body.funcao === null){
-        erros.push({texto: "Função na empresa obrigatório."})
+        erros.funcao = "Função na empresa obrigatório.";
     }
     else{
         funcao = req.body.funcao;
     }
     
     if(!req.body.departamento || typeof req.body.departamento === undefined || req.body.departamento === null){
-        erros.push({texto: "Departamento obrigatório."})
+        erros.departamento = "Departamento obrigatório.";
     }
     else{
         departamento = req.body.departamento;
     }
     
     if(!req.body.equipa || typeof req.body.equipa === undefined || req.body.equipa === null){
-        erros.push({texto: "Equipa obrigatório."})
+        erros.equipa = "Equipa obrigatório.";
     }
     else{
         equipa = req.body.equipa;
     }
 
     if(!req.body.password || typeof req.body.password === undefined || req.body.password === null){
-        erros.push({texto: "Password obrigatório."})
+        erros.password = "Password obrigatório.";
     }
     else{
         if(req.body.password.length < 5){
-            erros.push({texto: "Password curta. Mínimo 5 caracteres."})
+            erros.password = "Password curta. Mínimo 5 caracteres.";
         }
         
         if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
-            erros.push({texto: "Confirmação obrigatório."})
+            erros.password2 = "Confirmação obrigatório.";
         }
         else{
             if(req.body.password != req.body.password2){
-                erros.push({texto: "As passwords não correspondem."})
+                erros.password = "As passwords não correspondem.";
             }
         }        
     } 
 
-    var email = req.body.email;
-    if(erros.length > 0){
+    if(Object.keys(erros).length != 0){
         res.render("users/registo", {erros: erros, nomeF:nomeF, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
     }
     else{
         Funcionario.findOne({email:req.body.email}).then(function(funcionario){
             if(funcionario){
-                erros.push({texto: "Já existe uma conta com este email."})
-                res.render("users/registo", {erros: erros})
+                erros.email = "Já existe uma conta com este email.";
+                res.render("users/registo", {erros: erros, nomeF:nomeF, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
             }
             else{
                 const novoFunc = new Funcionario({
@@ -135,7 +142,6 @@ router.post('/registo', function asyncFunction(req, res){
                             req.flash("success_msg", "Registo concluído com sucesso.")
                             res.redirect("/login");
                         }).catch(function(erro){
-                            console.log(erro)
                             req.flash("error_msg", "Erro interno ao registar. Tente novamente.1")
                             res.redirect("/registo");
                         })
@@ -284,10 +290,10 @@ router.get('/tarefa/:id', authenticated, function(req, res){
                                     reques[i].maquinaNome = maquina.nome;
                                 })
                             }
+                            var t = JSON.stringify(tarefa);
+                            res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, t:t, funcionarios:funcionarios, requisicoes:reques})
                         }
                         obtemDados();
-                        var t = JSON.stringify(tarefa);
-                        res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, t:t, funcionarios:funcionarios, requisicoes:reques})
                     }).catch(function(error){
                         req.flash("error_msg", "Requisições não encontradas.")
                         res.redirect("/tarefas")
@@ -337,7 +343,7 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
 })
 
 router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
-    var erros = []
+    var erros = new Object();
    
     Tarefa.findOne({_id: req.params.id}).lean().then(function(tarefa){
         Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
@@ -345,10 +351,10 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
             if(req.user.role != "user"){
                 if(tarefa.estado != "emExecucao"){
                     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-                        erros.push({texto: "Nome inválido."});
+                        erros.nome = "Nome inválido.";
                     }else{
                         if(req.body.nome.trim().length < 2){
-                            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres."});
+                            erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
                         }
                         else{
                             tarefa.nome = req.body.nome;
@@ -356,12 +362,17 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     }
                 
                     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-                        erros.push({texto: "Descrição inválida."});
+                        erros.descricao = "Descrição inválida.";
                     }
                     else{
-                        tarefa.descricao = req.body.descricao;
+                        if(req.body.descricao.trim().length < 3){
+                            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
+                        }
+                        else{
+                            tarefa.descricao = req.body.descricao;
+                        }
                     }
-    
+                        
                     tarefa.importancia = req.body.importancia.toLowerCase();
                 }
                 else{
@@ -380,7 +391,7 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                 dataTarefa = moment(dataTarefa).add(1, "minutes");
                 if(moment(dataTarefa).isValid()){
                     if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
-                        erros.push({texto: "Data inválida. Data de início tem que ser superior ou igual à data atual e à data de inicio da obra."})
+                        erros.dataInicio = "Data inválida. Data de início tem que ser superior ou igual à data atual e à data de inicio da obra.";
                     }
                 }
             }
@@ -399,25 +410,29 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                 dataFimTarefa = moment(dataFimTarefa).add(1, "minutes");
                 if(moment(dataFimTarefa).isValid()){
                     if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
-                        erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data de inicio da tarefa."})
+                        erros.dataFinal = "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data de inicio da tarefa.";
                     }
                 }
             }
             
             if(moment(req.body.dataPrevistaInicio).isValid() && moment(req.body.dataPrevistaFim).isValid()){
                 if(moment(req.body.dataPrevistaInicio).isAfter(req.body.dataPrevistaFim) == true){
-                    erros.push({texto: "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data início da tarefa."})
+                    erros.dataFinal = "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data início da tarefa.";
                 }
             }
 
-            if(erros.length > 0){
+            if(Object.keys(erros).length != 0){
                 Funcionario.find({ tarefas: { $ne: tarefa._id}}).lean().then(function(f){
                     var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
                     var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
                     var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
                     var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
-                    var funcionariosSelecionados = JSON.stringify(req.body.funcionarios); 
-                    res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                    if(req.body.funcionarios)
+                        var funcionariosSelecionados = JSON.stringify(req.body.funcionarios); 
+                    else
+                        var funcionariosSelecionados = JSON.stringify(null);
+                    var importancia = req.body.importancia;
+                    res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, importancia:importancia, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
                             funcionarios : f})
                 }).catch(function(error){
                     req.flash("error_msg", "Funcionários não encontrados.")
@@ -575,186 +590,124 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                         "dataFim": moment()
                         }}, {useFindAndModify: false}).lean().then(function(){
                         Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
-                                    Funcionario.find({tarefas:req.params.id}).then(function(funcionarios){
-                                        Tarefa.findOne({_id:req.params.id}).lean().then(function(tarefa){
-                                            Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
-                                                Requisicao.find({tarefa:tarefa._id}).then(function(requisicoes){
-                                                    async function secondFunction(){
-                                                        var cost = obra.despesaFinal;
-                                                        var issueCost = 0;                                          
+                            Funcionario.find({tarefas:req.params.id}).then(function(funcionarios){
+                                Tarefa.findOne({_id:req.params.id}).lean().then(function(tarefa){
+                                    async function secondFunction(){
+                                        var cost = obra.despesaFinal;
+                                        var issueCost = 0;                                          
                                                             
-                                                        if(moment(tarefa.dataInicio).isValid() && moment(tarefa.dataFim).isValid()){
-                                                            var issueStartDateYear = moment(tarefa.dataInicio).format("YYYY");
-                                                            var issueFinishDateYear = moment(tarefa.dataFim).format("YYYY");
+                                        if(moment(tarefa.dataInicio).isValid() && moment(tarefa.dataFim).isValid()){
+                                            var issueStartDateYear = moment(tarefa.dataInicio).format("YYYY");
+                                            var issueFinishDateYear = moment(tarefa.dataFim).format("YYYY");
             
-                                                            var holidays = [];
-                                                            for(var i=issueStartDateYear; i <= issueFinishDateYear; i++){
-                                                                var yearHolidays = hd.getHolidays(i);
-                                                                for(var j=0; j<yearHolidays.length; j++){
-                                                                    holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
-                                                                }
-                                                            }
-            
-                                                            var requestStartDateYear; 
-                                                            var requestFinishDateYear;
-                                                            for(var i=0; i<requisicoes.length; i++){
-                                                                requestStartDateYear = moment(requisicoes[i].dataInicio).format("YYYY");
-                                                                requestFinishDateYear = moment(requisicoes[i].dataFim).format("YYYY");
-                                                                if(requestStartDateYear < issueStartDateYear){
-                                                                    var holidaysAux = [];
-                                                                    for(var j=requestStartDateYear; j < issueStartDateYear; j++){
-                                                                        var yearHolidays = hd.getHolidays(j);
-                                                                        for(var l=0; l<yearHolidays.length; l++){
-                                                                            holidaysAux.push(moment(yearHolidays[l].date).format("YYYY-MM-DD"));
-                                                                        }
-                                                                    }
-            
-                                                                    for(var j=0; j<holidays.length; j++){
-                                                                        holidaysAux.push(holidays[j]);
-                                                                    }
-            
-                                                                    holidays = holidaysAux;
-                                                                }
-                                                                if(requestFinishDateYear > issueFinishDateYear){
-                                                                    for(var j=issueFinishDateYear; j < requestFinishDateYear; j++){
-                                                                        var yearHolidays = hd.getHolidays(j);
-                                                                        for(var l=0; l<yearHolidays.length; l++){
-                                                                            holidays.push(moment(yearHolidays[l].date).format("YYYY-MM-DD"));
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                    
-                                                            momentBD.updateLocale('PT', {
-                                                                holidays: holidays,
-                                                                holidayFormat: 'YYYY-MM-DD',
-                                                                workingWeekdays: [1, 2, 3, 4, 5]
-                                                            });
+                                            var holidays = [];
+                                            for(var i=issueStartDateYear; i <= issueFinishDateYear; i++){
+                                                var yearHolidays = hd.getHolidays(i);
+                                                for(var j=0; j<yearHolidays.length; j++){
+                                                    holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
+                                                }
+                                            }
+     
+                                            momentBD.updateLocale('PT', {
+                                                holidays: holidays,
+                                                holidayFormat: 'YYYY-MM-DD',
+                                                workingWeekdays: [1, 2, 3, 4, 5]
+                                            });
                                                             
-                                                            var days = momentBD(tarefa.dataFim).businessDiff(moment(tarefa.dataInicio));
-                                                            var daysAux = days;
-                                                            var hours = momentBD(tarefa.dataFim).diff(moment(tarefa.dataInicio), 'days', true) % 1;
-                                                            if(hours != 0 && days != 0){
-                                                                days = days - 1;
-                                                            }
-                                                            days = days + hours;
-                                                            if(daysAux == 0){
-                                                                for(var i=0; i<funcionarios.length; i++){
-                                                                    cost = cost + ((days * 24) * funcionarios[i].custo);
-                                                                    issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
-                                                                }
-                                                            }
-                                                            else{
-                                                                for(var i=0; i<funcionarios.length; i++){
-                                                                    cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
-                                                                    issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
-                                                                }
-                                                            }
+                                            var days = momentBD(tarefa.dataFim).businessDiff(moment(tarefa.dataInicio));
+                                            var daysAux = days;
+                                            var hours = momentBD(tarefa.dataFim).diff(moment(tarefa.dataInicio), 'days', true) % 1;
+                                            if(hours != 0 && days != 0){
+                                                days = days - 1;
+                                            }
+                                            days = days + hours;
+                                            if(daysAux == 0){
+                                                for(var i=0; i<funcionarios.length; i++){
+                                                    cost = cost + ((days * 24) * funcionarios[i].custo);
+                                                    issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
+                                                }
+                                            }
+                                            else{
+                                                for(var i=0; i<funcionarios.length; i++){
+                                                    cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                    issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                }
+                                            }
             
-                                                            for(var i=0; i<requisicoes.length; i++){
-                                                                var days = momentBD(requisicoes[i].dataFim).businessDiff(moment(requisicoes[i].dataInicio));
-                                                                var daysAux = days;
-                                                                var hours = momentBD(requisicoes[i].dataFim).diff(moment(requisicoes[i].dataInicio), 'days', true) % 1;
-                                                                if(hours != 0 && days != 0){
-                                                                    days = days - 1;
-                                                                }
-                                                                days = days + hours;
-                                                                if(daysAux == 0){
-                                                                    console.log(requisicoes[i].maquina)
-                                                                    await Maquina.findOne({_id:requisicoes[i].maquina}).then(function (maquina) {
-                                                                        cost = cost + ((days * 24) * maquina.custo);
-                                                                    })
-                                                                    
-                                                                }
-                                                                else{
-                                                                    await Maquina.findOne({id:requisicoes[i].maquina}).then(function (maquina) {
-                                                                        cost = cost + ((days * 24 - (daysAux * 16)) * maquina.custo);
-                                                                    })
-                                                                }
-                                                            }                                                
-                                                            
-                                                            var finishDate;
-                                                            if(moment(obra.dataFim).isValid()){
-                                                                if(moment(tarefa.dataFim).isAfter(obra.dataFim)){
-                                                                    finishDate = tarefa.dataFim;
-                                                                }
-                                                                else{
-                                                                    finishDate = obra.dataFim;
-                                                                }
-                                                            }
-                                                            else{
-                                                                finishDate = tarefa.dataFim;
-                                                            }
-                                                            Tarefa.findOneAndUpdate({_id:req.params.id},
-                                                                {"$set": {
-                                                                    "despesaFinal": issueCost,
-                                                                    "custoFinal":issueCost + issueCost * (obra.percentagemLucro/100)
-                                                                }}, {useFindAndModify: false}).then()
+                                            var finishDate;
+                                            if(moment(obra.dataFim).isValid()){
+                                                if(moment(tarefa.dataFim).isAfter(obra.dataFim)){
+                                                    finishDate = tarefa.dataFim;
+                                                }
+                                                else{
+                                                    finishDate = obra.dataFim;
+                                                }
+                                            }
+                                            else{
+                                                finishDate = tarefa.dataFim;
+                                            }
+
+                                            Tarefa.findOneAndUpdate({_id:req.params.id},
+                                                {"$set": {
+                                                    "despesaFinal": issueCost,
+                                                    "custoFinal":issueCost + issueCost * (obra.percentagemLucro/100)
+                                                }}, {useFindAndModify: false}).then()
             
-                                                            
-                                                            Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
-                                                                if(tarefas.length > 0){
-                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
-                                                                    "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
-                                                                        if(obra == null){  
-                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                            res.redirect("/tarefa/"+req.params.id);
-                                                                        }
-                                                                        else{
-                                                                            req.flash("success_msg", "Tarefa terminada com sucesso")
-                                                                            res.redirect("/tarefa/"+req.params.id);
-                                                                        }
-                                                                        
-                                                                    }).catch(function(error){
-                                                                        console.log(error)
-                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    })
-                                                                }
-                                                                else{
-                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
-                                                                        "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
-                                                                        {useFindAndModify: false}).lean().then(function(obra){
-                                                                        if(obra == null){  
-                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                            res.redirect("/tarefa/"+req.params.id);
-                                                                        }
-                                                                        else{
-                                                                            req.flash("success_msg", "Tarefa validada com sucesso")
-                                                                            res.redirect("/tarefa/"+req.params.id);
-                                                                        }
-                                                                    }).catch(function(error){
-                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    })
-                                                                }
-                                                            }).catch(function(error){
-                                                                req.flash("error_msg", "Tarefas não encontradas.")
-                                                                res.redirect("/tarefa/"+req.params.id)
-                                                            })
-                                                        }
-                                                        else{
-                                                            req.flash("error_msg", "Datas da tarefa inválidas.")
+           
+                                            Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
+                                                if(tarefas.length > 0){
+                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                        "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
+                                                        if(obra == null){  
+                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
                                                             res.redirect("/tarefa/"+req.params.id);
                                                         }
-                                                    };
-                                                    secondFunction()
-                                                }).catch(function (error) {
-                                                    req.flash("error_msg", "Requisições não encontradas.")
-                                                    res.redirect("/tarefa"+req.params.id)
-                                                })
+                                                        else{
+                                                            req.flash("success_msg", "Tarefa terminada com sucesso")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                                        
+                                                    }).catch(function(error){
+                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                        res.redirect("/tarefa/"+req.params.id);
+                                                    })
+                                                }
+                                                else{
+                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                        "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                        {useFindAndModify: false}).lean().then(function(obra){
+                                                        if(obra == null){  
+                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                        else{
+                                                            req.flash("success_msg", "Tarefa validada com sucesso")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        }
+                                                    }).catch(function(error){
+                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                        res.redirect("/tarefa/"+req.params.id);
+                                                    })
+                                                }
                                             }).catch(function(error){
-                                                req.flash("error_msg", "Obra não encontrada.")
+                                                req.flash("error_msg", "Tarefas não encontradas.")
                                                 res.redirect("/tarefa/"+req.params.id)
                                             })
-                                        }).catch(function(error){
-                                            req.flash("error_msg", "Tarefa não encontrada.")
-                                            res.redirect("/tarefas/")
-                                        })
-                                    }).catch(function(error){
-                                        req.flash("error_msg", "Funcionários não encontrados.")
-                                        res.redirect("/tarefa/"+req.params.id)
-                                    })                 
+                                        }
+                                        else{
+                                            req.flash("error_msg", "Datas da tarefa inválidas.")
+                                            res.redirect("/tarefa/"+req.params.id);
+                                        }
+                                    };
+                                    secondFunction()
+                                }).catch(function(error){
+                                    req.flash("error_msg", "Tarefa não encontrada.")
+                                    res.redirect("/tarefas/")
+                                })
+                            }).catch(function(error){
+                                req.flash("error_msg", "Funcionários não encontrados.")
+                                res.redirect("/tarefa/"+req.params.id)
+                            })                 
                         }).catch(function(error){
                             req.flash("error_msg", "Obra não encontrada.")
                             res.redirect("/tarefa/"+req.params.id);
@@ -765,7 +718,7 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                 })
             }
         }).catch(function(error){
-            req.flash("error_msg", "Não tem permissões para começar a tarefa.")
+            req.flash("error_msg", "Não tem permissões para terminar a tarefa.")
             res.redirect("/tarefa/"+req.params.id)
         })
     }).catch(function(error){
@@ -784,6 +737,9 @@ router.get('/tarefa/:id/requisitarMaquina', authenticated, function (req, res){
             else{
                 Maquina.find().lean().then(function(maquinas){
                     var dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                    if(moment(dataInicio).isBefore(moment())){
+                        dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                    }
                     res.render("users/requisicoes/novaRequisicao", {tarefa:tarefa, dataInicio:dataInicio, maquinas:maquinas})
                 }).catch(function(error){
                     req.flash("error_msg", "Máquinas não encontradas.")
@@ -800,30 +756,49 @@ router.get('/tarefa/:id/requisitarMaquina', authenticated, function (req, res){
     })
 })
 
-router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (req, res){
+router.post('/tarefa/:id/requisitarMaquina', authenticated, function asyncFunction (req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({$and: [{_id:req.params.id}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
-            Maquina.find().lean().then(function(maquinas){
-                var erros = [];
-                if(!req.body.dataPrevistaInicio || !req.body.dataPrevistaFim){
-                    erros.push({texto: "Datas obrigatórias. Preencha data prevista de início e data prevista de fim."})
+            Maquina.find({}).lean().then(function(maquinas){
+                var erros = new Object();
+                var dataInicio;
+                var dataFim;
+                var maquina;
+                var descricao;
+                if(!req.body.dataPrevistaInicio){
+                    erros.dataInicio = "Datas obrigatórias. Preencha data prevista de início.";
+                }
+                else{
+                    dataInicio = req.body.dataPrevistaInicio;
+                }
+
+                if(!req.body.dataPrevistaFim){
+                    erros.dataFinal = "Datas obrigatórias. Preencha data prevista de fim.";
+                }
+                else{
+                    dataFim = req.body.dataPrevistaFim;
                 }
 
                 if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-                    erros.push({texto: "Descrição inválida."});
+                    erros.descricao = "Descrição inválida.";
                 }
                 else{
-                    if(req.body.descricao.trim() < 3){
-                        erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
+                    if(req.body.descricao.trim().length < 3){
+                        erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
                     }
                     else{
                         descricao = req.body.descricao;
                     }
                 }
 
-                if(erros.length>0){
-                    var dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
+                if(Object.keys(erros).length != 0){
+                    if(!dataInicio){
+                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                        if(moment(dataInicio).isBefore(moment()))
+                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                    }
+                    maquina = req.body.maquinas;
+                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
                 }
                 else{
                     Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
@@ -833,110 +808,123 @@ router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (
                             var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
                             var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                                     
-                                    
+                            
                             dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
                             dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
         
                             if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
-                                if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true || moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true){
                                 
-                                    var dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                                    erros.push({texto: "Data inválida. Data tem que ser superior à data de inicio da tarefa e a data de fim tem que ser superior à data de inicio da requisição."})
-                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
+                                    dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                    if(moment(dataInicio).isBefore(moment()))
+                                        dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                                    
+                                    erros.dataInicio = "Data inválida. Data de inicio tem que ser superior à data de inicio da tarefa e à data atual.";
+                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
                                 }
                                 else{
-                                    var invalid = false;
-                                    var elimina = false;
-                                    var paraEliminar = [];
-                                    for(var i=0; i<requisicoes.length; i++){
-                                        var data = moment().add(7, 'days')
-                                        if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
-                                            if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                elimina = true;
-                                            }
-                                            else{
-                                                invalid = true;
-                                                break;
-                                            }
-                                        }
-                                        if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                            if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                elimina = true;
-                                            }
-                                            else{
-                                                invalid = true;
-                                                break;
-                                            }
-                                        }
-                
-                                        if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                            if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                elimina = true;
-                                            }
-                                            else{
-                                                invalid = true;
-                                                break;
-                                            }
-                                        }
+                                    dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                    if(moment(dataInicio).isBefore(moment()))
+                                        dataInicio = moment().format("YYYY-MM-DDTHH:mm")
 
-                                        if(elimina){
-                                            paraEliminar.push(requisicoes[i]);
-                                            elimina = false;
-                                        }
-                                    }
-                                            
-                                    if(invalid){
-                                        erros.push({texto: "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário)."})
-                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                    if(moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                        erros.dataFinal = "Data inválida. Data de fim tem que ser superior à data de inicio.";
+                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})    
                                     }
                                     else{
-                                        var transporter = nodemailer.createTransport({
-                                            service: 'gmail',
-                                            auth: {
-                                                user: 'webappisec@gmail.com',
-                                                pass: 'mickaelsantos'
+                                        var invalid = false;
+                                        var elimina = false;
+                                        var paraEliminar = [];
+                                        for(var i=0; i<requisicoes.length; i++){
+                                            var data = moment().add(7, 'days')
+                                            if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                    elimina = true;
+                                                }
+                                                else{
+                                                    invalid = true;
+                                                    break;
+                                                }
                                             }
-                                        });
-
-                                        async function enviaMails(){
-                                            for(var i=0; i<paraEliminar.length; i++){
-                                                await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
-                                                    var mailOptions = {
-                                                        from: '"WebApp" webappisec@gmail.com',
-                                                        to: funcionario.email,
-                                                        subject: 'Cancelamento de requisição.',
-                                                        text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
-                                                            moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
-                                                            moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
-                                                        };
-                                                              
-                                                        transporter.sendMail(mailOptions, function(error, info){
-                                                            if (error)
-                                                                console.log(error);
-                                                        });
-                                                    Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
-                                                })
+                                            if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                                if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                    elimina = true;
+                                                }
+                                                else{
+                                                    invalid = true;
+                                                    break;
+                                                }
+                                            }
+                    
+                                            if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                                if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                    elimina = true;
+                                                }
+                                                else{
+                                                    invalid = true;
+                                                    break;
+                                                }
                                             }
     
-                                            var novaRequisicao = {
-                                                maquina: maquina._id,
-                                                funcionario : funcionario._id,
-                                                tarefa: tarefa._id,
-                                                descricao:descricao,
-                                                dataPrevistaFim: req.body.dataPrevistaFim,
-                                                dataPrevistaInicio: req.body.dataPrevistaInicio
+                                            if(elimina){
+                                                paraEliminar.push(requisicoes[i]);
+                                                elimina = false;
                                             }
-                                            new Requisicao(novaRequisicao).save().then();
-    
-                                            req.flash("success_msg", "Requisição concluída com sucesso.")
-                                            res.redirect("/tarefa/"+req.params.id);
                                         }
-                                        enviaMails();
+                                                
+                                        if(invalid){
+                                            erros.dataInicio = "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário).";
+                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                        }
+                                        else{
+                                            var transporter = nodemailer.createTransport({
+                                                service: 'gmail',
+                                                auth: {
+                                                    user: 'webappisec@gmail.com',
+                                                    pass: 'mickaelsantos'
+                                                }
+                                            });
+    
+                                            async function enviaMails(){
+                                                for(var i=0; i<paraEliminar.length; i++){
+                                                    await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
+                                                        var mailOptions = {
+                                                            from: '"WebApp" webappisec@gmail.com',
+                                                            to: funcionario.email,
+                                                            subject: 'Cancelamento de requisição.',
+                                                            text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
+                                                                moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
+                                                                moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
+                                                            };
+                                                                  
+                                                            transporter.sendMail(mailOptions, function(error, info){
+                                                                if (error)
+                                                                    console.log(error);
+                                                            });
+                                                        Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
+                                                    })
+                                                }
+        
+                                                var novaRequisicao = {
+                                                    maquina: maquina._id,
+                                                    funcionario : funcionario._id,
+                                                    tarefa: tarefa._id,
+                                                    descricao:descricao,
+                                                    dataPrevistaFim: req.body.dataPrevistaFim,
+                                                    dataPrevistaInicio: req.body.dataPrevistaInicio
+                                                }
+                                                new Requisicao(novaRequisicao).save().then();
+        
+                                                req.flash("success_msg", "Requisição concluída com sucesso.")
+                                                res.redirect("/tarefa/"+req.params.id);
+                                            }
+                                            enviaMails();
+                                        }
                                     }
                                 }
                             }
                             else{
-                                erros.push({texto: "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim."})
+                                erros.dataInicio = "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim.";
                                 res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
                             } 
                         }).catch(function(error){
@@ -944,7 +932,7 @@ router.post('/tarefa/:id/addRequisicao', authenticated, function asyncFunction (
                             res.redirect("/tarefa/"+req.params.id)
                         })
                     }).catch(function(error){
-                        req.flash("error_msg", "Requisições não encontradas.")
+                        req.flash("error_msg", "Máquina não encontrada.")
                         res.redirect("/tarefa/"+req.params.id)
                     })
                 }
@@ -981,38 +969,43 @@ router.get('/perfil/edit', authenticated, function(req, res){
 })
 
 router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
-    var erros = []
+    var erros = new Object();
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido."});
+        erros.nome = "Nome inválido.";
     }else{
         if(req.body.nome.trim().length < 2){
-            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres."});
+            erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
+        }
+        else{
+            funcionario.nome = req.body.nome;
         }
     }
 
     if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
-        erros.push({texto: "Email inválido."});
+        erros.email = "Email inválido.";
+    }else{
+        funcionario.email = req.body.email;
     }
     
 
     if(req.body.password){
         if(req.body.password.length < 5){
-            erros.push({texto: "Password curta. Mínimo 5 caracteres."})
+            erros.password = "Password curta. Mínimo 5 caracteres.";
         }
             
         if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
-            erros.push({texto: "Uma vez que pretende alterar a palavra-pass, a confirmação é obrigatório."})
+            erros.password2 = "Uma vez que pretende alterar a palavra-pass, a confirmação é obrigatório.";
         }
         else{
             if(req.body.password != req.body.password2){
-                erros.push({texto: "As passwords não correspondem."})
+                erros.password = "As passwords não correspondem.";
             }
         }         
     }
 
     
-    if(erros.length > 0){
+    if(Object.keys(erros).length != 0){
         Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
             res.render("users/perfil/editarPerfil", {erros:erros, funcionario:funcionario})
         }).catch(function(error){
@@ -1102,10 +1095,15 @@ router.get('/requisicao/:id', authenticated, function(req, res){
     Requisicao.findOne({_id:req.params.id}).lean().then(function(requisicao){
         Funcionario.findOne({_id:requisicao.funcionario}).lean().then(function(funcionario){
             Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
-                Maquina.findOne({_id:requisicao.maquina}).lean().then(function(maquina){
-                    res.render("users/requisicoes/requisicaoDetails", {requisicao:requisicao, tarefa:tarefa, funcionario:funcionario, maquina:maquina})
-                }).catch(function (error){
-                    req.flash("error_msg", "Máquina não encontrada.")
+                Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                    Maquina.findOne({_id:requisicao.maquina}).lean().then(function(maquina){
+                        res.render("users/requisicoes/requisicaoDetails", {requisicao:requisicao, obra:obra, tarefa:tarefa, funcionario:funcionario, maquina:maquina})
+                    }).catch(function (error){
+                        req.flash("error_msg", "Máquina não encontrada.")
+                        res.redirect("/requisicoes")
+                    })
+                }).catch(function(error){
+                    req.flash("error_msg", "Obra não encontrada.")
                     res.redirect("/requisicoes")
                 })
             }).catch(function (error){
@@ -1192,199 +1190,124 @@ router.get('/requisicao/:id/terminar', authenticated, function asyncFunction(req
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Requisicao.findOne({ $and: [{_id:req.params.id}, {funcionario : funcionario._id}]}).lean().then(function(requisicao){
             if(requisicao.estado != "emExecucao"){
-                req.flash("error_msg", "Não pode terminar esta tarefa. Verifique que a tarefa está em execução.")
+                req.flash("error_msg", "Não pode terminar a utilização desta máquina. Verifique que a utilização está em execução.")
                 res.redirect("/requisicao/"+req.params.id)
             }
             else{
                 Requisicao.findOneAndUpdate({_id:req.params.id},
                     {"$set": {
-                        "estado": "finalizada",
-                        "dataFim": moment()
-                        }}, {useFindAndModify: false}).lean().then(function(){
-                            Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
-                                Funcionario.find({tarefas:tarefa._id}).then(function(funcionarios){
-                                        Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
-                                            Requisicao.find({tarefa:tarefa._id}).then(function(requisicoes){
-                                                async function secondFunction(){
-                                                    var cost = obra.despesaFinal;
-                                                    var issueCost = 0;                                          
-                                                        
-                                                    if(moment(tarefa.dataInicio).isValid() && moment(tarefa.dataFim).isValid()){
-                                                        var issueStartDateYear = moment(tarefa.dataInicio).format("YYYY");
-                                                        var issueFinishDateYear = moment(tarefa.dataFim).format("YYYY");
-        
-                                                        var holidays = [];
-                                                        for(var i=issueStartDateYear; i <= issueFinishDateYear; i++){
-                                                            var yearHolidays = hd.getHolidays(i);
-                                                            for(var j=0; j<yearHolidays.length; j++){
-                                                                holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
-                                                            }
-                                                        }
-        
-                                                        var requestStartDateYear; 
-                                                        var requestFinishDateYear;
-                                                        for(var i=0; i<requisicoes.length; i++){
-                                                            requestStartDateYear = moment(requisicoes[i].dataInicio).format("YYYY");
-                                                            requestFinishDateYear = moment(requisicoes[i].dataFim).format("YYYY");
-                                                            if(requestStartDateYear < issueStartDateYear){
-                                                                var holidaysAux = [];
-                                                                for(var j=requestStartDateYear; j < issueStartDateYear; j++){
-                                                                    var yearHolidays = hd.getHolidays(j);
-                                                                    for(var l=0; l<yearHolidays.length; l++){
-                                                                        holidaysAux.push(moment(yearHolidays[l].date).format("YYYY-MM-DD"));
-                                                                    }
-                                                                }
-        
-                                                                for(var j=0; j<holidays.length; j++){
-                                                                    holidaysAux.push(holidays[j]);
-                                                                }
-        
-                                                                holidays = holidaysAux;
-                                                            }
-                                                            if(requestFinishDateYear > issueFinishDateYear){
-                                                                for(var j=issueFinishDateYear; j < requestFinishDateYear; j++){
-                                                                    var yearHolidays = hd.getHolidays(j);
-                                                                    for(var l=0; l<yearHolidays.length; l++){
-                                                                        holidays.push(moment(yearHolidays[l].date).format("YYYY-MM-DD"));
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                
-                                                        momentBD.updateLocale('PT', {
-                                                            holidays: holidays,
-                                                            holidayFormat: 'YYYY-MM-DD',
-                                                            workingWeekdays: [1, 2, 3, 4, 5]
-                                                        });
-                                                        
-                                                        var days = momentBD(tarefa.dataFim).businessDiff(moment(tarefa.dataInicio));
-                                                        var daysAux = days;
-                                                        var hours = momentBD(tarefa.dataFim).diff(moment(tarefa.dataInicio), 'days', true) % 1;
-                                                        if(hours != 0 && days != 0){
-                                                            days = days - 1;
-                                                        }
-                                                        days = days + hours;
-                                                        if(daysAux == 0){
-                                                            for(var i=0; i<funcionarios.length; i++){
-                                                                cost = cost + ((days * 24) * funcionarios[i].custo);
-                                                                issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
-                                                            }
-                                                        }
-                                                        else{
-                                                            for(var i=0; i<funcionarios.length; i++){
-                                                                cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
-                                                                issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
-                                                            }
-                                                        }
-        
-                                                        for(var i=0; i<requisicoes.length; i++){
-                                                            var days = momentBD(requisicoes[i].dataFim).businessDiff(moment(requisicoes[i].dataInicio));
-                                                            var daysAux = days;
-                                                            var hours = momentBD(requisicoes[i].dataFim).diff(moment(requisicoes[i].dataInicio), 'days', true) % 1;
-                                                            if(hours != 0 && days != 0){
-                                                                days = days - 1;
-                                                            }
-                                                            days = days + hours;
-                                                            if(daysAux == 0){
-                                                                console.log(requisicoes[i].maquina)
-                                                                await Maquina.findOne({_id:requisicoes[i].maquina}).then(function (maquina) {
-                                                                    cost = cost + ((days * 24) * maquina.custo);
-                                                                })
+                    "estado": "finalizada",
+                    "dataFim": moment()
+                    }}, {useFindAndModify: false}).lean().then(function(){
+                        Requisicao.findOne({_id:req.params.id}).lean().then(function(requisicao){
+                            Maquina.findOne({_id:requisicao.maquina}).lean().then(function(maquina){
+                                Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
+                                    Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
+                                        async function secondFunction(){
+                                            var cost = obra.despesaFinal;
+                                            var requestCost = 0;                                          
                                                                 
-                                                            }
-                                                            else{
-                                                                await Maquina.findOne({id:requisicoes[i].maquina}).then(function (maquina) {
-                                                                    cost = cost + ((days * 24 - (daysAux * 16)) * maquina.custo);
-                                                                })
-                                                            }
-                                                        }                                                
-                                                        
-                                                        var finishDate;
-                                                        if(moment(obra.dataFim).isValid()){
-                                                            if(moment(tarefa.dataFim).isAfter(obra.dataFim)){
-                                                                finishDate = tarefa.dataFim;
-                                                            }
-                                                            else{
-                                                                finishDate = obra.dataFim;
-                                                            }
-                                                        }
-                                                        else{
-                                                            finishDate = tarefa.dataFim;
-                                                        }
-                                                        Tarefa.findOneAndUpdate({_id:req.params.id},
-                                                            {"$set": {
-                                                                "despesaFinal": issueCost,
-                                                                "custoFinal":issueCost + issueCost * (obra.percentagemLucro/100)
-                                                            }}, {useFindAndModify: false}).then()
-        
-                                                        
-                                                        Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
-                                                            if(tarefas.length > 0){
-                                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
-                                                                "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
-                                                                    if(obra == null){  
-                                                                        req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                    else{
-                                                                        req.flash("success_msg", "Tarefa terminada com sucesso")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                    
-                                                                }).catch(function(error){
-                                                                    console.log(error)
-                                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                                    res.redirect("/tarefa/"+req.params.id);
-                                                                })
-                                                            }
-                                                            else{
-                                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
-                                                                    "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
-                                                                    {useFindAndModify: false}).lean().then(function(obra){
-                                                                    if(obra == null){  
-                                                                        req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                    else{
-                                                                        req.flash("success_msg", "Tarefa validada com sucesso")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                }).catch(function(error){
-                                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                                    res.redirect("/tarefa/"+req.params.id);
-                                                                })
-                                                            }
-                                                        }).catch(function(error){
-                                                            req.flash("error_msg", "Tarefas não encontradas.")
-                                                            res.redirect("/tarefa/"+req.params.id)
-                                                        })
+                                            if(moment(requisicao.dataInicio).isValid() && moment(requisicao.dataFim).isValid()){
+                                                var requestStartDateYear = moment(requisicao.dataInicio).format("YYYY");
+                                                var requestFinishDateYear = moment(requisicao.dataFim).format("YYYY");
+                
+                                                var holidays = [];
+                                                for(var i=requestStartDateYear; i <= requestFinishDateYear; i++){
+                                                    var yearHolidays = hd.getHolidays(i);
+                                                    for(var j=0; j<yearHolidays.length; j++){
+                                                        holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
+                                                    }
+                                                }
+         
+                                                momentBD.updateLocale('PT', {
+                                                    holidays: holidays,
+                                                    holidayFormat: 'YYYY-MM-DD',
+                                                    workingWeekdays: [1, 2, 3, 4, 5]
+                                                });
+                                                                
+                                                var days = momentBD(requisicao.dataFim).businessDiff(moment(requisicao.dataInicio));
+                                                var daysAux = days;
+                                                var hours = momentBD(requisicao.dataFim).diff(moment(requisicao.dataInicio), 'days', true) % 1;
+                                                if(hours != 0 && days != 0){
+                                                    days = days - 1;
+                                                }
+                                                days = days + hours;
+                                                if(daysAux == 0){
+                                                    cost = cost + ((days * 24) * maquina.custo);
+                                                    requestCost = requestCost + ((days * 24) * maquina.custo)
+                                                }
+                                                else{
+                                                    cost = cost + ((days * 24 - (daysAux * 16)) * maquina.custo);
+                                                    requestCost = requestCost + ((days * 24 - (daysAux * 16)) * maquina.custo);
+                                                }
+
+                                                if(cost < 0){
+                                                    cost = 0.01;
+                                                }
+
+                                                if(requestCost < 0){
+                                                    requestCost = 0.01;
+                                                }
+                
+                                                var finishDate;
+                                                if(moment(obra.dataFim).isValid()){
+                                                    if(moment(requisicao.dataFim).isAfter(obra.dataFim)){
+                                                        finishDate = requisicao.dataFim;
                                                     }
                                                     else{
-                                                        req.flash("error_msg", "Datas da tarefa inválidas.")
-                                                        res.redirect("/tarefa/"+req.params.id);
+                                                        finishDate = obra.dataFim;
                                                     }
-                                                };
-                                                secondFunction()
-                                            }).catch(function (error) {
-                                                req.flash("error_msg", "Requisições não encontradas.")
-                                                res.redirect("/tarefa"+req.params.id)
-                                            })
-                                        }).catch(function(error){
-                                            req.flash("error_msg", "Obra não encontrada.")
-                                            res.redirect("/tarefa/"+req.params.id)
-                                        })
-                                    
+                                                }
+                                                else{
+                                                    finishDate = requisicao.dataFim;
+                                                }
+    
+                                                Requisicao.findOneAndUpdate({_id:req.params.id},
+                                                    {"$set": {
+                                                        "despesaFinal": requestCost,
+                                                        "custoFinal": requestCost + requestCost * (obra.percentagemLucro/100)
+                                                    }}, {useFindAndModify: false}).then()
+                
+               
+                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                    "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                        {useFindAndModify: false}).lean().then(function(obra){
+                                                        if(obra == null){  
+                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                            res.redirect("/requisicao/"+req.params.id);
+                                                        }
+                                                        else{
+                                                            req.flash("success_msg", "Utilização terminada com sucesso.")
+                                                            res.redirect("/requisicao/"+req.params.id);
+                                                        }
+                                                }).catch(function(error){
+                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                    res.redirect("/requisicao/"+req.params.id);
+                                                })
+                                            }
+                                        };
+                                        secondFunction()
+                                    }).catch(function(error){
+                                        req.flash("error_msg", "Máquina não encontrada.")
+                                        res.redirect("/requisicao/"+req.params.id)
+                                    })
                                 }).catch(function(error){
-                                    req.flash("error_msg", "Funcionários não encontrados.")
+                                    req.flash("error_msg", "Tarefa não encontrada.")
                                     res.redirect("/requisicao/"+req.params.id)
                                 })
+                                
+                                            
                             }).catch(function(error){
                                 req.flash("error_msg", "Tarefa não encontrada.")
                                 res.redirect("/requisicao/"+req.params.id)
                             })
+                        }).catch(function(error){
+                            req.flash("error_msg", "Requisição não encontrada.")
+                            res.redirect("/requisicoes");
+                        })
                 }).catch(function(error){
-                    req.flash("error_msg", "Erro ao terminar a utilização da máquina.")
-                    res.redirect("/requisicao/"+req.params.id);
+                    req.flash("error_msg", "Requisição não encontrada.")
+                    res.redirect("/requisicao/"+req.params.id)
                 })
             }
         }).catch(function(error){

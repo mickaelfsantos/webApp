@@ -57,7 +57,7 @@
             {{#ifImAdmin}}
                 <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
-                        <h6 class="blockquote m-0">Despesa</h6>
+                        <h6 class="blockquote m-0">Despesa prevista</h6>
                     </div>
                     
                     <div class="col-md-9 p-3">
@@ -85,15 +85,27 @@
                     </div>
                 </div>
 
-                <div class="row mt-4 col-12" id="infoHover">
-                    <div class="col-md-3 p-3 text-left">
-                        <h6 class="blockquote m-0">Custo final</h6>
+                {{#ifTerminou obra.estado}}
+                    <div class="row mt-4 col-12" id="infoHover">
+                        <div class="col-md-3 p-3 text-left">
+                            <h6 class="blockquote m-0">Despesa</h6>
+                        </div>
+
+                        <div class="col-md-9 p-3">
+                            <label for="estado" id="estado" class="m-0">{{precoToString obra.despesaFinal}}</label>
+                        </div>
                     </div>
 
-                    <div class="col-md-9 p-3">
-                        <label for="estado" id="estado" class="m-0">{{precoToString obra.custoFinal}}</label>
+                    <div class="row mt-4 col-12" id="infoHover">
+                        <div class="col-md-3 p-3 text-left">
+                            <h6 class="blockquote m-0">Preço final</h6>
+                        </div>
+
+                        <div class="col-md-9 p-3">
+                            <label for="estado" id="estado" class="m-0">{{precoToString obra.custoFinal}}</label>
+                        </div>
                     </div>
-                </div>
+                {{/ifTerminou}}
             {{else}}
             {{/ifImAdmin}}
             

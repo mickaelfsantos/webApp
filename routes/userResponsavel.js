@@ -12,6 +12,8 @@ const pdf = require("html-pdf")
 const fs = require("fs")
 const path = require("path")
 const formidable = require('formidable');
+const e = require('express');
+const { O_NONBLOCK } = require('constants');
 
 //models
     require("../models/Obra")
@@ -30,17 +32,17 @@ router.get('/obras/add', authenticated, userResponsavel, function(req, res){
 
 router.post('/obras/add', authenticated, userResponsavel, function asyncFunction(req, res){
     
-    var erros = []
+    var erros = new Object();
     var nomeO;
     var descricao;
     var data;
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido"});
+        erros.nome = "Nome inválido";
     }
     else{
         if(req.body.nome.trim().length < 2){
-            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+            erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }else{
             nomeO = req.body.nome;
         }
@@ -48,10 +50,10 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
     
 
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-        erros.push({texto: "Descrição inválida"});
+        erros.descricao = "Descrição inválida";
     } else{
         if(req.body.descricao.trim().length < 3){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
+            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
             descricao = req.body.descricao
@@ -64,7 +66,7 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
         date = moment(date).add(1, 'minutes');
         if(moment(date).isValid()){
             if(moment(today).isAfter(date) == true){
-                erros.push({texto: "Data invalida. Data de inicio tem que ser uma data supeior à data de hoje."});
+                erros.datas = "Data invalida. Data de inicio tem que ser uma data supeior à data de hoje.";
             }
             else{
                 data = req.body.dataPrevistaInicio;
@@ -72,7 +74,7 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
         }
     }
 
-    if(erros.length > 0){
+    if(Object.keys(erros).length != 0){
         res.render("usersResponsaveis/obras/novaObra", {erros: erros, nomeO:nomeO, descricao:descricao, data:data})
     }
     else{
@@ -108,8 +110,7 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
             req.flash("success_msg", "Obra criada com sucesso")
             res.redirect("/obras");
         }).catch(function(erro){
-            console.log(erro)
-            erros.push({texto: "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente."});
+            erros.nome = "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente.";
             res.render("usersResponsaveis/obras/novaObra", {erros: erros, nomeO:nomeO, descricao:descricao, data:data})
         })
     
@@ -134,17 +135,17 @@ router.get('/obra/:id/addTarefa', authenticated, userResponsavel, function(req, 
 
 router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyncFunction(req, res){
     
-    var erros = []
+    var erros = new Object();
     var nomeT;
     var descricao;
     var data;
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido."});
+        erros.nome = "Nome inválido.";
     }
     else{
         if(req.body.nome.trim().length < 2){   
-            erros.push({texto: "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+            erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }
         else{
             nomeT = req.body.nome;
@@ -152,10 +153,10 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
     }
 
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-        erros.push({texto: "Descrição inválida."});
+        erros.descricao = "Descrição inválida.";
     } else{
         if(req.body.descricao.trim().length < 3){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
+            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
             descricao = req.body.descricao;
@@ -163,7 +164,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
     }
 
     if(!req.body.funcionarios || typeof req.body.funcionarios == undefined || req.body.funcionarios == null){
-        erros.push({texto: "Associe funcionários à tarefa."});
+        erros.funcionarios = "Associe funcionários à tarefa.";
     }
 
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
@@ -174,19 +175,23 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
             dataTarefa = moment(dataTarefa).add(1, 'minutes');
             if(moment(dataTarefa).isValid()){
                 if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
-                    erros.push({texto: "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra."})
+                    erros.datas = "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra.";
+                }
+                else{
+                    data = req.body.dataPrevistaInicio
                 }
             }
         }
 
         Tarefa.find({ $and: [{nome:req.body.nome}, {obra : obra._id}]}).lean().then(function(tarefas){
             if(tarefas.length != 0){
-                erros.push({texto: "Já existe uma tarefa com este nome dentro da obra."})
+                erros.nome = "Já existe uma tarefa com este nome dentro da obra.";
             }
-            if(erros.length > 0){ 
+            if(Object.keys(erros).length != 0){ 
                 Funcionario.find().then(function(funcionarios){
+                    var importancia = req.body.importancia;
                     var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
-                    res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionariosSelecionados: funcionariosSelecionados, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
+                    res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionariosSelecionados: funcionariosSelecionados, importancia:importancia, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
                         funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
                 }).catch(function(err){
                     req.flash("error_msg", "Erro interno no GET dos funcionários.")
@@ -270,7 +275,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
                                 })
                                 
                             }).catch(function(erro){
-                                erros.push({texto: "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."});
+                                erros.nome = "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente.";
                                 Funcionario.find({}).then(function(funcionarios){
                                         if(funcionarios){
                                             res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
@@ -316,34 +321,37 @@ router.get('/obra/:id/edit', authenticated, userResponsavel, function(req, res){
 
 router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){
     
-    var erros = []
+    var erros = new Object();
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido."});
+        erros.nome = "Nome inválido.";
     }
     else{
         if(req.body.nome.trim().length < 2){   
-            erros.push({texto: "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+            erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }
     }
 
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-        erros.push({texto: "Descrição inválida."});
+        erros.descricao = "Descrição inválida.";
     } else{
-        if(req.body.descricao.trim() < 3){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
+        if(req.body.descricao.trim().length < 3){
+            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
     }
 
     if(req.body.percentagemLucro < 0){
-        erros.push({texto: "Percentagem de lucro inválida"})
+        erros.percentagemLucro = "Percentagem de lucro inválida";
     }
 
 
-    if(erros.length > 0){
+    if(Object.keys(erros).length != 0){ 
         Obra.findOne({_id:req.params.id}).lean().then(function(obra){
             Funcionario.find({ obras : { $ne: obra._id}}).lean().then(function(funcionarios){
-                var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
+                if(req.body.funcionarios)
+                    var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
+                else
+                    var funcionariosSelecionados = JSON.stringify(null);
                 var custo = JSON.stringify(obra.custoFinal);
                 res.render("usersResponsaveis/obras/editarObra", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, erros:erros, funcionarios: funcionarios, custo:custo})  
             })
@@ -391,7 +399,6 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
                     res.redirect("/obra/"+req.params.id+"/edit")
                 })
             }).catch(function (error){
-                console.log(error)
                 req.flash("error_msg", "Obra não encontrada.")
                 res.redirect("/obras")
             })
@@ -677,6 +684,13 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                         issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
                                                     }
                                                 }
+                                                if(cost < 0){
+                                                    cost = 0.01;
+                                                }
+                                                
+                                                if(issueCost < 0){
+                                                    issueCost = 0.01;
+                                                }
                                                 var expectedFinishDate = tarefa.dataPrevistaFim;
 
                                                 for(var i=0; i<requisicoes.length; i++){
@@ -706,6 +720,13 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                             cost = cost + ((days * 24 - (daysAux * 16)) * maquina.custo);
                                                             requestCost = requestCost + ((days * 24 - (daysAux * 16)) * maquina.custo);
                                                         })
+                                                    }
+                                                    if(cost < 0){
+                                                        cost = 0.01;
+                                                    }
+                                                    
+                                                    if(requestCost < 0){
+                                                        requestCost = 0.01;
                                                     }
 
                                                     await Requisicao.findOneAndUpdate({_id:requisicoes[i].id},
@@ -811,7 +832,7 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                 })
             }
             else{
-                var erros=[];
+                var erros= new Object();
                 if(!req.body.justificacao || typeof req.body.justificacao == undefined || req.body.justificacao == null){
                     erros.push({texto: "Justificação obrigatória."});
                 }
@@ -903,17 +924,17 @@ router.get('/tarefas/addTarefa', authenticated, userResponsavel, function (req, 
 })
 
 router.post('/tarefas/addTarefa', authenticated, userResponsavel, function asyncFunction (req, res){
-    var erros = []
+    var erros = new Object();
     var nomeT;
     var descricao;
     var data;
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido."});
+        erros.nome = "Nome inválido.";
     }
     else{
         if(req.body.nome.trim().length < 2){   
-            erros.push({texto: "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+            erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }
         else{
             nomeT = req.body.nome;
@@ -922,10 +943,10 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
 
     
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
-        erros.push({texto: "Descrição inválida."});
+        erros.descricao = "Descrição inválida.";
     } else{
         if(req.body.descricao.trim().length < 3){
-            erros.push({texto: "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços."});
+            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
             descricao = req.body.descricao;
@@ -940,22 +961,26 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
             dataTarefa = moment(dataTarefa).add(1, 'minutes');
             if(moment(dataTarefa).isValid()){
                 if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
-                    erros.push({texto: "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra."})
+                    erros.datas = "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra.";
+                }
+                else{
+                    var data = req.body.dataPrevistaInicio
                 }
             }
         }
 
         Tarefa.find({ $and: [{nome:req.body.nome}, {obra : obra._id}]}).lean().then(function(tarefas){
             if(tarefas.length != 0){
-                erros.push({texto: "Já existe uma tarefa com este nome dentro da obra."})
+                erros.nome = "Já existe uma tarefa com este nome dentro da obra.";
             }
-            if(erros.length > 0){ 
+            if(Object.keys(erros).length != 0){ 
                 Funcionario.find().then(function(funcionarios){
                     Obra.find({estado:"preOrcamento"}).lean().then(function(obras){
+                        importancia = req.body.importancia
                         var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
-                        console.log(funcionariosSelecionados)
                         obra = JSON.stringify(obra);
-                        res.render("usersResponsaveis/tarefas/novaTarefaSemObra", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, obras:obras, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
+                        res.render("usersResponsaveis/tarefas/novaTarefaSemObra", {obra:obra, importancia:importancia, funcionariosSelecionados:funcionariosSelecionados, 
+                            obras:obras, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
                             funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
                     }).catch(function(err){
                         req.flash("error_msg", "Obras não encontradas")
@@ -1043,7 +1068,7 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
                                 })
                                 
                             }).catch(function(erro){
-                                erros.push({texto: "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente."});
+                                erros.nome = "Já existe uma tarefa com o mesmo nome ou houve um erro ao adicionar a tarefa. Tente novamente.";
                                 Funcionario.find({}).then(function(funcionarios){
                                         if(funcionarios){
                                             res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
@@ -1097,34 +1122,35 @@ router.get('/funcionario/:id/edit', authenticated, admin, function(req, res){
 
 router.post('/funcionario/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){ 
     
-    var erros = []
+    var erros = new Object();
 
     if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
-        erros.push({texto: "Departamento inválido."});
+        erros.departamento = "Departamento inválido.";
     }
 
     if(!req.body.equipa || typeof req.body.equipa == undefined || req.body.equipa == null){
-        erros.push({texto: "Equipa inválida."});
+        erros.equipa = "Equipa inválida.";
     }
 
     if(!req.body.funcao || typeof req.body.funcao == undefined || req.body.funcao == null){
-        erros.push({texto: "Função inválida."});
+        erros.funcao = "Função inválida.";
     }
 
     if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null || req.body.custo < 0){
-        erros.push({texto: "Preço inválido."});
+        erros.custo = "Salário inválido.";
     }
+    
+    var role = req.body.role;
 
-    if(erros.length > 0){
+    if(Object.keys(erros).length != 0){
         Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
-            res.render("admin/funcionarios/editarFuncionario", {erros:erros, funcionario:funcionario})
+            res.render("admin/funcionarios/editarFuncionario", {erros:erros, role:role, funcionario:funcionario})
         }).catch(function(error){
             req.flash("error_msg", "Erro ao fazer o GET dos funcionários.")
             res.redirect("/funcionarios");
         })
     }
     else{
-        var role = req.body.role;
         if(role == "Funcionário")
             role = "user"
         if(role == "Chefe de equipa")
@@ -1132,17 +1158,6 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
         if(role == "Administrador")
             role = "admin"
         
-        console.log(req.body.foto);
-        // var form = new formidable.IncomingForm();
-        //     form.parse(req.body.foto, function (err, fields, files) {
-        //     var oldpath = files.filetoupload.path;
-        //     var newpath = 'C:/Users/Mickaël/Desktop' + files.filetoupload.name;
-        //     fs.rename(oldpath, newpath, function (err) {
-        //         if (err) throw err;
-        //         res.write('File uploaded and moved!');
-        //         res.end();
-        //     });
-        // });
 
         Funcionario.findOneAndUpdate({_id:req.params.id},
             {"$set": {
@@ -1264,42 +1279,53 @@ router.get('/maquinas/add', authenticated, userResponsavel, function(req, res){
 
 router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunction(req, res){
     
-    var erros = []
+    var erros = new Object();
     var nomeO;
     var departamento;
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido"});
+        erros.nome = "Nome inválido";
     }
     else{
         if(req.body.nome.trim().length < 2){
-            erros.push({texto: "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+            erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }else{
             nomeO = req.body.nome;
         }
     }
     
     if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
-        erros.push({texto: "Departamento inválida"});
+        erros.departamento = "Departamento inválida";
     } else{
         departamento = req.body.departamento
     }
 
+    if(req.user.role == "admin"){
+        if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null || req.body.custo < 0){
+            erros.custo = "Custo inválido";
+        } else{
+            var custo = req.body.custo
+        }
+    }
 
-    if(erros.length > 0){
-        res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, departamento:departamento})
+
+    if(Object.keys(erros).length != 0){
+        res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, custo:custo, departamento:departamento})
     }
     else{
         var novaMaquina;
         novaMaquina = {
             nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
             departamento: req.body.departamento.replace(/\s\s+/g, ' ').replace(/\s*$/,'')
-        }        
+        }
+        if(req.user.role == "admin"){
+            novaMaquina.custo = custo;
+        }   
         new Maquina(novaMaquina).save().then(function(){ 
             req.flash("success_msg", "Máquina criada com sucesso.")
             res.redirect("/maquinas");
         }).catch(function(erro){
-            erros.push({texto: "Já existe uma máquina com o mesmo nome ou houve um erro ao adicionar a máquina. Tente novamente."});
+            erros.nome = "Já existe uma máquina com o mesmo nome ou houve um erro ao adicionar a máquina. Tente novamente.";
             res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, departamento:departamento})
         })
     
@@ -1326,60 +1352,68 @@ router.get('/maquina/:id/edit', authenticated, userResponsavel, function(req, re
 
 router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){
     
-    var erros = []
+    Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
+        var erros = [];
 
-    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.push({texto: "Nome inválido."});
-    }
-    else{
-        if(req.body.nome.trim().length < 2){   
-            erros.push({texto: "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
+        if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+            erros.nome = "Nome inválido.";
         }
-    }
-
-    if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
-        erros.push({texto: "Departamento inválido."});
-    }
-
-    if(req.user.role == "admin"){
-        if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null || req.body.custo < 0){
-            erros.push({texto: "Preço inválido."});
+        else{
+            if(req.body.nome.trim().length < 2){   
+                erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
+            }
+            else{
+                maquina.nome = req.body.nome;
+            }
         }
-    }    
 
-    if(erros.length > 0){
-        Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
-            res.render("usersResponsaveis/maquinas/editarMaquina", {erros:erros, maquina:maquina})
-        }).catch(function(error){
-            req.flash("error_msg", "Máquina não encontrada.")
-            res.redirect("/maquinas")
-        })
-    }
-    else{
-        Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
-            var custo;
-            if(req.body.custo != undefined)
-                custo = req.body.custo;
-            else
-                custo = maquina.custo;
-            Maquina.findOneAndUpdate({_id:req.params.id},
-                {"$set": {
-                    "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                    "departamento": req.body.departamento,
-                    "custo": custo
-                    }}, {useFindAndModify: false}).then(function(){
-                    req.flash("success_msg", "Máquina editada com sucesso")
-                    res.redirect("/maquinas");
+        if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
+            erros.departamento = "Departamento inválido.";
+        }else{
+            maquina.departamento = req.body.departamento;
+        }
+
+        if(req.user.role == "admin"){
+            if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null || req.body.custo < 0){
+                erros.custo = "Preço inválido.";
+            }
+            else{
+                maquina.custo = req.body.custo;
+            }
+        }    
+
+        if(Object.keys(erros).length != 0){
+                res.render("usersResponsaveis/maquinas/editarMaquina", {erros:erros, maquina:maquina})
+        }
+        else{
+            Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
+                var custo;
+                if(req.body.custo != undefined)
+                    custo = req.body.custo;
+                else
+                    custo = maquina.custo;
+                Maquina.findOneAndUpdate({_id:req.params.id},
+                    {"$set": {
+                        "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                        "departamento": req.body.departamento,
+                        "custo": custo
+                        }}, {useFindAndModify: false}).then(function(){
+                        req.flash("success_msg", "Máquina editada com sucesso")
+                        res.redirect("/maquinas");
+                }).catch(function(error){
+                    req.flash("error_msg", "Já existe uma máquina com o mesmo nome.")
+                    res.redirect("/maquina/"+req.params.id+"/edit");
+                })
             }).catch(function(error){
-                req.flash("error_msg", "Já existe uma máquina com o mesmo nome.")
-                res.redirect("/maquina/"+req.params.id+"/edit");
+                req.flash("error_msg", "Máquina não encontrada.")
+                res.redirect("/maquinas");
             })
-        }).catch(function(error){
-            req.flash("error_msg", "Máquina não encontrada.")
-            res.redirect("/maquinas");
-        })
-        
-    }
+            
+        }
+    }).catch(function(error){
+        req.flash("error_msg", "Máquina não encontrada.")
+        res.redirect("/maquinas")
+    })
 })
 
 router.get('/maquina/:id/remove', authenticated, admin, function(req, res){

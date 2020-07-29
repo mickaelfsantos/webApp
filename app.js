@@ -69,9 +69,11 @@
                     dataMaiorString = moment(requisicoes[0].dataPrevistaFim).format("DD/MM/YYYY HH:mm")
                     for(var i=1; i<requisicoes.length; i++){
                         var dataProx = moment(requisicoes[i].dataPrevistaFim).format("YYYY-MM-DD HH:mm");
-                        if(moment(dataProx).isValid() && moment(dataProx).isAfter(dataMaior)){
-                            dataMaior = dataProx;
-                            dataMaiorString = moment(requisicoes[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm");
+                        if((dataMaior != "Invalid date" || typeof dataMaior == undefined )&& (dataProx != "Invalid date" || typeof dataProx == undefined)){
+                            if(moment(dataProx).isValid() && moment(dataProx).isAfter(dataMaior)){
+                                dataMaior = dataProx;
+                                dataMaiorString = moment(requisicoes[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm");
+                            }
                         }
                     }
                 }
@@ -102,9 +104,11 @@
                     dataMaiorString = moment(requisicoes[0].dataFim).format("DD/MM/YYYY HH:mm")
                     for(var i=1; i<requisicoes.length; i++){
                         var dataProx = moment(requisicoes[i].dataFim).format("YYYY-MM-DD HH:mm");
-                        if(moment(dataProx).isValid() && moment(dataProx).isAfter(dataMaior)){
-                            dataMaior = dataProx;
-                            dataMaiorString = moment(requisicoes[i].dataFim).format("DD/MM/YYYY HH:mm");
+                        if((dataMaior != "Invalid date" || typeof dataMaior == undefined )&& (dataProx != "Invalid date" || typeof dataProx == undefined)){
+                            if(moment(dataProx).isValid() && moment(dataProx).isAfter(dataMaior)){
+                                dataMaior = dataProx;
+                                dataMaiorString = moment(requisicoes[i].dataFim).format("DD/MM/YYYY HH:mm");
+                            }
                         }
                     }
                 }
@@ -230,6 +234,13 @@
 
             ifComecar: function(estado, options){
                 if(estado === "aceite"){
+                    return options.fn(this)
+                }
+                return options.inverse(this);
+            },
+
+            ifComecarRequest: function(tarefaEstado, requisicaoEstado, obraEstado, options){
+                if((tarefaEstado === "aceite" || tarefaEstado === "emExecucao") && requisicaoEstado == "preProducao" && (obraEstado == "preProducao" || obraEstado == "producao")){
                     return options.fn(this)
                 }
                 return options.inverse(this);

@@ -1,10 +1,4 @@
 <div class="container-fluid pr-4 pl-4">
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
-    
     <h2 id="nomeFuncionario">Editar perfil</h2>
     
         
@@ -15,16 +9,44 @@
                 <input type="hidden" id="id" value="{{funcionario._id}}">
 
                 <label for="nome">Nome*</label>
-                <input type="text" id="nome" name="nome" value="{{funcionario.nome}}" class="form-control mb-4" required>
+                {{#if erros.nome}}
+                    <input type="text" id="nome" name="nome" value="{{funcionario.nome}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nome}}
+                    </div>
+                {{else}}
+                    <input type="text" id="nome" name="nome" value="{{funcionario.nome}}" class="form-control mb-4">
+                {{/if}}
                 
                 <label for="equipa">Email*</label>
-                <input type="email" id="email" name="email" value="{{funcionario.email}}" class="form-control mb-4" required>
+                {{#if erros.email}}
+                    <input type="email" id="email" name="email" value="{{funcionario.email}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.email}}
+                    </div>
+                {{else}}
+                    <input type="email" id="email" name="email" value="{{funcionario.email}}" class="form-control mb-4">
+                {{/if}}
                 
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password"class="form-control mb-4">
+                {{#if erros.password}}
+                    <input type="password" id="password" name="password"class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.password}}
+                    </div>
+                {{else}}
+                    <input type="password" id="password" name="password"class="form-control mb-4">
+                {{/if}}
 
                 <label for="password2">Confirmação da password</label>
-                <input type="password" id="password2" name="password2" class="form-control mb-4">
+                {{#if erros.password2}}
+                    <input type="password" id="password2" name="password2" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.password2}}
+                    </div>
+                {{else}}
+                    <input type="password" id="password2" name="password2" class="form-control mb-4">
+                {{/if}}
                 
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>

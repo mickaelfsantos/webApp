@@ -1,10 +1,4 @@
 <div class="container-fluid pl-4 pr-4">
-        
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
     
     <h2 id="nomeFuncionario">Editar funcionario {{funcionario.nome}}</h2>
       
@@ -15,21 +9,49 @@
                 <input type="hidden" id="id" value="{{funcionario._id}}">
 
                 <label for="departamento">Departamento*</label>
-                <input type="text" id="departamento" name="departamento" value="{{funcionario.departamento}}" class="form-control mb-4">
+                {{#if erros.departamento}}
+                    <input type="text" id="departamento" name="departamento" value="{{funcionario.departamento}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.departamento}}
+                    </div>
+                {{else}}
+                    <input type="text" id="departamento" name="departamento" value="{{funcionario.departamento}}" class="form-control mb-4">
+                {{/if}}
                 
                 <label for="equipa">Equipa*</label>
-                <input type="text" id="equipa" name="equipa" value="{{funcionario.equipa}}" class="form-control mb-4">
+                {{#if erros.equipa}}
+                    <input type="text" id="equipa" name="equipa" value="{{funcionario.equipa}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.equipa}}
+                    </div>
+                {{else}}
+                    <input type="text" id="equipa" name="equipa" value="{{funcionario.equipa}}" class="form-control mb-4">
+                {{/if}}
                 
                 <label for="funcao">Função*</label>
-                <input type="text" id="funcao" name="funcao" value="{{funcionario.funcao}}" class="form-control mb-4">
+                {{#if erros.funcao}}
+                    <input type="text" id="funcao" name="funcao" value="{{funcionario.funcao}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.funcao}}
+                    </div>
+                {{else}}
+                    <input type="text" id="funcao" name="funcao" value="{{funcionario.funcao}}" class="form-control mb-4">
+                {{/if}}
 
                 <label for="funcao">Custo por hora (€)*</label>
-                <input type="text" id="custo" name="custo" value="{{funcionario.custo}}" class="form-control mb-4">
+                {{#if erros.custo}}
+                    <input type="text" id="custo" name="custo" value="{{funcionario.custo}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.custo}}
+                    </div>
+                {{else}}
+                    <input type="text" id="custo" name="custo" value="{{funcionario.custo}}" class="form-control mb-4">
+                {{/if}}
                 
                 <div class="form-group">
                     <label for="importancia">Cargo</label>
-                    <input type="hidden" id="role" value="{{funcionario.role}}">
-                    <select class="form-control" id="role" name="role">
+                    <input type="hidden" id="role" value="{{role}}">
+                    <select class="form-control" name="role">
                         <option id="user">Funcionário</option>
                         <option id="userResponsavel">Chefe de equipa</option>
                         <option id="admin">Administrador</option>
@@ -48,14 +70,14 @@
  <script>
 
     var role = document.getElementById('role').getAttribute("value");
-    if(role == "user"){
+    if(role == "Funcionário"){
         document.getElementById("user").setAttribute("selected", "selected")
     }else{
-        if(role == "userResponsavel"){
+        if(role == "Chefe de equipa"){
             document.getElementById("userResponsavel").setAttribute("selected", "selected")
         }
         else{
-            if(role == "admin"){    
+            if(role == "Administrador"){    
                 document.getElementById("admin").setAttribute("selected", "selected")
             }
         }

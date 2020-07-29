@@ -5,13 +5,13 @@
             <h2>Requisição</h2>
         </div>
         <div class="col-md-8 text-right">
-            {{#ifComecar tarefa.estado}}
-                {{#ifTerminar requisicao.estado}}
-                    <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaTerminar()" style="cursor: pointer;"><i class="fa fa-play"></i> Terminar Utilização</button>
-                {{/ifTerminar}}
-                {{else}}
+            {{#ifComecarRequest tarefa.estado  requisicao.estado obra.estado}}
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar Utilização</button>
-            {{/ifComecar}}
+                {{else}}
+                    {{#ifTerminar requisicao.estado}}
+                        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaTerminar()" style="cursor: pointer;"><i class="fa fa-play"></i> Terminar Utilização</button>
+                    {{/ifTerminar}}
+            {{/ifComecarRequest}}
         </div>
 
     </div>

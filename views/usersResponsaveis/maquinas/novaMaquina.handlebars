@@ -1,11 +1,5 @@
 <div class="container-fluid pl-r pr-4">
     
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
-    
     <h2>Nova máquina</h2>
     
     <div class="card mt-4">
@@ -13,10 +7,36 @@
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
             <form action="/maquinas/add" method="POST">
                 <label for="nome">Nome*</label>
-                <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control" required>
+                {{#if erros.nome}}
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control is-invalid" required>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nome}}
+                    </div>
+                {{else}}
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control mb-4" required>
+                {{/if}}
                 
-                <label for="departamento" class="mt-4">Departamento*</label>
-                <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control mb-4" required>
+                <label for="departamento">Departamento*</label>
+                {{#if erros.departamento}}
+                    <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control is-invalid" required>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.departamento}}
+                    </div>
+                {{else}}
+                    <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control mb-4" required>
+                {{/if}}
+
+                {{#ifImAdmin}}
+                    <label for="custo">Custo por hora (€)*</label>
+                    {{#if erros.custo}}
+                        <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo da máquina" class="form-control is-invalid" required>
+                        <div class="invalid-feedback mb-4">
+                            {{erros.custo}}
+                        </div>
+                    {{else}}
+                        <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo da máquina" class="form-control mb-4" required>
+                    {{/if}}
+                {{/ifImAdmin}}
                 
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>

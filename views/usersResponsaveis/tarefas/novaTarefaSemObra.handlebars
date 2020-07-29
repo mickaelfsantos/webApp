@@ -1,51 +1,76 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" type="text/css"/>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/js/bootstrap-multiselect.js"></script>
+
 <div class="container-fluid pl-4 pr-4">
-
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
-    
+   
     <h2>Nova tarefa</h2>
     <div class="card mt-4">
         <div class="card-body">
             <label style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
             <form action="/tarefas/addTarefa" name="getTarefa" method="POST">
                 <label for="nome">Nome*</label>
-                <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4" required>
+
+                {{#if erros.nome}}
+                    <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control is-invalid" required>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nome}}
+                    </div>
+                {{else}}
+                    <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4" required>
+                {{/if}}
 
                 <label for="descricao">Descrição*</label>
-                <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                {{#if erros.descricao}}
+                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.descricao}}
+                    </div>
+                {{else}}
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                {{/if}}
 
                 <div class="form-group">
                     <label for="obra">Obra a que esta tarefa pertence*</label>
-                    <select class="form-control" id="obras" name="obras" required>
+                    <select class="form-control mb-4" id="obras" name="obras" required>
                         {{#each obras}}
                             <option id="{{nome}}">{{nome}}</option>
                         {{/each}}
                     </select>
                 </div>
+                <br>
 
 
-                <div class="form-group">
-                    <label for="funcionarios">Funcionarios a associar* (Tecla ctrl pressionada se pretender selecionar vários)</label>
-                    <select multiple class="form-control" id="funcionarios" name="funcionarios" required>
+                <div class="form-group mb-4">
+                    <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios" required>
                         {{#each funcionarios}}
-                            <option value="{{nome}}" id="{{nome}}">{{nome}}</option>
+                            <option value="{{nome}}" id="{{nome}}" data-img="{{foto}}">{{nome}}</option>
                         {{/each}}
                     </select>
                 </div>
 
+
                 <label for="dataPrevistaInicio">Data prevista para inicio</label>
+                {{#if erros.datas}}
+                <div class="row">
+                    <div class="col-3">
+                        <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control is-invalid">
+                        <div class="invalid-feedback mb-4">
+                        {{erros.datas}}
+                    </div>
+                    </div>
+                </div>
+                {{else}}
                 <div class="row">
                     <div class="col-3">
                         <input type="datetime-local" value="{{data}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
                     </div>
                 </div>
+                {{/if}}
+                
 
                 <div class="form-group">
                     <label for="importancia">Importância da tarefa</label>
-                    <input type="hidden" id="importancia" value="{{tarefa.importancia}}">
+                    <input type="hidden" id="importancia" value="{{importancia}}">
                     <select class="form-control" id="importancia" name="importancia">
                         <option id="baixa">Baixa</option>
                         <option id="media">Média</option>
@@ -64,33 +89,45 @@
 
 <script>  
     var imp = document.getElementById('importancia').getAttribute("value");
-    if(imp == "baixa"){
+    if(imp == "Baixa"){
         document.getElementById("baixa").setAttribute("selected", "selected")
     }else{
-        if(imp == "media"){
+        if(imp == "Média"){
             document.getElementById("media").setAttribute("selected", "selected")
         }
         else{
-            if(imp == "alta"){    
+            if(imp == "Alta"){    
                 document.getElementById("alta").setAttribute("selected", "selected")
             }
         }
     }
 
     var funcionariosSelecionados = {{{funcionariosSelecionados}}};
-    if(funcionariosSelecionados[0].length == 1){
-        document.getElementById(funcionariosSelecionados).setAttribute("selected", "selected");
-    }
-    else{
-        for(var i=0; i<funcionariosSelecionados.length; i++){
-            document.getElementById(funcionariosSelecionados[i]).setAttribute("selected", "selected");
+    if(funcionariosSelecionados){
+        if(funcionariosSelecionados[0].length == 1){
+            document.getElementById(funcionariosSelecionados).setAttribute("selected", "selected");
+        }
+        else{
+            for(var i=0; i<funcionariosSelecionados.length; i++){
+                document.getElementById(funcionariosSelecionados[i]).setAttribute("selected", "selected");
+            }
         }
     }
     
     var obra = {{{obra}}};
-    document.getElementById(obra.nome).setAttribute("selected", "selected");
+    if(obra)
+        document.getElementById(obra.nome).setAttribute("selected", "selected");
 
     function saltaParaTarefas(){
         window.location = "/tarefas";
     }
+
+    $('.multiselect').multiselect({
+        enableHTML: true,
+        nonSelectedText:'Funcionários a associar à tarefa',
+        buttonWidth: '300px',
+        optionLabel: function(element) {
+            return '<img src="'+$(element).attr('data-img')+'" class="avatar"> '+$(element).text();
+        }
+    });
 </script>

@@ -1,7 +1,4 @@
 <div class="container mt-4">
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{/each}}
 
     <div class="text-center mt-5">
         <h2>Registo</h2>
@@ -10,19 +7,81 @@
         <div class="card-body">
             <form action="/registo" method="POST">
                 <label for="nome">Nome </label>
-                <input type="nome" name="nome" value="{{nomeF}}" class="form-control" required>
-                <label class="mt-4" for="funcao">Função na empresa </label>
-                <input type="funcao" class="form-control" value="{{funcao}}" name="funcao" required>
-                <label class="mt-4" for="departamento">Departamento </label>
-                <input type="departamento" class="form-control" value="{{departamento}}" name="departamento" required>
-                <label class="mt-4" for="equipa">Equipa </label>
-                <input type="equipa" class="form-control" value="{{equipa}}" name="equipa" required>
-                <label class="mt-4" for="email">Email </label>
-                <input type="email" class="form-control" value="{{email}}" name="email" required>
-                <label class="mt-4" for="password">Password </label>
-                <input type="password" class="form-control" name="password" required>
-                <label class="mt-4" for="password2">Repita a password </label>
-                <input type="password" class="form-control" name="password2" required>
+                {{#if erros.nome}}
+                    <input type="nome" name="nome" value="{{nomeF}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nome}}
+                    </div>
+                {{else}}
+                    <input type="nome" name="nome" value="{{nomeF}}" class="form-control mb-4">
+                {{/if}}
+
+
+                <label for="funcao">Função na empresa </label>
+                {{#if erros.funcao}}
+                    <input type="funcao" class="form-control is-invalid" value="{{funcao}}" name="funcao">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.funcao}}
+                    </div>
+                {{else}}
+                    <input type="funcao" class="form-control mb-4" value="{{funcao}}" name="funcao">
+                {{/if}}
+
+
+                <label for="departamento">Departamento </label>
+                {{#if erros.departamento}}
+                    <input type="departamento" class="form-control is-invalid" value="{{departamento}}" name="departamento">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.departamento}}
+                    </div>
+                {{else}}
+                    <input type="departamento" class="form-control mb-4" value="{{departamento}}" name="departamento">
+                {{/if}}
+                
+                
+                <label for="equipa">Equipa </label>
+                {{#if erros.equipa}}
+                    <input type="equipa" class="form-control is-invalid" value="{{equipa}}" name="equipa">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.equipa}}
+                    </div>
+                {{else}}
+                    <input type="equipa" class="form-control mb-4" value="{{equipa}}" name="equipa">
+                {{/if}}
+
+                <label for="email">Email </label>
+                {{#if erros.email}}
+                    <input type="email" class="form-control is-invalid" value="{{email}}" name="email">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.email}}
+                    </div>
+                {{else}}
+                    <input type="email" class="form-control mb-4" value="{{email}}" name="email">
+                {{/if}}
+                
+                
+                <label for="password">Password </label>
+                {{#if erros.password}}
+                    <input type="password" class="form-control is-invalid" name="password">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.password}}
+                    </div>
+                {{else}}
+                    <input type="password" class="form-control mb-4" name="password">
+                {{/if}}
+
+
+                <label for="password2">Repita a password </label>
+                {{#if erros.password2}}
+                    <input type="password" class="form-control is-invalid" name="password2">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.password2}}
+                    </div>  
+                {{else}}
+                    <input type="password" class="form-control mb-4" name="password2">
+                {{/if}}
+                
+                
                 <div class="mt-5 mb-5 col-12 text-center">
                     <button class="btn btn-info col-5" type="submit">Criar conta</button>
                 </div>

@@ -1,9 +1,4 @@
 <div class="container-fluid pl-4 pr-4">
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
     
     <h2>Nova requisição</h2>
     <div class="card mt-4">
@@ -13,7 +8,7 @@
                 <input type="hidden" name="{{tarefa._id}}" id="id" value="{{tarefa._id}}">
                 <div class="form-group">
                     <label for="maquina">Máquina*</label>
-                    <select class="form-control" id="maquinas" name="maquinas">
+                    <select class="form-control" id="maquinas" name="maquinas" required>
                         {{#each maquinas}}
                             <option id="{{nome}}">{{nome}}</option>
                         {{/each}}
@@ -21,21 +16,50 @@
                 </div>
 
                 <label for="descricao">Descricao*</label>
-                <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da requisição" required>{{descricao}}</textarea>
+                {{#if erros.descricao}}
+                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da requisição">{{descricao}}</textarea>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.descricao}}
+                    </div>
+                {{else}}
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da requisição">{{descricao}}</textarea>
+                {{/if}}
 
                 <label for="dataPrevistaInicio">Data prevista para inicio*</label>
+                {{#if erros.dataInicio}}
+                <div class="row">
+                    <div class="col-3">
+                        <input type="datetime-local" value="{{dataInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control is-invalid">
+                        <div class="invalid-feedback mb-4">
+                            {{erros.dataInicio}}
+                        </div>
+                    </div>
+                </div>
+                {{else}}
                 <div class="row">
                     <div class="col-3">
                         <input type="datetime-local" value="{{dataInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
                     </div>
                 </div>
+                {{/if}}
 
                 <label for="dataPrevistaFim">Data prevista para fim*</label>
+                {{#if erros.dataFinal}}
+                <div class="row">
+                    <div class="col-3">
+                        <input type="datetime-local" value="{{dataFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control is-invalid">
+                        <div class="invalid-feedback mb-4">
+                            {{erros.dataFinal}}
+                        </div>
+                    </div>
+                </div>
+                {{else}}
                 <div class="row">
                     <div class="col-3">
                         <input type="datetime-local" value="{{dataFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control mb-4">
                     </div>
                 </div>
+                {{/if}}
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
                     <button type="button" onclick="saltaParaTarefa()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
@@ -48,7 +72,8 @@
 <script>
     window.onload = function() {
         var tarefa = document.getElementById("id").getAttribute("value");
-        document.getTarefa.action = "/tarefa/"+tarefa+"/addRequisicao";
+        document.getTarefa.action = "/tarefa/"+tarefa+"/requisitarMaquina";
+        console.log(tarefa)
     };
 
 
@@ -56,4 +81,6 @@
         var tarefa = document.getElementById("id").getAttribute("value");
         window.location = "/tarefa/"+tarefa;
     }
+
+    var maquina = {{{maquina}}};
 </script>

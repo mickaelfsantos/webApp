@@ -3,12 +3,6 @@
 
 <div class="container-fluid mt-4 pr-4 pl-4">
     
-    {{#each erros}}
-        <div class="alert alert-danger">{{texto}}</div>
-    {{else}}
-
-    {{/each}}
-
     <h2 id="nomeFuncionario">Editar tarefa</h2>
     
         
@@ -36,11 +30,25 @@
                     {{else}}
                         {{#ifUR}}
                             <label for="nome">Nome*</label>
-                            <input type="text" id="nome" name="nome" value="{{tarefa.nome}}" class="form-control mb-4" required>
+                            {{#if erros.nome}}
+                                <input type="text" id="nome" name="nome" value="{{tarefa.nome}}" class="form-control is-invalid">
+                                <div class="invalid-feedback mb-4">
+                                    {{erros.nome}}
+                                </div>
+                            {{else}}
+                                <input type="text" id="nome" name="nome" value="{{tarefa.nome}}" class="form-control mb-4">
+                            {{/if}}
                             
                             <label for="descricao">Descrição*</label>
-                            <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da tarefa" required>{{tarefa.descricao}}</textarea>
-
+                            {{#if erros.descricao}}
+                                <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da tarefa">{{tarefa.descricao}}</textarea>
+                                <div class="invalid-feedback mb-4">
+                                    {{erros.descricao}}
+                                </div>
+                            {{else}}
+                                <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da tarefa">{{tarefa.descricao}}</textarea>
+                            {{/if}}
+                            
                             <div class="form-group mb-4">
                                 <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios">
                                     {{#each funcionarios}}
@@ -61,24 +69,38 @@
                             <label for="dataPrevistaInicio">Data prevista para inicio</label>
                             <div class="row">
                                 <div class="col-3">
-                                    <input type="datetime-local" value="{{dataPrevistaInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                                    {{#if erros.dataInicio}}
+                                        <input type="datetime-local" value="{{dataPrevistaInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control is-invalid">
+                                        <div class="invalid-feedback mb-4">
+                                            {{erros.dataInicio}}
+                                        </div>
+                                    {{else}}
+                                        <input type="datetime-local" value="{{dataPrevistaInicio}}" name="dataPrevistaInicio" id="dataPrevistaInicio" class="form-control mb-4">
+                                    {{/if}}
                                 </div>
                             </div>
                             
                             <label for="dataPrevistaFim">Data prevista para fim</label>
                             <div class="row">
                                 <div class="col-3">
-                                    <input type="datetime-local" value="{{dataPrevistaFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control mb-4">
+                                    {{#if erros.dataFinal}}
+                                        <input type="datetime-local" value="{{dataPrevistaFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control is-invalid">
+                                        <div class="invalid-feedback mb-4">
+                                            {{erros.dataFinal}}
+                                        </div>
+                                    {{else}}
+                                        <input type="datetime-local" value="{{dataPrevistaFim}}" name="dataPrevistaFim" id="dataPrevistaFim" class="form-control mb-4">
+                                    {{/if}}
                                 </div>
                             </div>
 
                             {{#ifUR}}
                             <div class="form-group">
                                 <label for="importancia">Importância da tarefa</label>
-                                <select class="form-control" id="importancia" name="importancia">
-                                    <option>Baixa</option>
-                                    <option>Média</option>
-                                    <option>Alta</option>
+                                <select class="form-control" value={{importancia}} id="importancia" name="importancia">
+                                    <option id="baixa">Baixa</option>
+                                    <option id="media">Média</option>
+                                    <option id="alta">Alta</option>
                                 </select>
                             </div>
                             {{else}}
@@ -100,21 +122,14 @@
 
 
 <script>
-    $('.multiselect').multiselect({
-        enableHTML: true,
-        nonSelectedText:'Funcionários a associar à tarefa',
-        buttonWidth: '300px',
-        optionLabel: function(element) {
-            return '<img src="'+$(element).attr('data-img')+'" class="avatar"> '+$(element).text();
-        }
-});
-    function saltaParaTarefa(){
+        function saltaParaTarefa(){
         var obra = document.getElementById('id').getAttribute("value");
         window.location.href = "/tarefa/"+obra;
     }
 
     var funcionariosSelecionados = {{{funcionariosSelecionados}}};
-    if(funcionariosSelecionados != null){
+    if(funcionariosSelecionados){
+        console.log(funcionariosSelecionados)
         if(funcionariosSelecionados[0].length == 1){
             document.getElementById(funcionariosSelecionados).setAttribute("selected", "selected");
         }
@@ -124,8 +139,32 @@
             }
         }
     }
-
     
+    $('.multiselect').multiselect({
+        enableHTML: true,
+        nonSelectedText:'Funcionários a associar à tarefa',
+        buttonWidth: '300px',
+        optionLabel: function(element) {
+            return '<img src="'+$(element).attr('data-img')+'" class="avatar"> '+$(element).text();
+        }
+    });
+
+    var imp = document.getElementById('importancia').getAttribute("value");
+    console.log(imp);
+    if(imp == "Baixa"){
+        document.getElementById("baixa").setAttribute("selected", "selected")
+    }else{
+        if(imp == "Média"){
+            document.getElementById("media").setAttribute("selected", "selected")
+        }
+        else{
+            if(imp == "Alta"){    
+                document.getElementById("alta").setAttribute("selected", "selected")
+            }
+        }
+    }
+
+
     var rangeValues =
     {
         "0": "Progresso: 0%",
