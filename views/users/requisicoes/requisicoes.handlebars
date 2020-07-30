@@ -151,7 +151,7 @@ calendarEl.style.display = "none";
 
     {{#ifUR}}
       <div class="col-md-8 text-right">
-        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddObra()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova requisição</button>  
+        <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddRequisicao()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova requisição</button>  
     </div>
     {{/ifUR}}
   </div>
@@ -239,6 +239,11 @@ calendarEl.style.display = "none";
   function saltaParaRequisicao(handle) {
     window.location.href = "/requisicao/" + handle.dataset.name;
   }
+
+  function saltaParaAddRequisicao(handle) {
+    window.location.href = "/requisicoes/addRequisicao";
+  }
+
 
   function lista() {
 

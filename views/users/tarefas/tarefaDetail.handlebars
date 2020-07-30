@@ -75,7 +75,7 @@
             {{#ifImAdmin}}
                 <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
-                        <h6 class="blockquote m-0">Despesa prevista</h6>
+                        <h6 class="blockquote m-0">Despesa prevista (mão de obra)</h6>
                     </div>
 
                     <div class="col-md-9 p-3">
@@ -83,13 +83,25 @@
                     </div>
                 </div>
 
+                {{#if requisicoes}}
+                    <div class="row mt-4 col-12" id="infoHover">
+                        <div class="col-md-3 p-3 text-left">
+                            <h6 class="blockquote m-0">Despesa prevista (requisições)</h6>
+                        </div>
+
+                        <div class="col-md-9 p-3">
+                            <label for="descricao" id="descricao" class="m-0">{{precoToString despesaRequisicoes}}</label>
+                        </div>
+                    </div>
+                {{/if}}
+
                 <div class="row mt-4 col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Orçamento</h6>
                     </div>
 
                     <div class="col-md-9 p-3">
-                        <label for="descricao" id="descricao" class="m-0">{{precoToString tarefa.orcamento}}</label>
+                        <label for="descricao" id="descricao" class="m-0">{{precoToStringSoma tarefa.orcamento orcamentoRequisicoes}}</label>
                     </div>
                 </div>
                 

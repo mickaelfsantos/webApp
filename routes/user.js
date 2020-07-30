@@ -50,7 +50,7 @@ router.get('/registo', function(req, res){
     res.render("users/registo")
 })
 
-router.post('/registo', function asyncFunction(req, res){
+router.post('/registo', upload.single("file"), function asyncFunction(req, res){
     var erros = new Object();
     var nomeF;
     var funcao;
@@ -138,11 +138,22 @@ router.post('/registo', function asyncFunction(req, res){
                         }
 
                         novoFunc.password = hash
-                        novoFunc.save().then(function(){
+                        novoFunc.save().then(function(funcionario){
+                            if(req.file){
+                                const tempPath = req.file.path;
+        
+                                fs.rename(tempPath, targetPath+"/"+funcionario._id + path.extname(req.file.originalname).toLowerCase(), function(err) {
+                                    if (err) 
+                                        console.log('ERROR: ' + err);
+                                    Funcionario.findOneAndUpdate({_id:funcionario._id}, 
+                                        {"$set": {"foto":  "/img/"+funcionario._id+path.extname(req.file.originalname).toLowerCase()}}, 
+                                        {useFindAndModify: false}).then()
+                                });
+                            }
                             req.flash("success_msg", "Registo concluído com sucesso.")
                             res.redirect("/login");
                         }).catch(function(erro){
-                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.1")
+                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
                             res.redirect("/registo");
                         })
                     })
@@ -280,6 +291,11 @@ router.get('/tarefa/:id', authenticated, function(req, res){
                 Funcionario.find({tarefas:tarefa._id}).lean().then(function(funcionarios){
                     Requisicao.find({tarefa:tarefa._id}).lean().then(function(requisicoes){
                         var reques = [];
+                        var despesaRequisicoes = 0;
+                        var orcamentoRequisicoes = 0;
+                        var despesaFinalRequisicoes = 0;
+                        var custoFinalRequisicoes = 0;
+                        
                         async function obtemDados(){
                             for(var i=0; i<requisicoes.length; i++){
                                 reques.push(requisicoes[i]);
@@ -289,9 +305,14 @@ router.get('/tarefa/:id', authenticated, function(req, res){
                                 await Maquina.findOne({_id:requisicoes[i].maquina}).lean().then(function(maquina){
                                     reques[i].maquinaNome = maquina.nome;
                                 })
+                                despesaRequisicoes += reques[i].despesa;
+                                orcamentoRequisicoes += reques[i].orcamento;
+                                despesaFinalRequisicoes += reques[i].despesaFinal;
+                                custoFinalRequisicoes += reques[i].custoFinal;
                             }
                             var t = JSON.stringify(tarefa);
-                            res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, t:t, funcionarios:funcionarios, requisicoes:reques})
+                            res.render("users/tarefas/tarefaDetail", {obra:obra, tarefa:tarefa, t:t, despesaRequisicoes:despesaRequisicoes, orcamentoRequisicoes:orcamentoRequisicoes,
+                                despesaFinalRequisicoes:despesaFinalRequisicoes, custoFinalRequisicoes:custoFinalRequisicoes, funcionarios:funcionarios, requisicoes:reques})
                         }
                         obtemDados();
                     }).catch(function(error){
@@ -393,6 +414,15 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
                         erros.dataInicio = "Data inválida. Data de início tem que ser superior ou igual à data atual e à data de inicio da obra.";
                     }
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                            erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
+                        else{
+                            if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                                erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+                        }
+                    }
+                    
                 }
             }
 
@@ -411,6 +441,14 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                 if(moment(dataFimTarefa).isValid()){
                     if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
                         erros.dataFinal = "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data de inicio da tarefa.";
+                    }
+                    else{
+                        if(moment(req.body.dataPrevistaFim).format("HH") >= 18 && moment(req.body.dataPrevistaFim).format("mm") > 00)
+                            erros.dataFinal = "Data invalida. A hora limite são 18:00h.";
+                        else{
+                            if(moment(req.body.dataPrevistaFim).format("HH") < 9 && moment(req.body.dataPrevistaFim).format("mm") <= 59)
+                                erros.dataFinal = "Data invalida. A hora limite são 9:00h.";
+                        }
                     }
                 }
             }
@@ -613,8 +651,17 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                                                 holidayFormat: 'YYYY-MM-DD',
                                                 workingWeekdays: [1, 2, 3, 4, 5]
                                             });
-                                                            
+
                                             var days = momentBD(tarefa.dataFim).businessDiff(moment(tarefa.dataInicio));
+                                            var alterou = false;
+
+                                            if(days == 0){
+                                                if(moment(tarefa.dataFim).format('HH') >= 14 && moment(tarefa.dataInicio).format('HH') <= 13){
+                                                    tarefa.dataFim = moment(tarefa.dataFim).subtract(1, 'hours')
+                                                    alterou = true;
+                                                }        
+                                            }
+                                                            
                                             var daysAux = days;
                                             var hours = momentBD(tarefa.dataFim).diff(moment(tarefa.dataInicio), 'days', true) % 1;
                                             if(hours != 0 && days != 0){
@@ -628,23 +675,36 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                                                 }
                                             }
                                             else{
-                                                for(var i=0; i<funcionarios.length; i++){
-                                                    cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
-                                                    issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                var dataPInicio = moment(tarefa.dataInicio).format("HH");
+                                                var dataPFim = moment(tarefa.dataFim).format("HH");
+                                                if(dataPInicio >=14 && dataPFim <= 13){
+                                                    for(var i=0; i<funcionarios.length; i++){
+                                                        cost = cost + ((days * 24 - (((daysAux-1) * 16) + 15)) * funcionarios[i].custo);
+                                                        issueCost = issueCost + ((days * 24 - (((daysAux-1) * 16) + 15)) * funcionarios[i].custo);
+                                                    }
+                                                }
+                                                else{
+                                                    if(dataPInicio <= 13 && dataPFim >= 14){
+                                                        for(var i=0; i<funcionarios.length; i++){
+                                                            cost = cost + ((days * 24 - (((daysAux-1) * 16) + 17)) * funcionarios[i].custo);
+                                                            issueCost = issueCost + ((days * 24 - (((daysAux-1) * 16) + 17)) * funcionarios[i].custo);
+                                                        }
+                                                    }
+                                                    else{
+                                                        for(var i=0; i<funcionarios.length; i++){
+                                                            cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                            issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                        }
+                                                    }
                                                 }
                                             }
             
-                                            var finishDate;
-                                            if(moment(obra.dataFim).isValid()){
-                                                if(moment(tarefa.dataFim).isAfter(obra.dataFim)){
-                                                    finishDate = tarefa.dataFim;
-                                                }
-                                                else{
-                                                    finishDate = obra.dataFim;
-                                                }
+                                            if(cost <= 0){
+                                                cost = 0.01;
                                             }
-                                            else{
-                                                finishDate = tarefa.dataFim;
+                                            
+                                            if(issueCost <= 0){
+                                                issueCost = 0.01;
                                             }
 
                                             Tarefa.findOneAndUpdate({_id:req.params.id},
@@ -656,7 +716,7 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
            
                                             Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
                                                 if(tarefas.length > 0){
-                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
                                                         "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
                                                         if(obra == null){  
                                                             req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
@@ -673,7 +733,7 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                                                     })
                                                 }
                                                 else{
-                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
+                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
                                                         "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
                                                         {useFindAndModify: false}).lean().then(function(obra){
                                                         if(obra == null){  
@@ -765,19 +825,6 @@ router.post('/tarefa/:id/requisitarMaquina', authenticated, function asyncFuncti
                 var dataFim;
                 var maquina;
                 var descricao;
-                if(!req.body.dataPrevistaInicio){
-                    erros.dataInicio = "Datas obrigatórias. Preencha data prevista de início.";
-                }
-                else{
-                    dataInicio = req.body.dataPrevistaInicio;
-                }
-
-                if(!req.body.dataPrevistaFim){
-                    erros.dataFinal = "Datas obrigatórias. Preencha data prevista de fim.";
-                }
-                else{
-                    dataFim = req.body.dataPrevistaFim;
-                }
 
                 if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
                     erros.descricao = "Descrição inválida.";
@@ -791,14 +838,43 @@ router.post('/tarefa/:id/requisitarMaquina', authenticated, function asyncFuncti
                     }
                 }
 
+                if(!req.body.dataPrevistaInicio){
+                    erros.dataInicio = "Datas obrigatórias. Preencha data prevista de início.";
+                }
+                else{
+                    if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                        erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                            erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+                        else
+                        dataInicio = req.body.dataPrevistaInicio;
+                    }
+                }
+
+                if(!req.body.dataPrevistaFim){
+                    erros.dataFinal = "Datas obrigatórias. Preencha data prevista de fim.";
+                }
+                else{
+                    if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                        erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                            erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+                        else
+                            dataFim = req.body.dataPrevistaFim;
+                    }
+                }
+
                 if(Object.keys(erros).length != 0){
                     if(!dataInicio){
                         dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
                         if(moment(dataInicio).isBefore(moment()))
                             dataInicio = moment().format("YYYY-MM-DDTHH:mm")
                     }
-                    maquina = req.body.maquinas;
-                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
+                    maquina = JSON.stringify(req.body.maquinas);
+                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas, 
+                        maquina:maquina})
                 }
                 else{
                     Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
@@ -968,101 +1044,102 @@ router.get('/perfil/edit', authenticated, function(req, res){
     })
 })
 
-router.post('/perfil/edit', authenticated, function asyncFunction(req, res){
-    var erros = new Object();
+router.post('/perfil/edit', upload.single("file"), authenticated, function asyncFunction(req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function (funcionario){
+        var erros = new Object();
 
-    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
-        erros.nome = "Nome inválido.";
-    }else{
-        if(req.body.nome.trim().length < 2){
-            erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
-        }
-        else{
-            funcionario.nome = req.body.nome;
-        }
-    }
-
-    if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
-        erros.email = "Email inválido.";
-    }else{
-        funcionario.email = req.body.email;
-    }
-    
-
-    if(req.body.password){
-        if(req.body.password.length < 5){
-            erros.password = "Password curta. Mínimo 5 caracteres.";
-        }
-            
-        if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
-            erros.password2 = "Uma vez que pretende alterar a palavra-pass, a confirmação é obrigatório.";
-        }
-        else{
-            if(req.body.password != req.body.password2){
-                erros.password = "As passwords não correspondem.";
+        if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+            erros.nome = "Nome inválido.";
+        }else{
+            if(req.body.nome.trim().length < 2){
+                erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
             }
-        }         
-    }
-
+            else{
+                funcionario.nome = req.body.nome;
+            }
+        }
     
-    if(Object.keys(erros).length != 0){
-        Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
-            res.render("users/perfil/editarPerfil", {erros:erros, funcionario:funcionario})
-        }).catch(function(error){
-            req.flash("error_msg", "Erro ao fazer o GET do funcionário.")
-            res.redirect("/perfil");
-        })
-    }
-    else{
-        Funcionario.findOneAndUpdate({_id:req.user.id},
-            {"$set": {
-                "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                "email": req.body.email
-                }}, {useFindAndModify: false}).lean().then(function(funcionario){
-                if(req.body.password){
-                    funcionario.password = req.body.password;
-                    bcrypt.genSalt(10, function(erro, salt){
-                         bcrypt.hash(funcionario.password, salt, function(erro, hash){
-                            if(erro){
-                                req.flash("error_msg", "Erro ao alterar a palavra passe.")
-                                res.redirect("/perfil/edit");
-                            }
-                            
-                            var password = hash
-                            Funcionario.updateOne(
-                                {"_id":funcionario._id},
-                                {$set: {password : password}},
-                                ).catch(function(erro){
-                                    req.flash("error_msg", "Erro ao atualizar o perfil.")
-                                    res.redirect('/obras/');
-                                });
-                        })
-                    })
+        if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
+            erros.email = "Email inválido.";
+        }else{
+            funcionario.email = req.body.email;
+        }
+        
+    
+        if(req.body.password){
+            if(req.body.password.length < 5){
+                erros.password = "Password curta. Mínimo 5 caracteres.";
+            }
+                
+            if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
+                erros.password2 = "Uma vez que pretende alterar a palavra-pass, a confirmação é obrigatório.";
+            }
+            else{
+                if(req.body.password != req.body.password2){
+                    erros.password = "As passwords não correspondem.";
                 }
-                        
-                req.flash("success_msg", "Perfil editado com sucesso.")
-                res.redirect("/perfil");
-        }).catch(function(error){
-            req.flash("error_msg", "Já existe um cliente com este email.")
-            res.redirect("/perfil/edit");
-        })
-    }
-})
-
-router.post('/perfil/editFoto', upload.single("file"), authenticated, function asyncFunction(req, res) {
+            }         
+        }
     
-    const tempPath = req.file.path;
+        
+        if(Object.keys(erros).length != 0){
+            Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+                res.render("users/perfil/editarPerfil", {erros:erros, funcionario:funcionario})
+            }).catch(function(error){
+                req.flash("error_msg", "Erro ao fazer o GET do funcionário.")
+                res.redirect("/perfil");
+            })
+        }
+        else{
+            Funcionario.findOneAndUpdate({_id:req.user.id},
+                {"$set": {
+                    "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    "email": req.body.email
+                    }}, {useFindAndModify: false}).lean().then(function(funcionario){
+                    if(req.body.password){
+                        funcionario.password = req.body.password;
+                        bcrypt.genSalt(10, function(erro, salt){
+                             bcrypt.hash(funcionario.password, salt, function(erro, hash){
+                                if(erro){
+                                    req.flash("error_msg", "Erro ao alterar a palavra passe.")
+                                    res.redirect("/perfil/edit");
+                                }
+                                
+                                var password = hash
+                                Funcionario.updateOne(
+                                    {"_id":funcionario._id},
+                                    {$set: {password : password}},
+                                    ).catch(function(erro){
+                                        req.flash("error_msg", "Erro ao atualizar o perfil.")
+                                        res.redirect('/obras/');
+                                    });
+                            })
+                        })
+                    }
 
-    fs.rename(tempPath, targetPath+"/"+req.user.id + path.extname(req.file.originalname).toLowerCase(), function(err) {
-        if (err) 
-            console.log('ERROR: ' + err);
-        Funcionario.findOneAndUpdate({_id:req.user.id}, 
-            {"$set": {"foto":  "/img/"+req.user.id+path.extname(req.file.originalname).toLowerCase()}}, 
-            {useFindAndModify: false}).then(function(funcionario){
-                req.flash("success_msg", "Foto de perfil alterada com sucesso.")
-                res.redirect("/perfil")
-        })
-    });
+                    if(req.file){
+                        const tempPath = req.file.path;
+
+                        fs.rename(tempPath, targetPath+"/"+req.user.id + path.extname(req.file.originalname).toLowerCase(), function(err) {
+                            if (err) 
+                                console.log('ERROR: ' + err);
+                            Funcionario.findOneAndUpdate({_id:req.user.id}, 
+                                {"$set": {"foto":  "/img/"+req.user.id+path.extname(req.file.originalname).toLowerCase()}}, 
+                                {useFindAndModify: false}).then()
+                        });
+                    }
+                            
+                    req.flash("success_msg", "Perfil editado com sucesso.")
+                    res.redirect("/perfil");
+            }).catch(function(error){
+                req.flash("error_msg", "Já existe um cliente com este email.")
+                res.redirect("/perfil/edit");
+            })
+        }
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard")
+    })
 })
 
 router.get('/requisicoes', authenticated, function(req, res){
@@ -1088,6 +1165,242 @@ router.get('/requisicoes', authenticated, function(req, res){
     }).catch(function(error){
         req.flash("error_msg", "Requisições não encontradas.")
         res.redirect('/dashboard')
+    })
+})
+
+router.get('/requisicoes/addRequisicao', authenticated, function (req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.find({ $and: [{_id : funcionario.tarefas}, {$or: [{estado: "associada"}, {estado: "recusada"}]}]}).lean().then(function(tarefas){
+            Maquina.find().lean().then(function(maquinas){
+                res.render("users/requisicoes/novaRequisicaoSemTarefa", {tarefas:tarefas, maquinas:maquinas})
+            }).catch(function(error){
+                req.flash("error_msg", "Máquinas não encontradas.")
+                res.redirect("/requisicoes")
+            })
+        }).catch(function(error){
+            req.flash("error_msg", "Tarefas não encontradas")
+            res.redirect("/requisicoes")
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard")
+    })
+})
+
+router.post('/requisicoes/addRequisicao', authenticated, function asyncFunction (req, res){
+    Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
+        Tarefa.findOne({$and: [{nome:req.body.tarefas}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
+            Tarefa.find({ $and: [{_id : funcionario.tarefas}, {$or: [{estado: "associada"}, {estado: "recusada"}]}]}).lean().then(function(tarefas){
+                Maquina.find({}).lean().then(function(maquinas){
+                    var erros = new Object();
+                    var dataInicio;
+                    var dataFim;
+                    var maquina;
+                    var descricao;
+    
+                    if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
+                        erros.descricao = "Descrição inválida.";
+                    }
+                    else{
+                        if(req.body.descricao.trim().length < 3){
+                            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
+                        }
+                        else{
+                            descricao = req.body.descricao;
+                        }
+                    }
+    
+                    if(!req.body.dataPrevistaInicio){
+                        erros.dataInicio = "Datas obrigatórias. Preencha data prevista de início.";
+                    }
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                            erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
+                        else{
+                            if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                                erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+                            else
+                            dataInicio = req.body.dataPrevistaInicio;
+                        }
+                    }
+    
+                    if(!req.body.dataPrevistaFim){
+                        erros.dataFinal = "Datas obrigatórias. Preencha data prevista de fim.";
+                    }
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                            erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
+                        else{
+                            if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                                erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+                            else
+                                dataFim = req.body.dataPrevistaFim;
+                        }
+                    }
+    
+                    if(Object.keys(erros).length != 0){
+                        if(!dataInicio){
+                            dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                            if(moment(dataInicio).isBefore(moment()))
+                                dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                        }
+                        maquina = JSON.stringify(req.body.maquina);
+                        tarefa = JSON.stringify(req.body.tarefas);
+                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, tarefas:tarefas,
+                            maquinas:maquinas, maquina:maquina})
+                    }
+                    else{
+                        Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
+                            Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
+                                var today = moment().format("YYYY-MM-DD HH:mm");
+                                var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                                var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                        
+                                
+                                dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
+                                dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
+            
+                                if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
+                                    if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true){
+                                    
+                                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                        if(moment(dataInicio).isBefore(moment()))
+                                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                                        
+                                        erros.dataInicio = "Data inválida. Data de inicio tem que ser superior à data de inicio da tarefa e à data atual.";
+                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
+                                    }
+                                    else{
+                                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                        if(moment(dataInicio).isBefore(moment()))
+                                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+    
+                                        if(moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                            erros.dataFinal = "Data inválida. Data de fim tem que ser superior à data de inicio.";
+                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})    
+                                        }
+                                        else{
+                                            var invalid = false;
+                                            var elimina = false;
+                                            var paraEliminar = [];
+                                            for(var i=0; i<requisicoes.length; i++){
+                                                var data = moment().add(7, 'days')
+                                                if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
+                                                }
+                                                if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
+                                                }
+                        
+                                                if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
+                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
+                                                }
+        
+                                                if(elimina){
+                                                    paraEliminar.push(requisicoes[i]);
+                                                    elimina = false;
+                                                }
+                                            }
+                                                    
+                                            if(invalid){
+                                                erros.dataInicio = "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário).";
+                                                res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                            }
+                                            else{
+                                                var transporter = nodemailer.createTransport({
+                                                    service: 'gmail',
+                                                    auth: {
+                                                        user: 'webappisec@gmail.com',
+                                                        pass: 'mickaelsantos'
+                                                    }
+                                                });
+        
+                                                async function enviaMails(){
+                                                    for(var i=0; i<paraEliminar.length; i++){
+                                                        await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
+                                                            var mailOptions = {
+                                                                from: '"WebApp" webappisec@gmail.com',
+                                                                to: funcionario.email,
+                                                                subject: 'Cancelamento de requisição.',
+                                                                text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
+                                                                    moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
+                                                                    moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
+                                                                };
+                                                                      
+                                                                transporter.sendMail(mailOptions, function(error, info){
+                                                                    if (error)
+                                                                        console.log(error);
+                                                                });
+                                                            Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
+                                                        })
+                                                    }
+            
+                                                    var novaRequisicao = {
+                                                        maquina: maquina._id,
+                                                        funcionario : funcionario._id,
+                                                        tarefa: tarefa._id,
+                                                        descricao:descricao,
+                                                        dataPrevistaFim: req.body.dataPrevistaFim,
+                                                        dataPrevistaInicio: req.body.dataPrevistaInicio
+                                                    }
+                                                    new Requisicao(novaRequisicao).save().then();
+            
+                                                    req.flash("success_msg", "Requisição concluída com sucesso.")
+                                                    res.redirect("/tarefa/"+req.params.id);
+                                                }
+                                                enviaMails();
+                                            }
+                                        }
+                                    }
+                                }
+                                else{
+                                    erros.dataInicio = "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim.";
+                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                } 
+                            }).catch(function(error){
+                                req.flash("error_msg", "Tarefas não encontradas.")
+                                res.redirect("/tarefa/"+req.params.id)
+                            })
+                        }).catch(function(error){
+                            req.flash("error_msg", "Máquina não encontrada.")
+                            res.redirect("/tarefa/"+req.params.id)
+                        })
+                    }
+                }).catch(function(error){
+                    req.flash("error_msg", "Máquinas não encontradas.")
+                    res.redirect("/tarefa/"+req.params.id)
+                })
+                
+            }).catch(function(error){
+                req.flash("error_msg", "Tarefas não encontradas")
+                res.redirect("/tarefas")
+            })
+        }).catch(function(error){
+            req.flash("error_msg", "Não tem permissões para requisitar máquinas nesta tarefa.")
+            res.redirect("/tarefas")
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Funcionário não encontrado.")
+        res.redirect("/dashboard")
     })
 })
 
@@ -1340,13 +1653,6 @@ async function getFuncionarios(funcionarios, f){
         })
     }
     return a;
-}
-
-async function countWeekendDays( d0, d1, d2, d3 )
-{
-  var ndays = 1 + Math.round((d1.getTime()-d0.getTime())/(24*3600*1000));
-  var nsaturdays = Math.floor( (d2+ndays) / 7 );
-  return 2*nsaturdays + (d0.getDay()==0) - (d1.getDay()==6);
 }
 
 module.exports = router

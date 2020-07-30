@@ -11,42 +11,56 @@
                 <label for="nome">Nome*</label>
 
                 {{#if erros.nome}}
-                    <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control is-invalid" required>
+                    <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control is-invalid">
                     <div class="invalid-feedback mb-4">
                         {{erros.nome}}
                     </div>
                 {{else}}
-                    <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4" required>
+                    <input type="text" id="nome" name="nome" value="{{nomeT}}"placeholder="Nome da tarefa" class="form-control mb-4">
                 {{/if}}
 
                 <label for="descricao">Descrição*</label>
                 {{#if erros.descricao}}
-                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra">{{descricao}}</textarea>
                     <div class="invalid-feedback mb-4">
                         {{erros.descricao}}
                     </div>
                 {{else}}
-                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra">{{descricao}}</textarea>
                 {{/if}}
 
-                <div class="form-group">
+                <div class="form-group mb-4">
                     <label for="obra">Obra a que esta tarefa pertence*</label>
-                    <select class="form-control mb-4" id="obras" name="obras" required>
+                    <select class="form-control" id="obras" name="obras" required>
                         {{#each obras}}
                             <option id="{{nome}}">{{nome}}</option>
                         {{/each}}
                     </select>
                 </div>
-                <br>
+                
 
 
-                <div class="form-group mb-4">
-                    <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios" required>
-                        {{#each funcionarios}}
-                            <option value="{{nome}}" id="{{nome}}" data-img="{{foto}}">{{nome}}</option>
-                        {{/each}}
-                    </select>
-                </div>
+                {{#if erros.funcionarios}}
+                    <div class="form-group is-invalid">
+                        <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios">
+                            {{#each funcionarios}}
+                                <option value="{{nome}}" id="{{nome}}" data-img="{{foto}}">{{nome}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.funcionarios}}
+                    </div>
+                {{else}}
+                    <div class="form-group mb-4">
+                        <select multiple class="form-control multiselect" id="funcionarios" name="funcionarios">
+                            {{#each funcionarios}}
+                                <option value="{{nome}}" id="{{nome}}" data-img="{{foto}}">{{nome}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                {{/if}}
+                
 
 
                 <label for="dataPrevistaInicio">Data prevista para inicio</label>

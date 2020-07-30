@@ -209,6 +209,14 @@
                 return parseFloat(numero).toFixed(2)+"€";
             },
 
+            
+            precoToStringSoma: function(numero1, numero2){
+                if(numero1 + numero2 == 0)
+                    return "Por definir";
+                return parseFloat(numero1 + numero2).toFixed(2)+"€";
+            },
+            
+
             ifUR: function(options){
                 if(u){
                     if(u.role === "admin" || u.role === "userResponsavel") {

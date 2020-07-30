@@ -7,6 +7,11 @@ const Maquina = new Schema({
         required: true,
         unique: true
     },
+    
+    funcao: {
+        type: String,
+        required: true
+    },
 
     departamento: {
         type: String,

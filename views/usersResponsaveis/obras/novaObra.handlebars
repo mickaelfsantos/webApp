@@ -7,23 +7,23 @@
                 
                 <label for="nome">Nome*</label>
                 {{#if erros.nome}}
-                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control is-invalid" required>
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control is-invalid">
                     <div class="invalid-feedback mb-4">
                         {{erros.nome}}
                     </div>
                 {{else}}
-                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control mb-4" required>
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control mb-4">
                 {{/if}}
                 
 
                 <label for="descricao">Descrição*</label>
                 {{#if erros.descricao}}
-                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra">{{descricao}}</textarea>
                     <div class="invalid-feedback mb-4">
                         {{erros.descricao}}
                     </div>
                 {{else}}
-                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra" required>{{descricao}}</textarea>
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição da obra">{{descricao}}</textarea>
                 {{/if}}
                 
                 <label for="dataPrevistaInicio">Data prevista para inicio</label>

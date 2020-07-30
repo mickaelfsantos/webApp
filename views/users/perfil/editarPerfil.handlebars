@@ -1,3 +1,6 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+
 <div class="container-fluid pr-4 pl-4">
     <h2 id="nomeFuncionario">Editar perfil</h2>
     
@@ -5,7 +8,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-            <form action="/perfil/edit" method="POST">
+            <form action="/perfil/edit" enctype="multipart/form-data" method="POST">
                 <input type="hidden" id="id" value="{{funcionario._id}}">
 
                 <label for="nome">Nome*</label>
@@ -48,16 +51,9 @@
                     <input type="password" id="password2" name="password2" class="form-control mb-4">
                 {{/if}}
                 
-                <div class="row justify-content-end">
-                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
-                    <button type="button" onclick="saltaParaPerfil()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
-                </div>
-            </form>
-
-            <form action="/perfil/editFoto" enctype="multipart/form-data" method="POST">
                 <label for="foto">Foto de perfil</label>
                 <input type="file" class="form-control-file mb-4" name="file" id="file" placeholder="Foto">
-
+                
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
                     <button type="button" onclick="saltaParaPerfil()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
@@ -71,4 +67,5 @@
     function saltaParaPerfil(){
         window.location.href = "/perfil";
     }
+
 </script>

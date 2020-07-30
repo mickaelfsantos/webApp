@@ -8,33 +8,44 @@
             <form action="/maquinas/add" method="POST">
                 <label for="nome">Nome*</label>
                 {{#if erros.nome}}
-                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control is-invalid" required>
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da máquina" class="form-control is-invalid">
                     <div class="invalid-feedback mb-4">
                         {{erros.nome}}
                     </div>
                 {{else}}
-                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control mb-4" required>
+                    <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da máquina" class="form-control mb-4">
+                {{/if}}
+
+
+                <label for="departamento">Função*</label>
+                {{#if erros.funcao}}
+                    <input type="text" id="funcao" name="funcao" value="{{funcao}}" placeholder="Função da máquina" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.funcao}}
+                    </div>
+                {{else}}
+                    <input type="text" id="funcao" name="funcao" value="{{funcao}}" placeholder="Função da máquina" class="form-control mb-4">
                 {{/if}}
                 
                 <label for="departamento">Departamento*</label>
                 {{#if erros.departamento}}
-                    <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control is-invalid" required>
+                    <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control is-invalid">
                     <div class="invalid-feedback mb-4">
                         {{erros.departamento}}
                     </div>
                 {{else}}
-                    <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control mb-4" required>
+                    <input type="text" id="departamento" name="departamento" value="{{departamento}}" placeholder="Departamento da obra" class="form-control mb-4">
                 {{/if}}
 
                 {{#ifImAdmin}}
                     <label for="custo">Custo por hora (€)*</label>
                     {{#if erros.custo}}
-                        <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo da máquina" class="form-control is-invalid" required>
+                        <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo da máquina" class="form-control is-invalid">
                         <div class="invalid-feedback mb-4">
                             {{erros.custo}}
                         </div>
                     {{else}}
-                        <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo da máquina" class="form-control mb-4" required>
+                        <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo da máquina" class="form-control mb-4">
                     {{/if}}
                 {{/ifImAdmin}}
                 

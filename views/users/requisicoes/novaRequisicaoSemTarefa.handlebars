@@ -6,6 +6,16 @@
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
             <form action="" name="getTarefa" method="POST">
                 <input type="hidden" name="{{tarefa._id}}" id="id" value="{{tarefa._id}}">
+                
+                <div class="form-group">
+                    <label for="tarefa">Tarefa*</label>
+                    <select class="form-control" id="tarefas" name="tarefas" required>
+                        {{#each tarefas}}
+                            <option id="{{nome}}">{{nome}}</option>
+                        {{/each}}
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="maquina">Máquina*</label>
                     <select class="form-control" id="maquinas" name="maquinas" required>
@@ -73,6 +83,7 @@
     window.onload = function() {
         var tarefa = document.getElementById("id").getAttribute("value");
         document.getTarefa.action = "/tarefa/"+tarefa+"/requisitarMaquina";
+        console.log(tarefa)
     };
 
 
@@ -82,5 +93,8 @@
     }
 
     var maquina = {{{maquina}}};
+    var tarefa = {{{tarefa}}};
+    
     document.getElementById(maquina).setAttribute("selected", "selected");
+    document.getElementById(tarefa).setAttribute("selected", "selected");
 </script>

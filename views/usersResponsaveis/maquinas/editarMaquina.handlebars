@@ -23,6 +23,16 @@
                     <input type="text" id="nome" name="nome" value="{{maquina.nome}}" class="form-control mb-4">
                 {{/if}}
 
+                <label for="departamento">Função*</label>
+                {{#if erros.funcao}}
+                    <input type="text" id="funcao" name="funcao" value="{{funcao}}" placeholder="Função da máquina" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.funcao}}
+                    </div>
+                {{else}}
+                    <input type="text" id="funcao" name="funcao" value="{{funcao}}" placeholder="Função da máquina" class="form-control mb-4">
+                {{/if}}
+
                 <label for="departamento">Departamento*</label>
                 {{#if erros.departamento}}
                     <input type="text" id="departamento" name="departamento" value="{{maquina.departamento}}" class="form-control is-invalid">

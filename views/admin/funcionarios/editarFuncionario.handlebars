@@ -70,14 +70,15 @@
  <script>
 
     var role = document.getElementById('role').getAttribute("value");
-    if(role == "Funcionário"){
+    console.log(role)
+    if(role == "user"){
         document.getElementById("user").setAttribute("selected", "selected")
     }else{
-        if(role == "Chefe de equipa"){
+        if(role == "userResponsavel"){
             document.getElementById("userResponsavel").setAttribute("selected", "selected")
         }
         else{
-            if(role == "Administrador"){    
+            if(role == "admin"){    
                 document.getElementById("admin").setAttribute("selected", "selected")
             }
         }

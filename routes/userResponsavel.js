@@ -69,7 +69,14 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
                 erros.datas = "Data invalida. Data de inicio tem que ser uma data supeior à data de hoje.";
             }
             else{
-                data = req.body.dataPrevistaInicio;
+                if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                    erros.datas = "Data invalida. A hora limite são 18:00h.";
+                else{
+                    if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                        erros.datas = "Data invalida. A hora limite são 9:00h.";
+                    else
+                        data = req.body.dataPrevistaInicio;
+                }
             }
         }
     }
@@ -178,7 +185,14 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
                     erros.datas = "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra.";
                 }
                 else{
-                    data = req.body.dataPrevistaInicio
+                    if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                        erros.datas = "Data invalida. A hora limite são 18:00h.";
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                            erros.datas = "Data invalida. A hora limite são 9:00h.";
+                        else
+                            data = req.body.dataPrevistaInicio;
+                    }
                 }
             }
         }
@@ -190,7 +204,10 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
             if(Object.keys(erros).length != 0){ 
                 Funcionario.find().then(function(funcionarios){
                     var importancia = req.body.importancia;
-                    var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
+                    if(req.body.funcionarios)
+                        var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
+                    else
+                        var funcionariosSelecionados = JSON.stringify(null);
                     res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionariosSelecionados: funcionariosSelecionados, importancia:importancia, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
                         funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
                 }).catch(function(err){
@@ -617,6 +634,7 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                             var cost = obra.despesa;
                                             var issueCost = 0;
 
+                                            
                                             if(moment(tarefa.dataPrevistaInicio).isValid() && moment(tarefa.dataPrevistaFim).isValid()){
                                                 var expectedIssueStartDateYear = moment(tarefa.dataPrevistaInicio).format("YYYY");
                                                 var expectedIssueFinishDateYear = moment(tarefa.dataPrevistaFim).format("YYYY");
@@ -666,6 +684,15 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                 });
                                                 
                                                 var days = momentBD(tarefa.dataPrevistaFim).businessDiff(moment(tarefa.dataPrevistaInicio));
+                                                var alterou = false;
+
+                                                if(days == 0){
+                                                    if(moment(tarefa.dataPrevistaFim).format('HH') >= 14 && moment(tarefa.dataPrevistaInicio).format('HH') <= 13){
+                                                        tarefa.dataPrevistaFim = moment(tarefa.dataPrevistaFim).subtract(1, 'hours')
+                                                        alterou = true;
+                                                    }
+                                                    
+                                                }
                                                 var daysAux = days;
                                                 var hours = momentBD(tarefa.dataPrevistaFim).diff(moment(tarefa.dataPrevistaInicio), 'days', true) % 1;
                                                 if(hours != 0 && days != 0){
@@ -676,20 +703,43 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                     for(var i=0; i<funcionarios.length; i++){
                                                         cost = cost + ((days * 24) * funcionarios[i].custo);
                                                         issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
-                                                    }
+                                                    }                                                    
                                                 }
                                                 else{
-                                                    for(var i=0; i<funcionarios.length; i++){
-                                                        cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
-                                                        issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                    var dataPInicio = moment(tarefa.dataPrevistaInicio).format("HH");
+                                                    var dataPFim = moment(tarefa.dataPrevistaFim).format("HH");
+                                                    if(dataPInicio >=14 && dataPFim <= 13){
+                                                        for(var i=0; i<funcionarios.length; i++){
+                                                            cost = cost + ((days * 24 - (((daysAux-1) * 16) + 15)) * funcionarios[i].custo);
+                                                            issueCost = issueCost + ((days * 24 - (((daysAux-1) * 16) + 15)) * funcionarios[i].custo);
+                                                        }
+                                                    }
+                                                    else{
+                                                        if(dataPInicio <= 13 && dataPFim >= 14){
+                                                            for(var i=0; i<funcionarios.length; i++){
+                                                                cost = cost + ((days * 24 - (((daysAux-1) * 16) + 17)) * funcionarios[i].custo);
+                                                                issueCost = issueCost + ((days * 24 - (((daysAux-1) * 16) + 17)) * funcionarios[i].custo);
+                                                            }
+                                                        }
+                                                        else{
+                                                            for(var i=0; i<funcionarios.length; i++){
+                                                                cost = cost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                                issueCost = issueCost + ((days * 24 - (daysAux * 16)) * funcionarios[i].custo);
+                                                            }
+                                                        }
                                                     }
                                                 }
-                                                if(cost < 0){
+                                                
+                                                if(cost <= 0){
                                                     cost = 0.01;
                                                 }
                                                 
-                                                if(issueCost < 0){
+                                                if(issueCost <= 0){
                                                     issueCost = 0.01;
+                                                }
+                                                if(alterou == true){
+                                                    tarefa.dataPrevistaFim = moment(tarefa.dataPrevistaFim).add(1, 'hours')
+                                                    alterou = false;
                                                 }
                                                 var expectedFinishDate = tarefa.dataPrevistaFim;
 
@@ -766,19 +816,44 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                     }
                                                     else{
                                                         if(obra.estado == "preOrcamento"){
-                                                            Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaFim": expectedFinishDate, 
-                                                                "estado": "aAguardarResposta", "orcamento" : cost + cost * (obra.percentagemLucro / 100)}}, 
-                                                                {useFindAndModify: false}).lean().then(function(obra){
-                                                                if(obra == null){  
-                                                                    req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                            Tarefa.find({obra: obra._id}).lean().then(function(tarefas){
+                                                                var data = moment(tarefas[0].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+                                                                async function obtemData(){
+                                                                    for(var i=0; i<tarefas.length; i++){
+                                                                        await Requisicao.find({tarefa:tarefas[i]._id}).then(function(requisicoes){
+                                                                            for(var j=0; j<requisicoes.length; j++){
+                                                                                var dataProx = moment(requisicoes[i].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+                                                                                if(moment(data).isAfter(dataProx)){
+                                                                                    data = dataProx;
+                                                                                }
+                                                                            }
+                                                                            var dataProx = moment(tarefas[i].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+                                                                            if(moment(data).isAfter(dataProx)){
+                                                                                data = dataProx;
+                                                                            }
+                                                                        })
+                                                                    }
+
+                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaInicio": data, 
+                                                                    "dataPrevistaFim": expectedFinishDate, "estado": "aAguardarResposta", 
+                                                                    "orcamento" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                                    {useFindAndModify: false}).lean().then(function(obra){
+                                                                        if(obra == null){  
+                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                            res.redirect("/tarefa/"+req.params.id);
+                                                                        }
+                                                                        else{
+                                                                            req.flash("success_msg", "Tarefa validada com sucesso")
+                                                                            res.redirect("/tarefa/"+req.params.id);
+                                                                        }
+                                                                    }).catch(function(error){
+                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    })
                                                                 }
-                                                                else{
-                                                                    req.flash("success_msg", "Tarefa validada com sucesso")
-                                                                    res.redirect("/tarefa/"+req.params.id);
-                                                                }
+                                                                obtemData();
                                                             }).catch(function(error){
-                                                                req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                req.flash("error_msg", "Tarefas não encontradas.")
                                                                 res.redirect("/tarefa/"+req.params.id);
                                                             })
                                                         }
@@ -953,6 +1028,10 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
         }
     }
 
+    if(!req.body.funcionarios || typeof req.body.funcionarios == undefined || req.body.funcionarios == null){
+        erros.funcionarios = "Funcionários inválidos.";
+    }
+
     Obra.findOne({nome:req.body.obras}).lean().then(function(obra){
         if(req.body.dataPrevistaInicio){
             var today = moment().format("YYYY-MM-DD HH:mm");
@@ -964,7 +1043,14 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
                     erros.datas = "Data inválida. Data tem que ser superior à data de hoje e superior à data de inicio da obra.";
                 }
                 else{
-                    var data = req.body.dataPrevistaInicio
+                    if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                        erros.datas = "Data invalida. A hora limite são 18:00h.";
+                    else{
+                        if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                            erros.datas = "Data invalida. A hora limite são 9:00h.";
+                        else
+                            data = req.body.dataPrevistaInicio
+                    }
                 }
             }
         }
@@ -977,8 +1063,11 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
                 Funcionario.find().then(function(funcionarios){
                     Obra.find({estado:"preOrcamento"}).lean().then(function(obras){
                         importancia = req.body.importancia
-                        var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
-                        obra = JSON.stringify(obra);
+                        if(req.body.funcionarios)
+                            var funcionariosSelecionados = JSON.stringify(req.body.funcionarios);
+                        else
+                            var funcionariosSelecionados = JSON.stringify(null);
+                        
                         res.render("usersResponsaveis/tarefas/novaTarefaSemObra", {obra:obra, importancia:importancia, funcionariosSelecionados:funcionariosSelecionados, 
                             obras:obras, erros: erros, data:data, descricao:descricao, nomeT:nomeT,
                             funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
@@ -1113,7 +1202,7 @@ router.get('/funcionario/:id', authenticated, admin, function(req, res){
 
 router.get('/funcionario/:id/edit', authenticated, admin, function(req, res){
     Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
-        res.render("admin/funcionarios/editarFuncionario", {funcionario:funcionario})
+        res.render("admin/funcionarios/editarFuncionario", {funcionario:funcionario, role:funcionario.role})
     }).catch(function(erro){
         req.flash("error_msg", "Funcionario não encontrado")
         res.redirect("/funcionarios");
@@ -1141,6 +1230,12 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
     }
     
     var role = req.body.role;
+    if(role == "Funcionário")
+            role = "user"
+        if(role == "Chefe de equipa")
+            role = "userResponsavel"
+        if(role == "Administrador")
+            role = "admin"
 
     if(Object.keys(erros).length != 0){
         Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
@@ -1150,14 +1245,7 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
             res.redirect("/funcionarios");
         })
     }
-    else{
-        if(role == "Funcionário")
-            role = "user"
-        if(role == "Chefe de equipa")
-            role = "userResponsavel"
-        if(role == "Administrador")
-            role = "admin"
-        
+    else{        
 
         Funcionario.findOneAndUpdate({_id:req.params.id},
             {"$set": {
@@ -1294,6 +1382,12 @@ router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunct
         }
     }
     
+    if(!req.body.funcao || typeof req.body.funcao == undefined || req.body.funcao == null){
+        erros.funcao = "Função inválida";
+    } else{
+        funcao = req.body.funcao
+    }
+
     if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
         erros.departamento = "Departamento inválida";
     } else{
@@ -1310,13 +1404,14 @@ router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunct
 
 
     if(Object.keys(erros).length != 0){
-        res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, custo:custo, departamento:departamento})
+        res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, custo:custo, funcao:funcao, departamento:departamento})
     }
     else{
         var novaMaquina;
         novaMaquina = {
             nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-            departamento: req.body.departamento.replace(/\s\s+/g, ' ').replace(/\s*$/,'')
+            funcao: req.body.funcao,
+            departamento: req.body.departamento
         }
         if(req.user.role == "admin"){
             novaMaquina.custo = custo;
@@ -1326,7 +1421,7 @@ router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunct
             res.redirect("/maquinas");
         }).catch(function(erro){
             erros.nome = "Já existe uma máquina com o mesmo nome ou houve um erro ao adicionar a máquina. Tente novamente.";
-            res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, departamento:departamento})
+            res.render("usersResponsaveis/maquinas/novaMaquina", {erros: erros, nomeO:nomeO, funcao:funcao, departamento:departamento})
         })
     
     }
@@ -1367,6 +1462,12 @@ router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncF
             }
         }
 
+        if(!req.body.funcao || typeof req.body.funcao == undefined || req.body.funcao == null){
+            erros.funcao = "Função inválido.";
+        }else{
+            maquina.funcao = req.body.funcao;
+        }
+
         if(!req.body.departamento || typeof req.body.departamento == undefined || req.body.departamento == null){
             erros.departamento = "Departamento inválido.";
         }else{
@@ -1396,6 +1497,7 @@ router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncF
                     {"$set": {
                         "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                         "departamento": req.body.departamento,
+                        "funcao": req.body.funcao,
                         "custo": custo
                         }}, {useFindAndModify: false}).then(function(){
                         req.flash("success_msg", "Máquina editada com sucesso")

@@ -5,8 +5,9 @@
     </div>
     <div class="card mt-5 mb-5">
         <div class="card-body">
-            <form action="/registo" method="POST">
-                <label for="nome">Nome </label>
+            <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+            <form action="/registo" enctype="multipart/form-data" method="POST">
+                <label for="nome">Nome*</label>
                 {{#if erros.nome}}
                     <input type="nome" name="nome" value="{{nomeF}}" class="form-control is-invalid">
                     <div class="invalid-feedback mb-4">
@@ -17,7 +18,7 @@
                 {{/if}}
 
 
-                <label for="funcao">Função na empresa </label>
+                <label for="funcao">Função na empresa*</label>
                 {{#if erros.funcao}}
                     <input type="funcao" class="form-control is-invalid" value="{{funcao}}" name="funcao">
                     <div class="invalid-feedback mb-4">
@@ -28,7 +29,7 @@
                 {{/if}}
 
 
-                <label for="departamento">Departamento </label>
+                <label for="departamento">Departamento*</label>
                 {{#if erros.departamento}}
                     <input type="departamento" class="form-control is-invalid" value="{{departamento}}" name="departamento">
                     <div class="invalid-feedback mb-4">
@@ -39,7 +40,7 @@
                 {{/if}}
                 
                 
-                <label for="equipa">Equipa </label>
+                <label for="equipa">Equipa*</label>
                 {{#if erros.equipa}}
                     <input type="equipa" class="form-control is-invalid" value="{{equipa}}" name="equipa">
                     <div class="invalid-feedback mb-4">
@@ -49,7 +50,7 @@
                     <input type="equipa" class="form-control mb-4" value="{{equipa}}" name="equipa">
                 {{/if}}
 
-                <label for="email">Email </label>
+                <label for="email">Email*</label>
                 {{#if erros.email}}
                     <input type="email" class="form-control is-invalid" value="{{email}}" name="email">
                     <div class="invalid-feedback mb-4">
@@ -58,9 +59,11 @@
                 {{else}}
                     <input type="email" class="form-control mb-4" value="{{email}}" name="email">
                 {{/if}}
+
+                <label for="foto">Foto de perfil</label>
+                <input type="file" class="form-control-file mb-4" name="file" id="file" placeholder="Foto">                
                 
-                
-                <label for="password">Password </label>
+                <label for="password">Password*</label>
                 {{#if erros.password}}
                     <input type="password" class="form-control is-invalid" name="password">
                     <div class="invalid-feedback mb-4">
@@ -71,7 +74,7 @@
                 {{/if}}
 
 
-                <label for="password2">Repita a password </label>
+                <label for="password2">Repita a password*</label>
                 {{#if erros.password2}}
                     <input type="password" class="form-control is-invalid" name="password2">
                     <div class="invalid-feedback mb-4">
