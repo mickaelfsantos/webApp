@@ -144,7 +144,6 @@ router.post('/registo', upload.single("file"), function asyncFunction(req, res){
         
                                 fs.rename(tempPath, targetPath+"/"+funcionario._id + path.extname(req.file.originalname).toLowerCase(), function(err) {
                                     if (err) 
-                                        console.log('ERROR: ' + err);
                                     Funcionario.findOneAndUpdate({_id:funcionario._id}, 
                                         {"$set": {"foto":  "/img/"+funcionario._id+path.extname(req.file.originalname).toLowerCase()}}, 
                                         {useFindAndModify: false}).then()
@@ -219,7 +218,6 @@ router.post('/obra/:id', function(req, res) {
     var base64Data = req.body.imgBase64.replace(/^data:image\/png;base64,/, "");
     fs.writeFile("graficos/obra"+req.params.id+".png", base64Data, 'base64', function(err) {
         if(err){
-           console.log(err);
          }
     });
 })
@@ -349,7 +347,6 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
                 res.render("users/tarefas/editarTarefa", {tarefa:tarefa, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
                     funcionarios : f})
             }).catch(function(erro){
-                console.log(erro)
                 req.flash("error_msg", "Tarefa não encontrada.")
                 res.redirect("/tarefas");
             })
@@ -989,7 +986,7 @@ router.post('/tarefa/:id/requisitarMaquina', authenticated, function asyncFuncti
                                                                       
                                                                 transporter.sendMail(mailOptions, function(error, info){
                                                                     if (error)
-                                                                        console.log(error);
+                                                                        console.log(error)
                                                                 });
                                                             Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
                                                         })
@@ -1140,7 +1137,7 @@ router.post('/perfil/edit', upload.single("file"), authenticated, function async
 
                         fs.rename(tempPath, targetPath+"/"+req.user.id + path.extname(req.file.originalname).toLowerCase(), function(err) {
                             if (err) 
-                                console.log('ERROR: ' + err);
+                            console.log(err)
                             Funcionario.findOneAndUpdate({_id:req.user.id}, 
                                 {"$set": {"foto":  "/img/"+req.user.id+path.extname(req.file.originalname).toLowerCase()}}, 
                                 {useFindAndModify: false}).then()
@@ -1382,7 +1379,7 @@ router.post('/requisicoes/addRequisicao', authenticated, function asyncFunction 
                                                                               
                                                                         transporter.sendMail(mailOptions, function(error, info){
                                                                             if (error)
-                                                                                console.log(error);
+                                                                            console.log(error)
                                                                         });
                                                                     Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
                                                                 })

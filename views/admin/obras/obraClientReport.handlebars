@@ -23,42 +23,71 @@
         <br>
         <br>
         {{#if tarefas}}
+            <h4>Tarefas</h4>
             <table style="width: 100%">
                 <thead>
                 <tr>
-                    <th style="width: 25%; text-align:left">Nome</th>
-                    <th style="width: 50%; text-align:left">Datas previstas</th>
-                    <th style="width: 25%; text-align:left">Custo</th>
+                    <th style="width: 30%; text-align:left">Nome</th>
+                    <th style="width: 60%; text-align:left">Datas previstas</th>
+                    <th style="width: 10%; text-align:left">Custo</th>
                 </tr>
                 </thead>
                 <tbody>
                     {{#each tarefas}}
                         <tr>
-                            <td style="width: 25%;">{{nome}}</td>
-                            <td style="width: 50%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                            <td style="width: 25%;">{{precoToString orcamento}}</td>
+                            <td style="width: 30%;">{{nome}}</td>
+                            <td style="width: 60%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 10%;">{{precoToString orcamento}}</td>
                         </tr>
-                    {{else}}
-
                     {{/each}}
+
                 
                 </tbody>
             </table>
-            <hr>
+        {{/if}}
+
+        {{#if tarefas}}
+        <br>
+        <br>
+        <br>
+            <h4>Máquinas</h4>
             <table style="width: 100%">
                 <thead>
                     <tr>
-                        <th style="width: 25%; text-align:left">Total</td>
-                        <td style="width: 50%;"></td>
-                        <td style="width: 25%;">{{precoToString obra.orcamento}}</td>
+                        <th style="width: 20%; text-align:left">Tarefa</th>
+                        <th style="width: 20%; text-align:left">Máquina</th>
+                        <th style="width: 50%; text-align:left">Datas previstas</th>
+                        <th style="width: 10%; text-align:left">Custo</th>
                     </tr>
                 </thead>
-            </table>
-
-            <br>
-            <br>
-            <br>
+            <tbody>
+                {{#each tarefas}}
+                    {{#each requisicoes}}
+                        <tr>
+                            <td style="width: 20%;">{{tarefaNome}}</td>
+                            <td style="width: 20%;">{{maquinaNome}}</td>
+                            <td style="width: 50%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 10%;">{{precoToString orcamento}}</td>
+                        </tr>
+                    {{/each}}
+                {{/each}}
+            </tbody>
+        </table>
         {{/if}}
+        <hr>
+        <table style="width: 100%">
+            <thead>
+                <tr>
+                    <th style="width: 30%; text-align:left">Total</td>
+                    <td style="width: 60%;"></td>
+                    <td style="width: 10%;">{{precoToString obra.orcamento}}</td>
+                </tr>
+            </thead>
+        </table>
+
+        <br>
+        <br>
+        <br>
     </div>
 
     <br id="finish">

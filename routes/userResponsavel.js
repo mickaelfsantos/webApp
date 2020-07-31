@@ -551,48 +551,74 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
 
 router.get('/obras/downloadReport', authenticated, admin, async function asyncFunction(req, res){
     Obra.find({}).lean().then(function(obras){
-        Tarefa.find({}).lean().then(function(tarefas){
-            var o = obras;
-            for(var i=0; i<o.length; i++){
-                o[i].tarefas = [];
-            }
-            for(var i=0; i<o.length; i++){
-                for(var j=0; j<tarefas.length; j++){
-                    if(tarefas[j].obra.equals(o[i]._id)){
-                        o[i].tarefas.push(tarefas[j])
-                    }
+        res.render("admin/obras/obrasReport", {obras:obras}, function(err, html){
+            var mySubString = html.substring(
+                html.lastIndexOf("<div id=\"comeca\""),
+                html.lastIndexOf("<br id=\"finish\">")
+            );
+                
+                
+            pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
+                if(err){
+                    req.flash("error_msg", "Erro ao criar relatório de obras.")
+                    res.redirect("/obras")
                 }
-            }
-            res.render("admin/obras/obrasReport", {obras:o}, function(err, html){
-                var mySubString = html.substring(
-                    html.lastIndexOf("<div id=\"comeca\""),
-                    html.lastIndexOf("<br id=\"finish\">")
-                );
-                
-                const imagem = path.resolve('/img/isec.jpg');
-                console.log(imagem);
-                
-                mySubString = mySubString + "<img src='file://" + imagem + "' />"
-                pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
-                    if(err){
-                        req.flash("error_msg", "Erro ao criar relatório de obras.")
-                        res.redirect("/obras")
-                    }
-                    else{
-                        const file = path.resolve('reports/obrasReport.pdf');
-                        res.download(file);
-                    }
-                })
+                else{
+                    const file = path.resolve('reports/obrasReport.pdf');
+                    res.download(file);
+                }
             })
-        }).catch(function(error){
-            req.flash("error_msg", "Erro ao encontrar as tarefas.")
-            res.redirect("/obras")
         })
     }).catch(function(error){
         req.flash("error_msg", "Erro ao encontrar as obras.")
         res.redirect("/dashboard")
     })
 })
+
+
+// router.get('/obras/downloadReport', authenticated, admin, async function asyncFunction(req, res){
+//     Obra.find({}).lean().then(function(obras){
+//         Tarefa.find({}).lean().then(function(tarefas){
+//             var o = obras;
+//             for(var i=0; i<o.length; i++){
+//                 o[i].tarefas = [];
+//             }
+//             for(var i=0; i<o.length; i++){
+//                 for(var j=0; j<tarefas.length; j++){
+//                     if(tarefas[j].obra.equals(o[i]._id)){
+//                         o[i].tarefas.push(tarefas[j])
+//                     }
+//                 }
+//             }
+//             res.render("admin/obras/obrasReport", {obras:o}, function(err, html){
+//                 var mySubString = html.substring(
+//                     html.lastIndexOf("<div id=\"comeca\""),
+//                     html.lastIndexOf("<br id=\"finish\">")
+//                 );
+                
+//                 const imagem = path.resolve('/img/isec.jpg');
+                
+//                 mySubString = mySubString + "<img src='file://" + imagem + "' />"
+//                 pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
+//                     if(err){
+//                         req.flash("error_msg", "Erro ao criar relatório de obras.")
+//                         res.redirect("/obras")
+//                     }
+//                     else{
+//                         const file = path.resolve('reports/obrasReport.pdf');
+//                         res.download(file);
+//                     }
+//                 })
+//             })
+//         }).catch(function(error){
+//             req.flash("error_msg", "Erro ao encontrar as tarefas.")
+//             res.redirect("/obras")
+//         })
+//     }).catch(function(error){
+//         req.flash("error_msg", "Erro ao encontrar as obras.")
+//         res.redirect("/dashboard")
+//     })
+// })
 
 router.get('/obra/:id/downloadReport', authenticated, admin, function asyncFunction(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
@@ -631,22 +657,45 @@ router.get('/obra/:id/downloadReport', authenticated, admin, function asyncFunct
 router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyncFunction(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-            res.render("admin/obras/obraClientReport", {obra:obra, tarefas:tarefas}, function(err, html){
-                var mySubString = html.substring(
-                    html.lastIndexOf("<div id=\"comeca\""),
-                    html.lastIndexOf("<br id=\"finish\">")
-                );
-                pdf.create(mySubString, {}).toFile("./reports/obra"+req.params.id+"ClientReport.pdf", function(err, reposta){
-                    if(err){
-                        req.flash("error_msg", "Erro ao criar relatório de obra para cliente.")
-                        res.redirect("/obra/"+req.params.id)
-                    }
-                    else{
-                        const file = path.resolve('reports/obra'+req.params.id+'ClientReport.pdf');
-                        res.download(file);
-                    }
+            async function obtemDados(){
+                var t = [];
+                for(var i=0; i<tarefas.length; i++){
+                    t.push(tarefas[i]);
+                    t[i].requisicoes = [];
+                    await Requisicao.find({tarefa:tarefas[i]._id}).lean().then(function(requisicoes){
+                        var req;
+                        for(var j=0; j<requisicoes.length; j++){
+                            req = requisicoes[j];
+                            Maquina.findOne({_id:req.maquina}).lean().then(function(maquina){
+                                req.maquinaNome = maquina.nome;
+                            })
+                            req.tarefaNome = t[i].nome
+                            t[i].requisicoes.push(req);
+                        }
+                    })
+                }
+
+                res.render("admin/obras/obraClientReport", {obra:obra, tarefas:t}, function(err, html){
+                    var mySubString = html.substring(
+                        html.lastIndexOf("<div id=\"comeca\""),
+                        html.lastIndexOf("<br id=\"finish\">")
+                    );
+                    pdf.create(mySubString, {}).toFile("./reports/obra"+req.params.id+"ClientReport.pdf", function(err, reposta){
+                        if(err){
+                            req.flash("error_msg", "Erro ao criar relatório de obra para cliente.")
+                            res.redirect("/obra/"+req.params.id)
+                        }
+                        else{
+                            const file = path.resolve('reports/obra'+req.params.id+'ClientReport.pdf');
+                            res.download(file);
+                        }
+                    })
                 })
-            })
+            }
+            obtemDados();
+        }).catch(function(error){
+            req.flash("error_msg", "Tarefas não encontradas.")
+            res.redirect("/obra/"+req.params.id)
         })
     }).catch(function(erro){
         req.flash("error_msg", "Obra não encontrada.")
@@ -945,7 +994,6 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                             }
                                                             
                                                         }).catch(function(error){
-                                                            console.log(error)
                                                             req.flash("error_msg", "Erro ao atualizar a obra.")
                                                             res.redirect("/tarefa/"+req.params.id);
                                                         })
@@ -1400,7 +1448,6 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
                                         await Funcionario.find({tarefas:tarefas[i]._id}).lean().then(function(funcionarios){
                                             async function secondFunction(){
                                                 await Obra.findOne({_id:tarefas[i].obra}).lean().then(function(obra){
-                                                    console.log(tarefas[i])
                                                     var finishDay = momentBD(tarefas[i].dataPrevistaFim).format('DD');
                                                     var startDay = momentBD(tarefas[i].dataPrevistaInicio).format('DD');
                                                     var expectedStartDateYear = moment(tarefas[i].dataPrevistaInicio).format("YYYY");

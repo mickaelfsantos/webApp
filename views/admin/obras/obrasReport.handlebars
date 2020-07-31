@@ -19,41 +19,10 @@
 
         {{#each obras}}
             <h4>Obra {{nome}}</h4>
-            <table style="width: 100%">
-                <thead>
-                <tr>
-                    <th style="width: 15%; text-align:left">Tarefas</th>
-                    <th style="width: 36%; text-align:left">Datas previstas</th>
-                    <th style="width: 36%; text-align:left">Datas</th>
-                    <th style="width: 13%; text-align:left">Despesa</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {{#each tarefas}}
-                        <tr>
-                            <td style="width: 15%;">{{nome}}</td>
-                            <td style="width: 36%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                            <td style="width: 36%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
-                            <td style="width: 13%;">{{precoToString despesa}}</td>
-                        </tr>
-                    {{else}}
-
-                    {{/each}}
-                
-                </tbody>
-            </table>
-            <hr>
-            <table style="width: 100%">
-                <thead>
-                    <tr>
-                        <th style="width: 15%; text-align:left">Total</td>
-                        <td style="width: 36%;"></td>
-                        <td style="width: 36%;"></td>
-                        <td style="width: 13%;">{{despesa}}</td>
-                    </tr>
-                </thead>
-            </table>
-
+            <label for="descricao">Descrição: {{descricao}}</label><br>
+            <label for="datasPrevistas">Datas previstas: {{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</label><br>
+            <label for="datas">Datas: {{dateToString dataInicio}} - {{dateToString dataFim}}</label><br>
+            <label for="estado">Estado: {{estadoToString estado}}</label><br>
             <br>
             <br>
             <br>
