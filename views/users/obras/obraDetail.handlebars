@@ -17,7 +17,9 @@
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddCompra()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Compra</button>
             {{/ifTerminou}}
-            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Orçamento</button> 
+            {{#ifWaitForClient obra.estado}}
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Orçamento</button> 
+            {{/ifWaitForClient}}
             {{#ifImAdmin}}
                 {{#ifWaitForClient obra.estado}}
                     <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaObraAceite()" style="cursor: pointer;"><i class="	fa fa-thumbs-up"></i> Cliente Aceitou</button>

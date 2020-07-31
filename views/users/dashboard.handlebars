@@ -47,7 +47,7 @@
 
 <script>
     var obras = {{{obras}}};
-    var preOrcamento = 0, aAguardarResposta = 0, preProducao = 0, producao = 0, finalizada = 0;
+    var preOrcamento = 0, aAguardarResposta = 0, preProducao = 0, producao = 0, finalizadaObra = 0;
     for(var i=0; i<obras.length; i++){
         switch(obras[i].estado){
             case 'preOrcamento':
@@ -63,7 +63,7 @@
                 producao++;
                 break;
             case 'finalizada':
-                finalizada++;
+                finalizadaObra++;
                 break;
         }   
     }
@@ -99,7 +99,7 @@
         data: {
             labels: ["Pré-orçamento", "A aguardar resposta", "Pré-produção", "Produção", "Finalizada"],
             datasets: [{
-                data: [preOrcamento, aAguardarResposta, preProducao, producao, finalizada],
+                data: [preOrcamento, aAguardarResposta, preProducao, producao, finalizadaObra],
                 backgroundColor: ["#949FB1", "#46BFBD", "#FDB45C", "#4D5360", "#228B22"],
                 hoverBackgroundColor: ["#A8B3C5", "#5AD3D1" , "#FFC870", "#616774", "#006400"] 
             }]
