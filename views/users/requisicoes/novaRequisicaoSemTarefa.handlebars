@@ -4,9 +4,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-            <form action="" name="getTarefa" method="POST">
-                <input type="hidden" name="{{tarefa._id}}" id="id" value="{{tarefa._id}}">
-                
+            <form action="/requisicoes/addRequisicao" method="POST">                
                 <div class="form-group">
                     <label for="tarefa">Tarefa*</label>
                     <select class="form-control" id="tarefas" name="tarefas" required>
@@ -72,7 +70,7 @@
                 {{/if}}
                 <div class="row justify-content-end">
                     <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
-                    <button type="button" onclick="saltaParaTarefa()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                    <button type="button" onclick="saltaParaRequisicoes()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
                 </div>
             </form>
         </div>
@@ -80,16 +78,9 @@
 </div>
 
 <script>
-    window.onload = function() {
-        var tarefa = document.getElementById("id").getAttribute("value");
-        document.getTarefa.action = "/tarefa/"+tarefa+"/requisitarMaquina";
-        console.log(tarefa)
-    };
 
-
-    function saltaParaTarefa(){
-        var tarefa = document.getElementById("id").getAttribute("value");
-        window.location = "/tarefa/"+tarefa;
+    function saltaParaRequisicoes(){
+        window.location = "/requisicoes";
     }
 
     var maquina = {{{maquina}}};

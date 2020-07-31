@@ -12,7 +12,11 @@
         {{#ifUR}}
         <div class="col-md-8 text-right">
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
-            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
+            {{#ifTerminou obra.estado}}
+            {{else}}
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddCompra()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Compra</button>
+            {{/ifTerminou}}
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReportCliente()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Orçamento</button> 
             {{#ifImAdmin}}
                 {{#ifWaitForClient obra.estado}}
@@ -194,6 +198,11 @@
         function saltaParaAddTarefa(){
             obra = document.getElementById('id').getAttribute("value");
             window.location.href = "/obra/"+obra+"/addTarefa";
+        }
+
+        function saltaParaAddCompra(){
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/addCompra";
         }
 
         function saltaParaTarefa(handle) {

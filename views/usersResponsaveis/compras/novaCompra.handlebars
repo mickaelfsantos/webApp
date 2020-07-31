@@ -1,0 +1,79 @@
+<div class="container-fluid pl-4 pr-4">    
+    <h2>Nova compra</h2>
+    <h5 id="nomeObra">Obra {{obra.nome}}</h5>
+    <div class="card mt-4">
+        <div class="card-body">
+            <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+            <form action="" method="POST">
+                <input type="hidden" name="id" id="id" value="{{obra._id}}"> 
+                
+                <label for="material">Nome do material*</label>
+                {{#if erros.material}}
+                    <input type="text" id="material" name="material" value="{{material}}" placeholder="Nome do material" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.material}}
+                    </div>
+                {{else}}
+                    <input type="text" id="material" name="material" value="{{material}}" placeholder="Nome do material" class="form-control mb-4">
+                {{/if}}
+                
+
+                <label for="descricao">Descrição</label>
+                {{#if erros.descricao}}
+                    <textarea class="form-control is-invalid" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição do material">{{descricao}}</textarea>
+                    <div class="invalid-feedback mb-4">
+                        {{erros.descricao}}
+                    </div>
+                {{else}}
+                    <textarea class="form-control mb-4" name="descricao" id="exampleFormControlTextarea1" rows="3" placeholder="Descrição do material">{{descricao}}</textarea>
+                {{/if}}
+                
+                <label for="quantidade">Quantidade*</label>
+                {{#if erros.quantidade}}
+                    <input type="text" id="quantidade" name="quantidade" value="{{quantidade}}" placeholder="Quantidade. Exemplos: 3 kgs. 3 unidades." class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.quantidade}}
+                    </div>
+                {{else}}
+                    <input type="text" id="quantidade" name="quantidade" value="{{quantidade}}" placeholder="Quantidade. Exemplos: 3 kgs. 3 unidades." class="form-control mb-4">
+                {{/if}}
+
+                <label for="custo">Custo total (€)*</label>
+                {{#if erros.custo}}
+                    <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.custo}}
+                    </div>
+                {{else}}
+                    <input type="text" id="custo" name="custo" value="{{custo}}" placeholder="Custo" class="form-control mb-4">
+                {{/if}}
+
+                <label for="fornecedor">Fornecedor*</label>
+                {{#if erros.fornecedor}}
+                    <input type="text" id="fornecedor" name="fornecedor" value="{{fornecedor}}" placeholder="Fornecedor" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.fornecedor}}
+                    </div>
+                {{else}}
+                    <input type="text" id="fornecedor" name="fornecedor" value="{{fornecedor}}" placeholder="Fornecedor" class="form-control mb-4">
+                {{/if}}
+                
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaObras()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        var obra = document.getElementById('id').getAttribute("value");
+        document.getTarefa.action = "/obra/"+obra+"/addCompra";
+    }; 
+
+    function saltaParaObras(){
+        window.location = "/obras";
+    }
+</script>

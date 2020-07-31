@@ -2,9 +2,16 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const Compra = new Schema({    
+    obra: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Obra",
+        required: true
+    },
+
     funcionario: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Funcionario"
+        ref: "Funcionario",
+        required: true
     },
 
     material: {
@@ -12,30 +19,25 @@ const Compra = new Schema({
         required: true
     },
 
+    descricao: {
+        type: String
+    },
+
     quantidade: {
-        type: Number,
+        type: String,
         required:true
     },
 
     custo: {
         type: Number,
-        default: 0
+        required:true
     },
 
     fornecedor: {
         type:String,
         required: true
-    },
-
-    dataPrevistaEntrega: {
-        type: Date,
-        required: true
-    },
-
-    dataEntrega: {
-        type: Date,
-        default: null
     }
+
 })
 
 mongoose.model("compras", Compra)

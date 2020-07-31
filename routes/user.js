@@ -877,138 +877,156 @@ router.post('/tarefa/:id/requisitarMaquina', authenticated, function asyncFuncti
                         maquina:maquina})
                 }
                 else{
-                    Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
-                        Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
-                            var today = moment().format("YYYY-MM-DD HH:mm");
-                            var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                            var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
-                            var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                                    
-                            
-                            dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
-                            dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
-        
-                            if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
-                                if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true){
+                    Obra.findOne({_id:tarefa.obra}).then(function(obra){
+                        Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
+                            Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
+                                var today = moment().format("YYYY-MM-DD HH:mm");
+                                var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                                var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                        
                                 
-                                    dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                                    if(moment(dataInicio).isBefore(moment()))
-                                        dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                                dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
+                                dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
+            
+                                if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
+                                    if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true){
                                     
-                                    erros.dataInicio = "Data inválida. Data de inicio tem que ser superior à data de inicio da tarefa e à data atual.";
-                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
-                                }
-                                else{
-                                    dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                                    if(moment(dataInicio).isBefore(moment()))
-                                        dataInicio = moment().format("YYYY-MM-DDTHH:mm")
-
-                                    if(moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
-                                        erros.dataFinal = "Data inválida. Data de fim tem que ser superior à data de inicio.";
-                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})    
+                                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                        if(moment(dataInicio).isBefore(moment()))
+                                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                                        
+                                        erros.dataInicio = "Data inválida. Data de inicio tem que ser superior à data de inicio da tarefa e à data atual.";
+                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
                                     }
                                     else{
-                                        var invalid = false;
-                                        var elimina = false;
-                                        var paraEliminar = [];
-                                        for(var i=0; i<requisicoes.length; i++){
-                                            var data = moment().add(7, 'days')
-                                            if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
-                                                if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                    elimina = true;
-                                                }
-                                                else{
-                                                    invalid = true;
-                                                    break;
-                                                }
-                                            }
-                                            if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                    elimina = true;
-                                                }
-                                                else{
-                                                    invalid = true;
-                                                    break;
-                                                }
-                                            }
-                    
-                                            if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                    elimina = true;
-                                                }
-                                                else{
-                                                    invalid = true;
-                                                    break;
-                                                }
-                                            }
+                                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                        if(moment(dataInicio).isBefore(moment()))
+                                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
     
-                                            if(elimina){
-                                                paraEliminar.push(requisicoes[i]);
-                                                elimina = false;
-                                            }
-                                        }
-                                                
-                                        if(invalid){
-                                            erros.dataInicio = "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário).";
-                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                        if(moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                            erros.dataFinal = "Data inválida. Data de fim tem que ser superior à data de inicio.";
+                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})    
                                         }
                                         else{
-                                            var transporter = nodemailer.createTransport({
-                                                service: 'gmail',
-                                                auth: {
-                                                    user: 'webappisec@gmail.com',
-                                                    pass: 'mickaelsantos'
+                                            var invalid = false;
+                                            var elimina = false;
+                                            var paraEliminar = [];
+                                            var data = moment().add(7, 'days')
+                                            for(var i=0; i<requisicoes.length; i++){
+                                                if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                    if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
                                                 }
-                                            });
     
-                                            async function enviaMails(){
-                                                for(var i=0; i<paraEliminar.length; i++){
-                                                    await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
-                                                        var mailOptions = {
-                                                            from: '"WebApp" webappisec@gmail.com',
-                                                            to: funcionario.email,
-                                                            subject: 'Cancelamento de requisição.',
-                                                            text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
-                                                                moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
-                                                                moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
-                                                            };
-                                                                  
-                                                            transporter.sendMail(mailOptions, function(error, info){
-                                                                if (error)
-                                                                    console.log(error);
-                                                            });
-                                                        Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
-                                                    })
+                                                if(moment(requisicoes[i].dataPrevistaFim).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                    if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
+                                                }
+                        
+                                                if(moment(dataPrevistaInicio).isBefore(requisicoes[i].dataPrevistaInicio) && moment(dataPrevistaFim).isAfter(requisicoes[i].dataPrevistaFim)){
+                                                    if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
+                                                }
+    
+                                                if(moment(dataPrevistaInicio).isAfter(requisicoes[i].dataPrevistaInicio) && moment(dataPrevistaFim).isBefore(requisicoes[i].dataPrevistaFim)){
+                                                    if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                        elimina = true;
+                                                    }
+                                                    else{
+                                                        invalid = true;
+                                                        break;
+                                                    }
                                                 }
         
-                                                var novaRequisicao = {
-                                                    maquina: maquina._id,
-                                                    funcionario : funcionario._id,
-                                                    tarefa: tarefa._id,
-                                                    descricao:descricao,
-                                                    dataPrevistaFim: req.body.dataPrevistaFim,
-                                                    dataPrevistaInicio: req.body.dataPrevistaInicio
+                                                if(elimina){
+                                                    paraEliminar.push(requisicoes[i]);
+                                                    elimina = false;
                                                 }
-                                                new Requisicao(novaRequisicao).save().then();
-        
-                                                req.flash("success_msg", "Requisição concluída com sucesso.")
-                                                res.redirect("/tarefa/"+req.params.id);
                                             }
-                                            enviaMails();
+                                                    
+                                            if(invalid){
+                                                erros.dataInicio = "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário).";
+                                                res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, 
+                                                    descricao:descricao, tarefa:tarefa, maquinas:maquinas})
+                                    
+                                            }
+                                            else{
+                                                var transporter = nodemailer.createTransport({
+                                                    service: 'gmail',
+                                                    auth: {
+                                                        user: 'webappisec@gmail.com',
+                                                        pass: 'mickaelsantos'
+                                                    }
+                                                });
+        
+                                                async function enviaMails(){
+                                                    for(var i=0; i<paraEliminar.length; i++){
+                                                        await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
+                                                            var mailOptions = {
+                                                                from: '"WebApp" webappisec@gmail.com',
+                                                                to: funcionario.email,
+                                                                subject: 'Cancelamento de requisição.',
+                                                                text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
+                                                                    moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
+                                                                    moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
+                                                                };
+                                                                      
+                                                                transporter.sendMail(mailOptions, function(error, info){
+                                                                    if (error)
+                                                                        console.log(error);
+                                                                });
+                                                            Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
+                                                        })
+                                                    }
+            
+                                                    var novaRequisicao = {
+                                                        maquina: maquina._id,
+                                                        funcionario : funcionario._id,
+                                                        tarefa: tarefa._id,
+                                                        descricao:descricao,
+                                                        dataPrevistaFim: req.body.dataPrevistaFim,
+                                                        dataPrevistaInicio: req.body.dataPrevistaInicio
+                                                    }
+                                                    new Requisicao(novaRequisicao).save().then();
+            
+                                                    req.flash("success_msg", "Requisição concluída com sucesso.")
+                                                    res.redirect("/tarefa/"+req.params.id);
+                                                }
+                                                enviaMails();
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            else{
-                                erros.dataInicio = "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim.";
-                                res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
-                            } 
+                                else{
+                                    erros.dataInicio = "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim.";
+                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                } 
+                            }).catch(function(error){
+                                req.flash("error_msg", "Tarefas não encontradas.")
+                                res.redirect("/tarefa/"+req.params.id)
+                            })
                         }).catch(function(error){
-                            req.flash("error_msg", "Tarefas não encontradas.")
+                            req.flash("error_msg", "Máquina não encontrada.")
                             res.redirect("/tarefa/"+req.params.id)
                         })
                     }).catch(function(error){
-                        req.flash("error_msg", "Máquina não encontrada.")
+                        req.flash("error_msg", "Obra não encontrada.")
                         res.redirect("/tarefa/"+req.params.id)
                     })
                 }
@@ -1244,159 +1262,183 @@ router.post('/requisicoes/addRequisicao', authenticated, function asyncFunction 
                             if(moment(dataInicio).isBefore(moment()))
                                 dataInicio = moment().format("YYYY-MM-DDTHH:mm")
                         }
-                        maquina = JSON.stringify(req.body.maquina);
+                        maquina = JSON.stringify(req.body.maquinas);
                         tarefa = JSON.stringify(req.body.tarefas);
-                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, tarefas:tarefas,
+                        res.render("users/requisicoes/novaRequisicaoSemTarefa", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, tarefas:tarefas,
                             maquinas:maquinas, maquina:maquina})
                     }
                     else{
                         Maquina.findOne({nome:req.body.maquinas}).then(function(maquina){
-                            Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
-                                var today = moment().format("YYYY-MM-DD HH:mm");
-                                var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                                var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
-                                var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                            Tarefa.findOne({nome:req.body.tarefas}).then(function(tarefa){
+                                Obra.findOne({_id:tarefa.obra}).then(function(obra){
+                                    Requisicao.find({maquina:maquina.id}).then(function(requisicoes){
+                                        var today = moment().format("YYYY-MM-DD HH:mm");
+                                        var dataPrevistaInicio = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                        var dataPrevistaFim = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                                        var dataTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                                                
                                         
-                                
-                                dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
-                                dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
-            
-                                if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
-                                    if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true){
-                                    
-                                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                                        if(moment(dataInicio).isBefore(moment()))
-                                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
-                                        
-                                        erros.dataInicio = "Data inválida. Data de inicio tem que ser superior à data de inicio da tarefa e à data atual.";
-                                        res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})
-                                    }
-                                    else{
-                                        dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                                        if(moment(dataInicio).isBefore(moment()))
-                                            dataInicio = moment().format("YYYY-MM-DDTHH:mm")
-    
-                                        if(moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
-                                            erros.dataFinal = "Data inválida. Data de fim tem que ser superior à data de inicio.";
-                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, maquinas:maquinas})    
-                                        }
-                                        else{
-                                            var invalid = false;
-                                            var elimina = false;
-                                            var paraEliminar = [];
-                                            for(var i=0; i<requisicoes.length; i++){
-                                                var data = moment().add(7, 'days')
-                                                if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
-                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                        elimina = true;
-                                                    }
-                                                    else{
-                                                        invalid = true;
-                                                        break;
-                                                    }
-                                                }
-                                                if(moment(dataPrevistaInicio).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                        elimina = true;
-                                                    }
-                                                    else{
-                                                        invalid = true;
-                                                        break;
-                                                    }
-                                                }
-                        
-                                                if(moment(dataPrevistaFim).isBetween(requisicoes[i].dataPrevistaInicio, requisicoes[i].dataPrevistaFim)){
-                                                    if((requisicoes[i].estado != "emExecucao" || requisicoes[i].estado != "aceite") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
-                                                        elimina = true;
-                                                    }
-                                                    else{
-                                                        invalid = true;
-                                                        break;
-                                                    }
-                                                }
-        
-                                                if(elimina){
-                                                    paraEliminar.push(requisicoes[i]);
-                                                    elimina = false;
-                                                }
-                                            }
-                                                    
-                                            if(invalid){
-                                                erros.dataInicio = "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário).";
-                                                res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                        dataPrevistaInicio = moment(dataPrevistaInicio).add(1, 'minutes');
+                                        dataPrevistaFim = moment(dataPrevistaFim).add(1, 'minutes');
+                    
+                                        if(moment(dataPrevistaInicio).isValid() && moment(dataPrevistaFim).isValid()){
+                                            if(moment(dataTarefa).isAfter(dataPrevistaInicio) == true || moment(today).isAfter(dataPrevistaInicio) == true){
+                                            
+                                                dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                                if(moment(dataInicio).isBefore(moment()))
+                                                    dataInicio = moment().format("YYYY-MM-DDTHH:mm")
+                                                
+                                                erros.dataInicio = "Data inválida. Data de inicio tem que ser superior à data de inicio da tarefa e à data atual.";
+                                                res.render("users/requisicoes/novaRequisicaoSemTarefa", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, tarefas:tarefas,
+                                                    maquinas:maquinas, maquina:maquina})    
                                             }
                                             else{
-                                                var transporter = nodemailer.createTransport({
-                                                    service: 'gmail',
-                                                    auth: {
-                                                        user: 'webappisec@gmail.com',
-                                                        pass: 'mickaelsantos'
-                                                    }
-                                                });
-        
-                                                async function enviaMails(){
-                                                    for(var i=0; i<paraEliminar.length; i++){
-                                                        await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
-                                                            var mailOptions = {
-                                                                from: '"WebApp" webappisec@gmail.com',
-                                                                to: funcionario.email,
-                                                                subject: 'Cancelamento de requisição.',
-                                                                text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
-                                                                    moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
-                                                                    moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
-                                                                };
-                                                                      
-                                                                transporter.sendMail(mailOptions, function(error, info){
-                                                                    if (error)
-                                                                        console.log(error);
-                                                                });
-                                                            Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
-                                                        })
-                                                    }
+                                                dataInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                                if(moment(dataInicio).isBefore(moment()))
+                                                    dataInicio = moment().format("YYYY-MM-DDTHH:mm")
             
-                                                    var novaRequisicao = {
-                                                        maquina: maquina._id,
-                                                        funcionario : funcionario._id,
-                                                        tarefa: tarefa._id,
-                                                        descricao:descricao,
-                                                        dataPrevistaFim: req.body.dataPrevistaFim,
-                                                        dataPrevistaInicio: req.body.dataPrevistaInicio
-                                                    }
-                                                    new Requisicao(novaRequisicao).save().then();
-            
-                                                    req.flash("success_msg", "Requisição concluída com sucesso.")
-                                                    res.redirect("/tarefa/"+req.params.id);
+                                                if(moment(dataPrevistaInicio).isAfter(dataPrevistaFim) == true){
+                                                    erros.dataFinal = "Data inválida. Data de fim tem que ser superior à data de inicio.";
+                                                    res.render("users/requisicoes/novaRequisicaoSemTarefa", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, tarefas:tarefas,
+                                                        maquinas:maquinas, maquina:maquina})    
                                                 }
-                                                enviaMails();
+                                                else{
+                                                    var invalid = false;
+                                                    var elimina = false;
+                                                    var paraEliminar = [];
+                                                    var data = moment().add(7, 'days')
+                                                    for(var i=0; i<requisicoes.length; i++){
+                                                        if(moment(requisicoes[i].dataPrevistaInicio).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                            if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                                elimina = true;
+                                                            }
+                                                            else{
+                                                                invalid = true;
+                                                                break;
+                                                            }
+                                                        }
+            
+                                                        if(moment(requisicoes[i].dataPrevistaFim).isBetween(dataPrevistaInicio, dataPrevistaFim)){
+                                                            if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                                elimina = true;
+                                                            }
+                                                            else{
+                                                                invalid = true;
+                                                                break;
+                                                            }
+                                                        }
+                                
+                                                        if(moment(dataPrevistaInicio).isBefore(requisicoes[i].dataPrevistaInicio) && moment(dataPrevistaFim).isAfter(requisicoes[i].dataPrevistaFim)){
+                                                            if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                                elimina = true;
+                                                            }
+                                                            else{
+                                                                invalid = true;
+                                                                break;
+                                                            }
+                                                        }
+            
+                                                        if(moment(dataPrevistaInicio).isAfter(requisicoes[i].dataPrevistaInicio) && moment(dataPrevistaFim).isBefore(requisicoes[i].dataPrevistaFim)){
+                                                            if((obra.estado == "aAguardarResposta") && moment(data).isAfter(requisicoes[i].dataPrevistaInicio)){
+                                                                elimina = true;
+                                                            }
+                                                            else{
+                                                                invalid = true;
+                                                                break;
+                                                            }
+                                                        }
+                
+                                                        if(elimina){
+                                                            paraEliminar.push(requisicoes[i]);
+                                                            elimina = false;
+                                                        }
+                                                    }
+                                                            
+                                                    if(invalid){
+                                                        erros.dataInicio = "Já existe uma requisição para esta máquina durante a duração pretendida. Consulte as requisições para obter uma duração desocupada (Requisições - Vista calendário).";
+                                                        res.render("users/requisicoes/novaRequisicaoSemTarefa", {erros:erros, dataInicio:dataInicio, dataFim:dataFim, descricao:descricao, tarefa:tarefa, tarefas:tarefas,
+                                                            maquinas:maquinas, maquina:maquina})
+                                                    }
+                                                    else{
+                                                        var transporter = nodemailer.createTransport({
+                                                            service: 'gmail',
+                                                            auth: {
+                                                                user: 'webappisec@gmail.com',
+                                                                pass: 'mickaelsantos'
+                                                            }
+                                                        });
+                
+                                                        async function enviaMails(){
+                                                            for(var i=0; i<paraEliminar.length; i++){
+                                                                await Funcionario.findOne({_id:paraEliminar[i].funcionario}).then(function(funcionario){
+                                                                    var mailOptions = {
+                                                                        from: '"WebApp" webappisec@gmail.com',
+                                                                        to: funcionario.email,
+                                                                        subject: 'Cancelamento de requisição.',
+                                                                        text: 'A sua requisição da máquina ' + maquina.nome + ' para o dia ' + 
+                                                                            moment(paraEliminar[i].dataPrevistaInicio).format("DD/MM/YYYY HH:mm") + ' ao dia ' + 
+                                                                            moment(paraEliminar[i].dataPrevistaFim).format("DD/MM/YYYY HH:mm") + ' acabou de ser cancelada, visto que faltam menos de 7 dias e a obra ainda não foi aceite por parte do cliente.'
+                                                                        };
+                                                                              
+                                                                        transporter.sendMail(mailOptions, function(error, info){
+                                                                            if (error)
+                                                                                console.log(error);
+                                                                        });
+                                                                    Requisicao.deleteOne({_id:paraEliminar[i].id}).then()
+                                                                })
+                                                            }
+                    
+                                                            var novaRequisicao = {
+                                                                maquina: maquina._id,
+                                                                funcionario : funcionario._id,
+                                                                tarefa: tarefa._id,
+                                                                descricao:descricao,
+                                                                dataPrevistaFim: req.body.dataPrevistaFim,
+                                                                dataPrevistaInicio: req.body.dataPrevistaInicio
+                                                            }
+                                                            new Requisicao(novaRequisicao).save().then();
+                    
+                                                            req.flash("success_msg", "Requisição concluída com sucesso.")
+                                                            res.redirect("/requisicoes");
+                                                        }
+                                                        enviaMails();
+                                                    }
+                                                }
                                             }
                                         }
-                                    }
-                                }
-                                else{
-                                    erros.dataInicio = "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim.";
-                                    res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
-                                } 
+                                        else{
+                                            erros.dataInicio = "Datas inválidas. Preencha corretamente data prevista de início e data prevista de fim.";
+                                            res.render("users/requisicoes/novaRequisicao", {erros:erros, tarefa:tarefa, maquinas:maquinas})
+                                        } 
+                                    }).catch(function(error){
+                                        req.flash("error_msg", "Requisições não encontradas.")
+                                        res.redirect("/requisicoes")
+                                    })
+                                }).catch(function(error){
+                                    req.flash("error_msg", "Obra não encontrada.")
+                                    res.redirect("/requisicoes")
+                                })
                             }).catch(function(error){
                                 req.flash("error_msg", "Tarefas não encontradas.")
-                                res.redirect("/tarefa/"+req.params.id)
+                                res.redirect("/requisicoes")
                             })
                         }).catch(function(error){
                             req.flash("error_msg", "Máquina não encontrada.")
-                            res.redirect("/tarefa/"+req.params.id)
+                            res.redirect("/requisicoes")
                         })
                     }
                 }).catch(function(error){
                     req.flash("error_msg", "Máquinas não encontradas.")
-                    res.redirect("/tarefa/"+req.params.id)
+                    res.redirect("/requisicoes")
                 })
                 
             }).catch(function(error){
                 req.flash("error_msg", "Tarefas não encontradas")
-                res.redirect("/tarefas")
+                res.redirect("/requisicoes")
             })
         }).catch(function(error){
             req.flash("error_msg", "Não tem permissões para requisitar máquinas nesta tarefa.")
-            res.redirect("/tarefas")
+            res.redirect("/requisicoes")
         })
     }).catch(function(error){
         req.flash("error_msg", "Funcionário não encontrado.")

@@ -13,16 +13,6 @@ const Obra = new Schema({
         required: true
     },
 
-    /*tarefas: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tarefa"
-    }],*/
-
-    /*funcionariosAssociados: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Funcionario"
-    }],*/
-
     dataPrevistaInicio: {
         type: Date,
         default: Date.now()

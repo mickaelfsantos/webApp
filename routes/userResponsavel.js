@@ -20,11 +20,13 @@ const { O_NONBLOCK } = require('constants');
     require("../models/Tarefa")
     require("../models/Funcionario")
     require("../models/Maquina")
+    require("../models/Compra")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
     const Funcionario = mongoose.model("funcionarios")
     const Maquina = mongoose.model("maquinas")
     const Requisicao = mongoose.model("requisicoes")
+    const Compra = mongoose.model("compras")
 
 router.get('/obras/add', authenticated, userResponsavel, function(req, res){
     res.render("usersResponsaveis/obras/novaObra")
@@ -125,19 +127,31 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
 })
 
 router.get('/obra/:id/addTarefa', authenticated, userResponsavel, function(req, res){
-    Obra.findOne({_id:req.params.id}).lean().then(function(obra){
-        Funcionario.find({}).then(function(funcionarios){
-            var funcionariosSelecionados = JSON.stringify(null);
-            res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
-        }).catch(function(err){
-            req.flash("error_msg", "Funcionários não encontrados.")
-            res.redirect('/obra/'+req.params.id);
+    Funcionario.findOne({_id:req.user.id}).then(function(funcionario){
+        Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
+            Funcionario.find({}).then(function(funcionarios){
+                if(obra.estado == "finalizada"){
+                    req.flash("error_msg", "Obra finalizada.")
+                    res.redirect("/obra/"+req.params.id);
+                }
+                else{
+                    var funcionariosSelecionados = JSON.stringify(null);
+                    res.render("usersResponsaveis/tarefas/novaTarefa", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, 
+                        funcionarios:funcionarios.map(funcionarios => funcionarios.toJSON())})
+                }
+            }).catch(function(err){
+                req.flash("error_msg", "Funcionários não encontrados.")
+                res.redirect('/obra/'+req.params.id);
+            })
+        }).catch(function(erro){
+            req.flash("error_msg", "Obra não encontrada.")
+            res.redirect("/obras");
         })
+        
     }).catch(function(erro){
-        req.flash("error_msg", "Obra não encontrada")
+        req.flash("error_msg", "Funcionários não encontrado.")
         res.redirect("/obras");
     })
-    
 })
 
 router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyncFunction(req, res){
@@ -318,13 +332,123 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
     
 })
 
+router.get('/obra/:id/addCompra', authenticated, userResponsavel, function(req, res){
+    Funcionario.findOne({_id:req.user.id}).then(function(funcionario){
+        Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
+            if(obra.estado == "finalizada"){
+                req.flash("error_msg", "Obra finalizada.")
+                res.redirect("/obra/"+req.params.id);
+            }
+            else{
+                res.render("usersResponsaveis/compras/novaCompra", {obra:obra});
+            }
+        }).catch(function(erro){
+            req.flash("error_msg", "Obra não encontrada.")
+            res.redirect("/obras");
+        })
+        
+    }).catch(function(erro){
+        req.flash("error_msg", "Funcionários não encontrado.")
+        res.redirect("/obras");
+    })
+})
+
+router.post('/obra/:id/addCompra', authenticated, userResponsavel, function asyncFunction(req, res){
+    
+    var erros = new Object();
+    var material;
+    var descricao;
+    var quantidade;
+    var custo;
+    var fornecedor;
+
+    if(!req.body.material || typeof req.body.material == undefined || req.body.material == null){
+        erros.material = "Nome inválido.";
+    }
+    else{
+        if(req.body.material.trim().length < 2){   
+            erros.material = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
+        }
+        else{
+            material = req.body.material;
+        }
+    }
+
+    if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
+        erros.descricao = "Descrição inválida.";
+    } else{
+        if(req.body.descricao.trim().length < 3){
+            erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
+        }
+        else{
+            descricao = req.body.descricao;
+        }
+    }
+
+    if(!req.body.quantidade || typeof req.body.quantidade == undefined || req.body.quantidade == null){
+        erros.quantidade = "Quantidade inválida.";
+    }else{
+        quantidade = req.body.quantidade;
+    }
+
+    if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null){
+        erros.custo = "Custo inválido.";
+    }else{
+        custo = req.body.custo;
+    }
+
+    if(!req.body.fornecedor || typeof req.body.fornecedor == undefined || req.body.fornecedor == null){
+        erros.fornecedor = "Fornecedor inválido.";
+    }else{
+        fornecedor = req.body.fornecedor;
+    }
+
+    Obra.findOne({_id:req.params.id}).lean().then(function(obra){
+        if(Object.keys(erros).length != 0){ 
+            res.render("usersResponsaveis/compras/novaCompra", {obra:obra, material:material, descricao:descricao, 
+                quantidade:quantidade, custo:custo, fornecedor:fornecedor});
+        }
+        else{
+            async function secondFunction(){
+                novaCompra = {
+                    material: req.body.material.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    quantidade: req.body.quantidade,
+                    custo: req.body.custo,
+                    fornecedor: req.body.fornecedor,
+                    obra: obra._id,
+                    funcionario: req.user.id};
+                        
+                new Compra(novaCompra).save().then(function(tarefa){
+                    req.flash("success_msg", "Compra registada com sucesso.")
+                    res.redirect("/obra/"+req.params.id);
+                }).catch(function(erro){
+                    req.flash("error_msg", "Erro ao registar a compra.")
+                    res.redirect("/obra/"+req.params.id);
+                })
+            };
+            secondFunction()
+        } 
+    }).catch(function(error){
+        req.flash("error_msg", "Obra não encontrada.");
+        res.redirect("/obra/"+req.params.id);
+    })
+    
+})
+
 router.get('/obra/:id/edit', authenticated, userResponsavel, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Obra.findOne({ $and : [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
             Funcionario.find({ obras : { $ne: obra._id}}).lean().then(function(funcionarios){
-                var custo = JSON.stringify(obra.custoFinal);
-                var funcionariosSelecionados = JSON.stringify(null);
-                res.render("usersResponsaveis/obras/editarObra", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, funcionarios: funcionarios, custo:custo})  
+                if(obra.estado == "finalizada"){
+                    req.flash("error_msg", "Obra finalizada.")
+                    res.redirect("/obra/"+req.params.id);
+                }
+                else{
+                    var custo = JSON.stringify(obra.custoFinal);
+                    var funcionariosSelecionados = JSON.stringify(null);
+                    res.render("usersResponsaveis/obras/editarObra", {obra:obra, funcionariosSelecionados:funcionariosSelecionados, funcionarios: funcionarios, custo:custo})  
+                }
             })
         }).catch(function(erro){
             req.flash("error_msg", "Obra não encontrada.")
@@ -533,15 +657,21 @@ router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyn
 router.get('/obra/:id/clientAccepted', authenticated, userResponsavel, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
-            Obra.updateOne(
-                {_id:req.params.id}, 
-                {"estado": "preProducao" }).lean().then(function(obra){
-                    req.flash("success_msg", "Obra alterada com sucesso.")
-                    res.redirect("/obra/"+req.params.id)
-                }).catch(function(error){
-                    req.flash("error_msg", "Erro ao alterar a obra.")
-                    res.redirect("/obra/"+req.params.id)
-                })
+            if(obra.estado != "aAguardarResposta"){
+                req.flash("error_msg", "Obra não pode ser aceite. Verifique que a obra está por aceitar.")
+                res.redirect("/obra/"+req.params.id);
+            }
+            else{
+                Obra.updateOne(
+                    {_id:req.params.id}, 
+                    {"estado": "preProducao" }).lean().then(function(obra){
+                        req.flash("success_msg", "Obra alterada com sucesso.")
+                        res.redirect("/obra/"+req.params.id)
+                    }).catch(function(error){
+                        req.flash("error_msg", "Erro ao alterar a obra.")
+                        res.redirect("/obra/"+req.params.id)
+                    })
+            }
         }).catch(function(error){
             req.flash("error_msg", "Não tem permissões de alterar o estado desta obra.")
             res.redirect("/obra/"+req.params.id);
@@ -557,21 +687,27 @@ router.get('/obra/:id/clientRejected', authenticated, userResponsavel, function(
         Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
             Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
                 Funcionario.updateMany({obras:obra._id}, {$pull: {obras : obra._id}}).then(function(funcionarios){
-                    async function removeIssues(){
-                        for(var i=0; i<tarefas.length; i++){
-                            await Funcionario.updateMany({tarefas:tarefas[i]._id}, {$pull: {tarefas : tarefas[i]._id}}).then()
-                            await Tarefa.deleteMany({_id:tarefas[i]._id}).then()
-                            await Requisicao.deleteMany({tarefa:tarefas[i]._id}).then()
-                        }
-                        Obra.deleteOne({_id:req.params.id}).then(function(){
-                            req.flash("success_msg", "Obra eliminada com sucesso.")
-                            res.redirect("/obras");
-                        }).catch(function(error){
-                            req.flash("error_msg", "Erro ao eliminar a obra.")
-                            res.redirect("/obra/"+req.params.id);
-                        })
+                    if(obra.estado != "aAguardarResposta"){
+                        req.flash("error_msg", "Obra não pode ser recusada. Verifique que a obra está por aceitar.")
+                        res.redirect("/obra/"+req.params.id);
                     }
-                    removeIssues();
+                    else{
+                        async function removeIssues(){
+                            for(var i=0; i<tarefas.length; i++){
+                                await Funcionario.updateMany({tarefas:tarefas[i]._id}, {$pull: {tarefas : tarefas[i]._id}}).then()
+                                await Tarefa.deleteMany({_id:tarefas[i]._id}).then()
+                                await Requisicao.deleteMany({tarefa:tarefas[i]._id}).then()
+                            }
+                            Obra.deleteOne({_id:req.params.id}).then(function(){
+                                req.flash("success_msg", "Obra eliminada com sucesso.")
+                                res.redirect("/obras");
+                            }).catch(function(error){
+                                req.flash("error_msg", "Erro ao eliminar a obra.")
+                                res.redirect("/obra/"+req.params.id);
+                            })
+                        }
+                        removeIssues();
+                    }
                 }).catch(function(error){
                     req.flash("error_msg", "Erro ao atualizar os funcionários (obras).")
                     res.redirect("/obra/"+req.params.id);
