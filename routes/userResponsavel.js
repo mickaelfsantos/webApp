@@ -452,7 +452,14 @@ router.post('/obra/:id/addCompra', authenticated, userResponsavel, function asyn
                     obra: obra._id,
                     funcionario: req.user.id};
                         
-                new Compra(novaCompra).save().then(function(tarefa){
+                new Compra(novaCompra).save().then(function(compra){
+                    Obra.findOneAndUpdate({_id:req.params.id}, 
+                        {"$set": {
+                            "orcamento": obra.orcamento + parseFloat(req.body.custo) + (obra.percentagemLucro*parseFloat(req.body.custo)) / 100,
+                            "despesa": obra.despesa + parseFloat(req.body.custo),
+                            "despesaFinal": obra.despesaFinal + parseFloat(req.body.custo),
+                            "custoFinal":  obra.custoFinal +parseFloat(req.body.custo) + (obra.percentagemLucro* parseFloat(req.body.custo)) / 100
+                          }}, {useFindAndModify: false}).then()
                     req.flash("success_msg", "Compra registada com sucesso.")
                     res.redirect("/obra/"+req.params.id);
                 }).catch(function(erro){
@@ -611,30 +618,68 @@ router.get('/obras/downloadReport', authenticated, admin, async function asyncFu
 router.get('/obra/:id/downloadReport', authenticated, admin, function asyncFunction(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-            var tarefasS = JSON.stringify(tarefas);
-            res.render("admin/obras/obraReport", {obra:obra, tarefas:tarefas, tarefasS:tarefasS}, function(err, html){
-                var mySubString = html.substring(
-                    html.lastIndexOf("<div id=\"comeca\""),
-                    html.lastIndexOf("<br id=\"finish\">")
-                );
-                config = {
-                    paginationOffset: 1,
-                    "border": {
-                      "top": "40px",
-                      "bottom": "40px"
-                    }
-                }
-                pdf.create(mySubString, config).toFile("./reports/obra"+req.params.id+"Report.pdf", function(err, reposta){
-                    if(err){
-                        req.flash("error_msg", "Erro ao criar relatório de obra.")
-                        res.redirect("/obra/"+req.params.id)
-                    }
-                    else{
-                        const file = path.resolve('reports/obra'+req.params.id+'Report.pdf');
-                        res.download(file);
-                    }
+            Requisicao.find({tarefa:tarefas}).lean().then(function(requisicoes){
+                Cliente.findOne({obras:obra._id}).lean().then(function(cliente){
+                    Compra.find({obra:obra._id}).lean().then(function(compras){
+                        async function obtemDados(){
+                            var valor = 0;
+                            for(var i=0; i<compras.length; i++){
+                                valor = valor + compras[i].custo;
+                            }
+
+                            for(var i=0; i<requisicoes.length; i++){
+                                var reques = requisicoes[i];
+                                await Maquina.findOne({_id:reques.maquina}).lean().then(async function(maquina){
+                                    await Tarefa.findOne({_id:reques.tarefa}).lean().then(function(tarefa){
+                                        reques.maquinaNome=maquina.nome;
+                                        reques.tarefaNome=tarefa.nome;
+                                        
+                                        requisicoes[i] = reques;
+                                    })
+                                })
+                            }
+                            var tarefasS = JSON.stringify(tarefas);
+                            res.render("admin/obras/obraReport", {obra:obra, tarefas:tarefas, cliente:cliente, requisicoes:requisicoes,
+                                compras:compras, valor:valor, tarefasS:tarefasS}, function(err, html){
+                                var mySubString = html.substring(
+                                    html.lastIndexOf("<div id=\"comeca\""),
+                                    html.lastIndexOf("<br id=\"finish\">")
+                                );
+                                config = {
+                                    paginationOffset: 1,
+                                    "border": {
+                                    "top": "40px",
+                                    "bottom": "40px"
+                                    }
+                                }
+                                pdf.create(mySubString, config).toFile("./reports/obra"+req.params.id+"Report.pdf", function(err, reposta){
+                                    if(err){
+                                        req.flash("error_msg", "Erro ao criar relatório de obra.")
+                                        res.redirect("/obra/"+req.params.id)
+                                    }
+                                    else{
+                                        const file = path.resolve('reports/obra'+req.params.id+'Report.pdf');
+                                        res.download(file);
+                                    }
+                                })
+                            })
+                        }
+                        obtemDados();
+                    }).catch(function(erro){
+                        req.flash("error_msg", "Compras não encontradas.")
+                        res.redirect("/compras");
+                    })
+                }).catch(function(erro){
+                    req.flash("error_msg", "Cliente não encontrado.")
+                    res.redirect("/obras");
                 })
+            }).catch(function(erro){
+                req.flash("error_msg", "Requisições não encontradas.")
+                res.redirect("/obras");
             })
+        }).catch(function(erro){
+            req.flash("error_msg", "Tarefas não encontradas.")
+            res.redirect("/obras");
         })
     }).catch(function(erro){
         req.flash("error_msg", "Obra não encontrada.")
@@ -645,42 +690,50 @@ router.get('/obra/:id/downloadReport', authenticated, admin, function asyncFunct
 router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyncFunction(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-            async function obtemDados(){
-                var t = [];
-                for(var i=0; i<tarefas.length; i++){
-                    t.push(tarefas[i]);
-                    t[i].requisicoes = [];
-                    await Requisicao.find({tarefa:tarefas[i]._id}).lean().then(function(requisicoes){
-                        var req;
-                        for(var j=0; j<requisicoes.length; j++){
-                            req = requisicoes[j];
-                            Maquina.findOne({_id:req.maquina}).lean().then(function(maquina){
-                                req.maquinaNome = maquina.nome;
-                            })
-                            req.tarefaNome = t[i].nome
-                            t[i].requisicoes.push(req);
-                        }
+            Compra.find({obra:obra._id}).lean().then(function(compras){
+                async function obtemDados(){
+                    var t = [];
+                    for(var i=0; i<tarefas.length; i++){
+                        t.push(tarefas[i]);
+                        t[i].requisicoes = [];
+                        await Requisicao.find({tarefa:tarefas[i]._id}).lean().then(function(requisicoes){
+                            var req;
+                            for(var j=0; j<requisicoes.length; j++){
+                                req = requisicoes[j];
+                                Maquina.findOne({_id:req.maquina}).lean().then(function(maquina){
+                                    req.maquinaNome = maquina.nome;
+                                })
+                                req.tarefaNome = t[i].nome
+                                t[i].requisicoes.push(req);
+                            }
+                        })
+                    }
+
+                    for(var i=0; i<compras.length; i++){
+                        var compra = compras[i];
+                        compra.orcamento = compras[i].custo + obra.percentagemLucro*compras[i].custo / 100;
+                        compras[i] = compra;
+                    }
+    
+                    res.render("admin/obras/obraClientReport", {obra:obra, tarefas:t, compras:compras}, function(err, html){
+                        var mySubString = html.substring(
+                            html.lastIndexOf("<div id=\"comeca\""),
+                            html.lastIndexOf("<br id=\"finish\">")
+                        );
+                        pdf.create(mySubString, {}).toFile("./reports/obra"+req.params.id+"ClientReport.pdf", function(err, reposta){
+                            if(err){
+                                req.flash("error_msg", "Erro ao criar relatório de obra para cliente.")
+                                res.redirect("/obra/"+req.params.id)
+                            }
+                            else{
+                                const file = path.resolve('reports/obra'+req.params.id+'ClientReport.pdf');
+                                res.download(file);
+                            }
+                        })
                     })
                 }
-
-                res.render("admin/obras/obraClientReport", {obra:obra, tarefas:t}, function(err, html){
-                    var mySubString = html.substring(
-                        html.lastIndexOf("<div id=\"comeca\""),
-                        html.lastIndexOf("<br id=\"finish\">")
-                    );
-                    pdf.create(mySubString, {}).toFile("./reports/obra"+req.params.id+"ClientReport.pdf", function(err, reposta){
-                        if(err){
-                            req.flash("error_msg", "Erro ao criar relatório de obra para cliente.")
-                            res.redirect("/obra/"+req.params.id)
-                        }
-                        else{
-                            const file = path.resolve('reports/obra'+req.params.id+'ClientReport.pdf');
-                            res.download(file);
-                        }
-                    })
-                })
-            }
-            obtemDados();
+                obtemDados();
+            })
         }).catch(function(error){
             req.flash("error_msg", "Tarefas não encontradas.")
             res.redirect("/obra/"+req.params.id)
@@ -1148,21 +1201,38 @@ router.get('/tarefa/:id/downloadReport', authenticated, admin, function asyncFun
     Tarefa.findOne({_id:req.params.id}).lean().then(function(tarefa){
         Funcionario.find({tarefas:tarefa._id}).lean().then(function(funcionarios){
             Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
-                res.render("admin/tarefas/tarefaReport", {tarefa:tarefa, funcionarios:funcionarios, obra:obra}, function(err, html){
-                    var mySubString = html.substring(
-                        html.lastIndexOf("<div id=\"comeca\""),
-                        html.lastIndexOf("<br id=\"finish\">")
-                    );
-                    pdf.create(mySubString, {}).toFile("./reports/tarefa"+req.params.id+"Report.pdf", function(err, reposta){
-                        if(err){
-                            req.flash("error_msg", "Erro ao criar relatório da tarefa.")
-                            res.redirect("/tarefa/"+req.params.id)
+                Requisicao.find({tarefa:tarefa._id}).lean().then(function(requisicoes){
+                    async function obtemDados(){
+                        var request;
+                        
+                        for(var i=0; i<requisicoes.length; i++){
+                            request = requisicoes[i];
+                            await Maquina.findOne({_id:requisicoes[i].maquina}).then(async function(maquina){
+                                request.maquinaNome = maquina.nome;
+                                Funcionario.findOne({_id:requisicoes[i].funcionario}).then(function(funcionario){
+                                    request.funcionarioNome = funcionario.nome;
+                                })
+                            })
+                            requisicoes[i] = request;
                         }
-                        else{
-                            const file = path.resolve('reports/tarefa'+req.params.id+'Report.pdf');
-                            res.download(file);
-                        }
-                    })
+                        res.render("admin/tarefas/tarefaReport", {tarefa:tarefa, funcionarios:funcionarios, requisicoes:requisicoes, obra:obra}, function(err, html){
+                            var mySubString = html.substring(
+                                html.lastIndexOf("<div id=\"comeca\""),
+                                html.lastIndexOf("<br id=\"finish\">")
+                            );
+                            pdf.create(mySubString, {}).toFile("./reports/tarefa"+req.params.id+"Report.pdf", function(err, reposta){
+                                if(err){
+                                    req.flash("error_msg", "Erro ao criar relatório da tarefa.")
+                                    res.redirect("/tarefa/"+req.params.id)
+                                }
+                                else{
+                                    const file = path.resolve('reports/tarefa'+req.params.id+'Report.pdf');
+                                    res.download(file);
+                                }
+                            })
+                        })
+                    }
+                    obtemDados();
                 })
             }).catch(function(erro){
                 req.flash("error_msg", "Obra não encontrada.")
@@ -1452,73 +1522,6 @@ router.post('/funcionario/:id/edit', authenticated, userResponsavel, function as
                 "role": role
               }}, {useFindAndModify: false}).then(function(){
 
-                Funcionario.findOne({_id:req.params.id}).lean().then(function(funcionario){
-                    Tarefa.find({_id:funcionario.tarefas}).lean().then(function(tarefas){
-                            async function firstFunction(){
-                                for(var i=0; i<tarefas.length; i++){
-                                    if(tarefas[i].estado == "aceite"){
-                                        await Funcionario.find({tarefas:tarefas[i]._id}).lean().then(function(funcionarios){
-                                            async function secondFunction(){
-                                                await Obra.findOne({_id:tarefas[i].obra}).lean().then(function(obra){
-                                                    var finishDay = momentBD(tarefas[i].dataPrevistaFim).format('DD');
-                                                    var startDay = momentBD(tarefas[i].dataPrevistaInicio).format('DD');
-                                                    var expectedStartDateYear = moment(tarefas[i].dataPrevistaInicio).format("YYYY");
-                                                    var expectedFinishDateYear = moment(tarefas[i].dataPrevistaFim).format("YYYY");
-                                                    var issueCost = 0;
-                                                    var cost = obra.despesa;
-                    
-                                                    var holidays = [];
-                                                    for(var i=expectedStartDateYear; i <= expectedFinishDateYear; i++){
-                                                        var yearHolidays = hd.getHolidays(i);
-                                                        for(var j=0; j<yearHolidays.length; j++){
-                                                            holidays.push(moment(yearHolidays[j].date).format("YYYY-MM-DD"));
-                                                        }
-                                                    }
-                                            
-                                                    momentBD.updateLocale('PT', {
-                                                        holidays: holidays,
-                                                        holidayFormat: 'YYYY-MM-DD',
-                                                        workingWeekdays: [1, 2, 3, 4, 5]
-                                                    });
-                                                    
-                                                    var days = momentBD(tarefas[i].dataPrevistaFim).businessDiff(moment(tarefas[i].dataPrevistaInicio));
-                                                    var hours = momentBD(tarefas[i].dataPrevistaFim).diff(moment(tarefas[i].dataPrevistaInicio), 'days', true) % 1;
-                                                    if(hours != 0 && days != 0){
-                                                        days = days - 1;
-                                                    }
-                                                    days = days + hours;
-                                                    if(startDay == finishDay)
-                                                        for(var i=0; i<funcionarios.length; i++){
-                                                            cost = cost + ((days * 24) * funcionarios[i].custo);
-                                                            issueCost = issueCost + ((days * 24) * funcionarios[i].custo)
-                                                        }
-                                                    else{
-                                                        var aux = finishDay - startDay;
-                                                        for(var i=0; i<funcionarios.length; i++){
-                                                            cost = cost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
-                                                            issueCost = issueCost + ((days * 24 - (aux * 16)) * funcionarios[i].custo);
-                                                        }
-                                                    }
-    
-                                                    Tarefa.findOneAndUpdate({_id:tarefas[i]._id},
-                                                        {"$set": {
-                                                            "despesa": issueCost
-                                                        }}, {useFindAndModify: false}).then()
-                    
-                                                    Obra.findOneAndUpdate({_id:obra._id},
-                                                        {"$set": {
-                                                            "despesa": cost
-                                                        }}, {useFindAndModify: false}).lean().then()
-                                                })
-                                            }
-                                            secondFunction();
-                                        })
-                                    }
-                                }
-                            };
-                            firstFunction()  
-                    })
-                })
                 req.flash("success_msg", "Utilizador editado com sucesso")
                 res.redirect("/funcionarios");
         }).catch(function(error){

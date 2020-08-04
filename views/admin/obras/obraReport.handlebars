@@ -15,38 +15,101 @@
         <br>
         
 
-        <label for="descricao">Descrição: {{obra.descricao}}</label><br><br>
-        <label for="estado">Estado: {{estadoToString obra.estado}}</label><br><br>
-        <label for="estado">Despesa: {{precoToString obra.despesa}}</label><br><br>
-        <label for="estado">Percentagem de lucro: {{obra.percentagemLucro}}%</label><br><br>
-        <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br><br>
-        <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br><br>
-        <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br><br>
-        <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br><br>
+        <label for="descricao">Descrição: {{obra.descricao}}</label><br>
+        <label for="descricao">Nome do cliente: {{cliente.nome}}</label><br>
+        <label for="descricao">Nif do cliente: {{cliente.nif}}</label><br>
+        <label for="estado">Estado: {{estadoToString obra.estado}}</label><br>
+        <label for="estado">Despesa: {{precoToString obra.despesa}}</label><br>
+        <label for="estado">Percentagem de lucro: {{obra.percentagemLucro}}%</label><br>
+        <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br>
+        <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br>
+        <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br>
+        <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br>
 
         <br>
         <br>
         <br>
-        <h3>Tarefas (Previstas)</h3>
+        {{#if compras}}
+        <h3>Compras </h3>
+            <table style="width: 100%">
+                <thead>
+                <tr>
+                    <th style="width: 15%; text-align:left">Material</th>
+                    <th style="width: 45%; text-align:left">Descrição</th>
+                    <th style="width: 15%; text-align:left">Quantidade</th>
+                    <th style="width: 15%; text-align:left">Fornecedor</th>
+                    <th style="width: 10%; text-align:left">Custo</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{#each compras}}
+                        <tr>
+                            <td style="width: 15%;">{{material}}</td>
+                            <td style="width: 45%;">{{descricao}}</td>
+                            <td style="width: 15%;">{{quantidade}}</td>
+                            <td style="width: 15%;">{{fornecedor}}</td>
+                            <td style="width: 10%;">{{precoToString custo}}</td>
+                        </tr>
+                    {{else}}
+
+                    {{/each}}
+                
+                </tbody>
+            </table>
+
+            <br>
+            <br>
+            <br>
+        {{/if}}
+        {{#if requisicoes}}
+            <h4>Máquinas</h4>
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <th style="width: 15%; text-align:left">Máquina</th>
+                        <th style="width: 15%; text-align:left">Tarefa</th>
+                        <th style="width: 30%; text-align:left">Datas previstas</th>
+                        <th style="width: 30%; text-align:left">Datas</th>
+                        <th style="width: 10%; text-align:left">Custo</th>
+                    </tr>
+                </thead>
+            <tbody>
+                {{#each requisicoes}}
+                    <tr>
+                        <td style="width: 15%;">{{maquinaNome}}</td>
+                        <td style="width: 15%;">{{tarefaNome}}</td>
+                        <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                        <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                        <td style="width: 10%;">{{precoToString despesa}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        
+        <br>
+        <br>
+        <br>
+        {{/if}}
+        <h3>Tarefas</h3>
         {{#if tarefas}}
             <table style="width: 100%">
                 <thead>
                 <tr>
                     <th style="width: 15%; text-align:left">Nome</th>
-                    <th style="width: 40%; text-align:left">Datas previstas</th>
                     <th style="width: 15%; text-align:left">Estado</th>
-                    <th style="width: 15%; text-align:left">Despesa</th>
-                    <th style="width: 15%; text-align:left">Orçamento</th>
+                    <th style="width: 30%; text-align:left">Datas previstas</th>
+                    <th style="width: 30%; text-align:left">Datas</th>
+                    <th style="width: 10%; text-align:left">Custo</th>
                 </tr>
                 </thead>
                 <tbody>
                     {{#each tarefas}}
                         <tr>
                             <td style="width: 15%;">{{nome}}</td>
-                            <td style="width: 40%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
                             <td style="width: 15%;">{{estadoToStringOD estado}}</td>
-                            <td style="width: 15%;">{{precoToString despesa}}</td>
-                            <td style="width: 15%;">{{precoToString orcamento}}</td>
+                            <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                            <td style="width: 10%;">{{precoToString despesa}}</td>
                         </tr>
                     {{else}}
 
@@ -59,10 +122,8 @@
                 <thead>
                     <tr>
                         <th style="width: 15%; text-align:left">Total</td>
-                        <td style="width: 40%;"></td>
-                        <td style="width: 15%;"></td>
-                        <td style="width: 15%;">{{precoToString obra.despesa}}</td>
-                        <td style="width: 15%;">{{precoToString obra.orcamento}}</td>
+                        <th style="width: 75%; text-align:left"></td>
+                        <td style="width: 10%;">{{precoToString obra.despesa}}</td>
                     </tr>
                 </thead>
             </table>
@@ -72,48 +133,6 @@
             <br>
         {{/if}}
         
-        {{#ifTerminou obra.estado}}
-        <h3>Tarefas</h3>
-            <table style="width: 100%">
-                <thead>
-                <tr>
-                    <th style="width: 20%; text-align:left">Nome</th>
-                    <th style="width: 40%; text-align:left">Datas</th>
-                    <th style="width: 15%; text-align:left">Despesa</th>
-                    <th style="width: 15%; text-align:left">Preço final</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {{#each tarefas}}
-                        <tr>
-                            <td style="width: 20%;">{{nome}}</td>
-                            <td style="width: 40%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
-                            <td style="width: 15%;">{{precoToString despesaFinal}}</td>
-                            <td style="width: 15%;">{{precoToString custoFinal}}</td>
-                        </tr>
-                    {{else}}
-
-                    {{/each}}
-                
-                </tbody>
-            </table>
-            <hr>
-            <table style="width: 100%">
-                <thead>
-                    <tr>
-                        <th style="width: 20%; text-align:left">Total</td>
-                        <td style="width: 40%;"></td>
-                        <td style="width: 15%;">{{precoToString obra.despesaFinal}}</td>
-                        <td style="width: 15%;">{{precoToString obra.custoFinal}}</td>
-                    </tr>
-                </thead>
-            </table>
-
-            <br>
-            <br>
-            <br>
-        {{/ifTerminou}}
-
     </div>
 </div>
 <br id="finish">

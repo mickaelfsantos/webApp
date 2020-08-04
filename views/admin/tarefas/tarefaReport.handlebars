@@ -28,8 +28,8 @@
         <br>
         <br>
         <br>
-        <h3>Funcionários</h3>
         {{#if funcionarios}}
+        <h3>Funcionários</h3>
             <table style="width: 100%">
                 <thead>
                 <tr>
@@ -62,69 +62,40 @@
             <br>
         {{/if}}
 
+        <br>
+        <br>
+        <br>
+        {{#if requisicoes}}
+        <h3>Requisições</h3>
+            <table style="width: 100%">
+                <thead>
+                <tr>
+                    <th style="width: 15%; text-align:left">Máquina</th>
+                    <th style="width: 15%; text-align:left">Requisitante</th>
+                    <th style="width: 30%; text-align:left">Datas previstas</th>
+                    <th style="width: 30%; text-align:left">Datas</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{#each requisicoes}}
+                        <tr>
+                            <td style="width: 15%;">{{maquinaNome}}</td>
+                            <td style="width: 15%;">{{funcionarioNome}}</td>
+                            <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                        </tr>
+                    {{else}}
+
+                    {{/each}}
+                
+                </tbody>
+            </table>
+            <br>
+            <br>
+            <br>
+        {{/if}}
+
         <div id='myDiv'></div>
     </div>
-
-<script>
-
-
-    var trace1 = {
-        x: [3, 3, 3, 4, 4],
-        type: 'box',
-        name: 'Datas'
-    };
-
-    var trace2 = {
-        x: [2, 2, 2, 3, 3],
-        type: 'box',
-        name: 'Datas'
-    };
-
-    var data = [trace1, trace2];
-
-    var layout = {
-        title: 'Desvios de datas',
-        hovermode:false
-    };
-
-    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true});
-
-
-    {{!-- if(!moment(tarefa.dataInicio).isValid()){
-        var trace2 = {
-        x: [],
-        type: 'box',
-        name: 'Datas'
-        };
-    }
-    else{
-        if(moment(tarefa.dataInicio).isValid() && !moment(tarefa.dataFim).isValid()){
-            var dataInicio = moment(tarefa.dataInicio).format("DD/MM/YYYY HH:mm")
-            var trace2 = {
-            x: [dataInicio],
-            type: 'box',
-            name: 'Datas'
-            };
-        }
-        else{
-            var dataInicio = moment(tarefa.dataInicio).format("DD/MM/YYYY HH:mm")
-            var dataFim = moment(tarefa.dataFim).format("DD/MM/YYYY HH:mm")
-            var trace2 = {
-            x: [dataInicio, dataInicio, dataInicio, dataFim, dataFim],
-            type: 'box',
-            name: 'Datas'
-            };
-        }
-    }
-
-    var data = [trace1, trace2];
-
-    var layout = {
-        title: 'Desvios de datas',
-        hovermode:false
-    };
-
-    Plotly.newPlot('myDiv', data, layout, {displaylogo: false, responsive: true}); --}}
-</script>
     <br id="finish">
 </div>
