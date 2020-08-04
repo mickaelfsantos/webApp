@@ -993,7 +993,7 @@ router.post('/perfil/edit', upload.single("file"), authenticated, function async
                 erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
             }
             else{
-                if(req.body.nome.length < 50){
+                if(req.body.nome.length > 50){
                     erros.nome = "Nome demasiado longo. São permitidos apenas 50 caracteres.";
                 }
                 else{
