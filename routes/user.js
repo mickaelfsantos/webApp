@@ -1428,7 +1428,7 @@ router.get('/requisicao/:id/comecar', authenticated, function asyncFunction(req,
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Requisicao.findOne({ $and: [{_id:req.params.id}, {funcionario : funcionario._id}]}).lean().then(function(requisicao){
             Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
-                if(tarefa.estado == "preProducao" || tarefa.estado == "recusada" || tarefa.estado == "porAceitar"){
+                if(tarefa.estado != "aceite" && tarefa.estado != "emExecucao"){
                     req.flash("error_msg", "Não pode começar a utilizar a máquina. Verifique que a tarefa está aceite, em execução ou finalizada.")
                     res.redirect("/requisicao/"+req.params.id)
                 }

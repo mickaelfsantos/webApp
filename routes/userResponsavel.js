@@ -1928,7 +1928,7 @@ router.post('/clientes/add', authenticated, userResponsavel, function asyncFunct
             res.redirect("/clientes");
         }).catch(function(erro){
             erros.nome = "Já existe um cliente com o mesmo nome/nif ou houve um erro ao adicionar o cliente. Tente novamente.";
-            res.render("usersResponsaveis/obras/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
+            res.render("usersResponsaveis/clientes/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
         })
     }
 })
