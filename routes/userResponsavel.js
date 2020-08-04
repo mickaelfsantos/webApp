@@ -1563,7 +1563,7 @@ router.post('/funcionarios/addFuncionario', authenticated, admin, function async
         erros.nome = "Nome obrigatório.";
     }
     else{
-        if(req.body.nome.length < 50){
+        if(req.body.nome.length > 50){
             erros.nome = "Nome demasiado longo. São permitidos apenas 50 caracteres.";
         }
         else{
