@@ -5,7 +5,7 @@
             <h2>Requisição</h2>
         </div>
         <div class="col-md-8 text-right">
-            {{#ifComecarRequest tarefa.estado  requisicao.estado obra.estado}}
+            {{#ifComecarRequest requisicao.estado  obra.estado}}
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaComecar()" style="cursor: pointer;"><i class="fa fa-play"></i> Começar Utilização</button>
                 {{else}}
                     {{#ifTerminar requisicao.estado}}
@@ -16,7 +16,7 @@
 
     </div>
     <hr>
-        <div class="row col-12 mt-4" id="infoHover">
+        <div class="row col-12" id="infoHover">
             <div class="col-md-3 p-3 text-left">
                 <h6 class="blockquote m-0">Tarefa</h6>
             </div>
@@ -24,7 +24,7 @@
                 <label for="nome" id="nomeTarefa" class="m-0">{{tarefa.nome}}</label>
             </div>
         </div>
-            <div class="row col-12 mt-4" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Máquina</h6>
                 </div>
@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Requisitante</h6>
                 </div>
@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
@@ -53,7 +53,7 @@
                 </div>            
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>
@@ -64,7 +64,7 @@
             </div>
 
             {{#ifImAdmin}}
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Despesa</h6>
                 </div>
@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Orçamento</h6>
                 </div>
@@ -86,7 +86,7 @@
             {{/ifImAdmin}}
 
             
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <input type="hidden" id="id" value="{{requisicao._id}}">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Estado</h6>

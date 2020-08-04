@@ -1,0 +1,117 @@
+<div class="container-fluid pl-4 pr-4">
+  {{#each erros}}
+      <div class="alert alert-danger">{{texto}}</div>
+  {{else}}
+
+  {{/each}}
+  
+  <div class="row">
+    <div class="col-md-4">
+      <h2>Lista de clientes</h2>
+    </div>
+
+    {{#ifUR}}
+    <div class="col-md-8 text-right">
+      <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaNovoCliente()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Cliente</button>  
+    </div>
+    {{/ifUR}}
+  </div>
+  <hr>
+  <br>
+
+  <div class="row">
+      <div class="col-md-6 mt-4" style="float:none;margin:auto;">
+          <input class="form-control flex-grow-0" id="inputFiltro" type="text" placeholder="Filtro">
+      </div>
+  </div>
+
+  {{#if clientes}}
+  <div id="lista">
+    <table class="mt-5 table" id="myTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)" scope="col">Nome</th>
+          <th onclick="sortTable(1)" scope="col">Nif</th>
+        </tr>
+      </thead>
+      
+      <tbody id="filtro">
+        {{#each clientes}}
+          <tr style="cursor: pointer;"  id="row" data-name="{{_id}}" onclick="saltaParaCliente(this)">
+              <td scope="row">{{nome}}</td>
+              <td>{{nif}}</td>
+          </tr>
+        {{else}}
+
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}
+  {{/if}}
+</div>
+
+<script>
+  $(document).ready(function(){
+  $("#inputFiltro").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#filtro tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+  
+});
+
+
+  function saltaParaCliente(handle) {
+    window.location.href = "/cliente/"+handle.dataset.name;
+  } 
+
+  function saltaParaNovoCliente(handle) {
+    window.location.href = "/clientes/add";
+  }
+
+  function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+  
+    dir = "asc"; 
+   
+    while (switching) {
+      
+      switching = false;
+      rows = table.rows;
+     
+      for (i = 1; i < (rows.length - 1); i++) {
+        
+        shouldSwitch = false;
+        
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch= true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount ++;
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  } 
+</script>

@@ -14,6 +14,13 @@ const path = require("path")
 const formidable = require('formidable');
 const e = require('express');
 const { O_NONBLOCK } = require('constants');
+const multer = require("multer");
+const bcrypt = require('bcryptjs')
+
+const targetPath = path.resolve('public/img');
+const upload = multer({
+    dest: targetPath
+  });
 
 //models
     require("../models/Obra")
@@ -21,15 +28,19 @@ const { O_NONBLOCK } = require('constants');
     require("../models/Funcionario")
     require("../models/Maquina")
     require("../models/Compra")
+    require("../models/Cliente")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
     const Funcionario = mongoose.model("funcionarios")
     const Maquina = mongoose.model("maquinas")
     const Requisicao = mongoose.model("requisicoes")
     const Compra = mongoose.model("compras")
+    const Cliente = mongoose.model("clientes")
 
 router.get('/obras/add', authenticated, userResponsavel, function(req, res){
-    res.render("usersResponsaveis/obras/novaObra")
+    Cliente.find().lean().then(function(clientes){
+        res.render("usersResponsaveis/obras/novaObra", {clientes:clientes})
+    })
 })
 
 router.post('/obras/add', authenticated, userResponsavel, function asyncFunction(req, res){
@@ -38,6 +49,7 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
     var nomeO;
     var descricao;
     var data;
+    var cliente;
 
     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
         erros.nome = "Nome inválido";
@@ -62,6 +74,14 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
         }
     }
 
+    
+    if(!req.body.cliente || typeof req.body.cliente == undefined || req.body.cliente == null || req.body.cliente == "nome"){
+        erros.cliente = "Cliente obrigatório.";
+    } 
+    else{
+        cliente = req.body.cliente;
+    }
+
     var today = moment().format("YYYY-MM-DD HH:mm");
     if(req.body.dataPrevistaInicio){
         var date = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
@@ -84,45 +104,58 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
     }
 
     if(Object.keys(erros).length != 0){
-        res.render("usersResponsaveis/obras/novaObra", {erros: erros, nomeO:nomeO, descricao:descricao, data:data})
+        res.render("usersResponsaveis/obras/novaObra", {erros: erros, cliente:cliente, nomeO:nomeO, descricao:descricao, data:data})
     }
     else{
         var novaObra;
-        if(req.body.dataPrevistaInicio){
-            novaObra = {
-                nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                dataPrevistaInicio: req.body.dataPrevistaInicio
+        cliente = cliente.split(" ").splice(-1);
+        cliente = cliente[0];
+        Cliente.findOne({nif: cliente}).lean().then(function(cliente){
+            if(req.body.dataPrevistaInicio){
+                novaObra = {
+                    nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    dataPrevistaInicio: req.body.dataPrevistaInicio
+                }
             }
-        }
-        else{
-            novaObra = {
-                nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'')
+            else{
+                novaObra = {
+                    nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    descricao: req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'')
+                }
             }
-        }
+            
         
-    
-        new Obra(novaObra).save().then(function(){
-            Obra.findOne({"nome":novaObra.nome}).then(function(obra){
-                Funcionario.updateOne(
-                    {"nome":req.user.nome},
-                    {$push: {obras : obra._id}}
-                ).catch(function(erro){
-                    req.flash("error_msg", "Erro ao inserir a obra nos funcionários.")
-                    res.redirect('/obra/'+req.params.nome);
+            new Obra(novaObra).save().then(function(){
+                Obra.findOne({"nome":novaObra.nome}).then(function(obra){
+                    Funcionario.updateOne(
+                        {"nome":req.user.nome},
+                        {$push: {obras : obra._id}}).then(function(){
+                        Cliente.updateOne(
+                            {_id:cliente._id},
+                            {$push: {obras : obra._id}}).then(function(cliente){
+                                req.flash("success_msg", "Obra criada com sucesso")
+                                res.redirect("/obras");
+                        }).catch(function(erro){
+                            req.flash("error_msg", "Erro ao inserir a obra no cliente.")
+                            res.redirect('/obra/'+req.params.nome);
+                        })                        
+                    }).catch(function(erro){
+                        req.flash("error_msg", "Erro ao inserir a obra nos funcionários.")
+                        res.redirect('/obra/'+req.params.nome);
+                    })
+                }).catch(function(err){
+                    req.flash("error_msg", "Obra não encontrada.")
+                    res.redirect("/obras");
                 })
-            }).catch(function(err){
-                req.flash("error_msg", "Obra não encontrada.")
-                res.redirect("/obras");
-            })           
-            req.flash("success_msg", "Obra criada com sucesso")
-            res.redirect("/obras");
+            }).catch(function(erro){
+                erros.nome = "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente.";
+                res.render("usersResponsaveis/obras/novaObra", {erros: erros, nomeO:nomeO, descricao:descricao, data:data})
+            })
         }).catch(function(erro){
-            erros.nome = "Já existe uma obra com o mesmo nome ou houve um erro ao adicionar a obra. Tente novamente.";
-            res.render("usersResponsaveis/obras/novaObra", {erros: erros, nomeO:nomeO, descricao:descricao, data:data})
-        })
-    
+            req.flash("error_msg", "Cliente não encontrado.");
+            res.redirect("/obras");
+        })    
     }
 })
 
@@ -575,51 +608,6 @@ router.get('/obras/downloadReport', authenticated, admin, async function asyncFu
     })
 })
 
-
-// router.get('/obras/downloadReport', authenticated, admin, async function asyncFunction(req, res){
-//     Obra.find({}).lean().then(function(obras){
-//         Tarefa.find({}).lean().then(function(tarefas){
-//             var o = obras;
-//             for(var i=0; i<o.length; i++){
-//                 o[i].tarefas = [];
-//             }
-//             for(var i=0; i<o.length; i++){
-//                 for(var j=0; j<tarefas.length; j++){
-//                     if(tarefas[j].obra.equals(o[i]._id)){
-//                         o[i].tarefas.push(tarefas[j])
-//                     }
-//                 }
-//             }
-//             res.render("admin/obras/obrasReport", {obras:o}, function(err, html){
-//                 var mySubString = html.substring(
-//                     html.lastIndexOf("<div id=\"comeca\""),
-//                     html.lastIndexOf("<br id=\"finish\">")
-//                 );
-                
-//                 const imagem = path.resolve('/img/isec.jpg');
-                
-//                 mySubString = mySubString + "<img src='file://" + imagem + "' />"
-//                 pdf.create(mySubString, {}).toFile("./reports/obrasReport.pdf", function(err, reposta){
-//                     if(err){
-//                         req.flash("error_msg", "Erro ao criar relatório de obras.")
-//                         res.redirect("/obras")
-//                     }
-//                     else{
-//                         const file = path.resolve('reports/obrasReport.pdf');
-//                         res.download(file);
-//                     }
-//                 })
-//             })
-//         }).catch(function(error){
-//             req.flash("error_msg", "Erro ao encontrar as tarefas.")
-//             res.redirect("/obras")
-//         })
-//     }).catch(function(error){
-//         req.flash("error_msg", "Erro ao encontrar as obras.")
-//         res.redirect("/dashboard")
-//     })
-// })
-
 router.get('/obra/:id/downloadReport', authenticated, admin, function asyncFunction(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
@@ -779,16 +767,38 @@ router.get('/obra/:id/clientRejected', authenticated, userResponsavel, function(
 router.get('/tarefa/:id/responderSubmissao', authenticated, userResponsavel, function (req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({ $and: [{_id:req.params.id},{$or: [{_id:funcionario.tarefas}, {_id:funcionario.tarefasCriadas}]}]}).lean().then(function(tarefa){
-            Obra.findOne({_id:tarefa.obra}).lean().then(function(obra){
-                if(tarefa.estado != "porAceitar"){
-                    req.flash("error_msg", "A tarefa "+ tarefa.nome + " não está por validar.")
-                    res.redirect("/tarefa/"+req.params.id);
-                }
-                else{
-                    res.render("usersResponsaveis/tarefas/responderSubmissao", {obra:obra, tarefa:tarefa});
-                }
+            Funcionario.find({ $or: [{tarefasCriadas:tarefa._id}, {tarefas: tarefa._id}]}).lean().then(function(funcionarios){
+                Requisicao.find({tarefa:tarefa._id}).lean().then(function(requisicoes){
+                    Obra.findOne({_id:tarefa.obra}).lean().then(async function(obra){
+                        if(tarefa.estado != "porAceitar"){
+                            req.flash("error_msg", "A tarefa "+ tarefa.nome + " não está por validar.")
+                            res.redirect("/tarefa/"+req.params.id);
+                        }
+                        else{
+                            var requests = [];
+                            for(var i=0; i<requisicoes.length; i++){
+                                var request = requisicoes[i];
+                                await Maquina.findOne({_id:request.maquina}).lean().then(async function(maquina){
+                                    await Funcionario.findOne({_id:request.funcionario}).lean().then(function(funcionario){
+                                        request.maquinaNome = maquina.nome;
+                                        request.funcionarioNome = funcionario.nome;
+                                        requests.push(request);
+                                    })
+                                })
+                            }
+                            res.render("usersResponsaveis/tarefas/responderSubmissao", {obra:obra, tarefa:tarefa, requisicoes:requisicoes, funcionarios:funcionarios});
+                        }
+                    }).catch(function(error){
+                        console.log(error);
+                        req.flash("error_msg", "Obra não encontrada.")
+                        res.redirect("/tarefa/"+req.params.id)
+                    })
+                }).catch(function(error){
+                    req.flash("error_msg", "Funcionários não encontrados.")
+                    res.redirect("/tarefa/"+req.params.id)
+                })
             }).catch(function(error){
-                req.flash("error_msg", "Obra não encontrada.")
+                req.flash("error_msg", "Requisições não encontradas.")
                 res.redirect("/tarefa/"+req.params.id)
             })
         }).catch(function(error){
@@ -1001,21 +1011,21 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                     else{
                                                         if(obra.estado == "preOrcamento"){
                                                             Tarefa.find({obra: obra._id}).lean().then(function(tarefas){
-                                                                var data = moment(tarefas[0].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
-                                                                async function obtemData(){
+                                                                Requisicao.find({tarefa:tarefas}).then(async function(requisicoes){
+                                                                    var data = moment(tarefas[0].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+                                                                    
                                                                     for(var i=0; i<tarefas.length; i++){
-                                                                        await Requisicao.find({tarefa:tarefas[i]._id}).then(function(requisicoes){
-                                                                            for(var j=0; j<requisicoes.length; j++){
-                                                                                var dataProx = moment(requisicoes[i].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
-                                                                                if(moment(data).isAfter(dataProx)){
-                                                                                    data = dataProx;
-                                                                                }
-                                                                            }
-                                                                            var dataProx = moment(tarefas[i].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
-                                                                            if(moment(data).isAfter(dataProx)){
-                                                                                data = dataProx;
-                                                                            }
-                                                                        })
+                                                                        var dataProx = moment(tarefas[i].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+                                                                        if(moment(data).isAfter(dataProx)){
+                                                                            data = dataProx;
+                                                                        }
+                                                                    }
+
+                                                                    for(var i=0; i<requisicoes.length; i++){
+                                                                        var dataProx = moment(requisicoes[i].dataPrevistaInicio).format("YYYY-MM-DD HH:mm");
+                                                                        if(moment(data).isAfter(dataProx)){
+                                                                            data = dataProx;
+                                                                        }
                                                                     }
 
                                                                     Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesa": cost, "dataPrevistaInicio": data, 
@@ -1034,8 +1044,10 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                                         req.flash("error_msg", "Erro ao atualizar a obra.")
                                                                         res.redirect("/tarefa/"+req.params.id);
                                                                     })
-                                                                }
-                                                                obtemData();
+                                                                }).catch(function(error){
+                                                                    req.flash("error_msg", "Requisicoes não encontradas.")
+                                                                    res.redirect("/tarefa/"+req.params.id);
+                                                                })
                                                             }).catch(function(error){
                                                                 req.flash("error_msg", "Tarefas não encontradas.")
                                                                 res.redirect("/tarefa/"+req.params.id);
@@ -1535,6 +1547,131 @@ router.post('/funcionario/:id/remove', authenticated, admin, function asyncFunct
     });
 })
 
+router.get('/funcionarios/addFuncionario', authenticated, admin, function(req, res){
+    res.render("admin/funcionarios/registo")
+})
+
+router.post('/funcionarios/addFuncionario', authenticated, admin, function asyncFunction(req, res){
+    var erros = new Object();
+    var nomeF;
+    var funcao;
+    var departamento;
+    var equipa;
+    var custo;
+
+    if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){
+        erros.nome = "Nome obrigatório.";
+    }
+    else{
+        if(req.body.nome.length < 50){
+            erros.nome = "Nome demasiado longo. São permitidos apenas 50 caracteres.";
+        }
+        else{
+            nomeF = req.body.nome;
+        }
+    }
+
+    if(!req.body.email || typeof req.body.email === undefined || req.body.email === null){
+        erros.email = "Email obrigatório.";
+    }
+    else{
+        email = req.body.email;
+    }
+
+    if(!req.body.funcao || typeof req.body.funcao === undefined || req.body.funcao === null){
+        erros.funcao = "Função na empresa obrigatório.";
+    }
+    else{
+        funcao = req.body.funcao;
+    }
+    
+    if(!req.body.departamento || typeof req.body.departamento === undefined || req.body.departamento === null){
+        erros.departamento = "Departamento obrigatório.";
+    }
+    else{
+        departamento = req.body.departamento;
+    }
+    
+    if(!req.body.equipa || typeof req.body.equipa === undefined || req.body.equipa === null){
+        erros.equipa = "Equipa obrigatório.";
+    }
+    else{
+        equipa = req.body.equipa;
+    }
+
+    if(!req.body.custo || typeof req.body.custo === undefined || req.body.custo === null || req.body.custo < 0){
+        erros.custo = "Custo inválido.";
+    }
+    else{
+        custo = req.body.custo;
+    }
+
+    if(!req.body.password || typeof req.body.password === undefined || req.body.password === null){
+        erros.password = "Password obrigatório.";
+    }
+    else{
+        if(req.body.password.length < 5){
+            erros.password = "Password curta. Mínimo 5 caracteres.";
+        }
+        
+        if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
+            erros.password2 = "Confirmação obrigatório.";
+        }
+        else{
+            if(req.body.password != req.body.password2){
+                erros.password = "As passwords não correspondem.";
+            }
+        }        
+    } 
+
+
+    if(Object.keys(erros).length != 0){
+        res.render("admin/funcionarios/registo", {erros: erros, nomeF:nomeF, custo:custo, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
+    }
+    else{
+        Funcionario.findOne({email:req.body.email}).then(function(funcionario){
+            if(funcionario){
+                erros.email = "Já existe uma conta com este email.";
+                res.render("admin/funcionarios/registo", {erros: erros, nomeF:nomeF, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
+            }
+            else{
+                const novoFunc = new Funcionario({
+                    nome: req.body.nome,
+                    funcao: req.body.funcao,
+                    departamento: req.body.departamento,
+                    equipa: req.body.equipa,
+                    email: req.body.email,
+                    password: req.body.password,
+                    custo: req.body.custo
+                })
+
+                bcrypt.genSalt(10, function(erro, salt){
+                    bcrypt.hash(novoFunc.password, salt, function(erro, hash){
+                        if(erro){
+                            req.flash("error_msg", "Erro interno ao registar. Tente novamente")
+                            res.redirect("/funcionarios/addFuncionario");
+                        }
+
+                        novoFunc.password = hash
+                        novoFunc.save().then(function(funcionario){
+                            req.flash("success_msg", "Registo concluído com sucesso.")
+                            res.redirect("/funcionarios");
+                        }).catch(function(erro){
+                            req.flash("error_msg", "Erro interno ao registar. Tente novamente")
+                            res.redirect("/funcionarios/addFuncionario");
+                        })
+                    })
+                })
+            }
+        }).catch(function(erro){
+            console.log(erro)
+            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
+            res.redirect("/funcionarios/addFuncionario");
+        })
+    }
+
+})
+
 router.get('/maquinas', authenticated, userResponsavel, function(req, res){
     Maquina.find().lean().then(function(maquinas){
         res.render("usersResponsaveis/maquinas/maquinas", {maquinas:maquinas})
@@ -1631,7 +1768,7 @@ router.get('/maquina/:id/edit', authenticated, userResponsavel, function(req, re
 router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){
     
     Maquina.findOne({_id:req.params.id}).lean().then(function(maquina){
-        var erros = [];
+        var erros = new Object();
 
         if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
             erros.nome = "Nome inválido.";
@@ -1718,6 +1855,162 @@ router.post('/maquina/:id/remove', authenticated, admin, function asyncFunction(
         req.flash("error_msg", "Erro ao remover máquina.")
         res.redirect("/maquinas")
     });
+})
+
+router.get('/clientes', authenticated, userResponsavel, function(req, res){
+    Cliente.find().lean().then(function(clientes){
+        res.render("usersResponsaveis/clientes/clientes", {clientes:clientes})
+    }).catch(function(error){
+        req.flash("error_msg", "Clientes não encontrados.")
+        res.redirect("/dashboard")
+    })
+})
+
+router.get('/clientes/add', authenticated, userResponsavel, function(req, res){
+    res.render("usersResponsaveis/clientes/novoCliente");
+})
+
+router.post('/clientes/add', authenticated, userResponsavel, function asyncFunction(req, res){
+    var erros = new Object();
+    var nomeC;
+    var nif;
+    var email;
+    var morada;
+
+    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+        erros.nome = "Nome inválido.";
+    }
+    else{
+        if(req.body.nome.trim().length < 2){
+            erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
+        }else{
+            nomeC = req.body.nome;
+        }
+    }
+    
+
+    if(!req.body.nif || typeof req.body.nif == undefined || req.body.nif == null){
+        erros.nif = "Número de identidade inválido.";
+    } else{
+        nif = req.body.nif;
+    }
+
+    if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
+        erros.email = "E-mail inválido.";
+    } 
+    else{
+        email = req.body.email;
+    }
+
+    if(!req.body.morada || typeof req.body.morada == undefined || req.body.morada == null){
+        erros.morada = "Morada inválida.";
+    } 
+    else{
+        morada = req.body.morada;
+    }
+    
+
+    if(Object.keys(erros).length != 0){
+        res.render("usersResponsaveis/clientes/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
+    }
+    else{
+        var novoCliente = {
+                nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                nif: req.body.nif,
+                email: req.body.email,
+                morada: req.body.morada }
+        
+        new Cliente(novoCliente).save().then(function(){       
+            req.flash("success_msg", "Cliente registado com sucesso.")
+            res.redirect("/clientes");
+        }).catch(function(erro){
+            erros.nome = "Já existe um cliente com o mesmo nome/nif ou houve um erro ao adicionar o cliente. Tente novamente.";
+            res.render("usersResponsaveis/obras/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
+        })
+    }
+})
+
+router.get('/cliente/:id', authenticated, userResponsavel, function(req, res){
+    Cliente.findOne({_id:req.params.id}).lean().then(function(cliente){
+        Obra.find({_id:cliente.obras}).lean().then(function(obras){
+            res.render("usersResponsaveis/clientes/clienteDetails", {cliente:cliente, obras:obras});
+        }).catch(function(error){
+            req.flash("error_msg", "Obras não encontradas.")
+            res.redirect("/clientes")
+        })
+    }).catch(function(error){
+        req.flash("error_msg", "Cliente não encontrado.")
+        res.redirect("/clientes")
+    })
+})
+
+router.get('/cliente/:id/edit', authenticated, userResponsavel, function(req, res){
+    Cliente.findOne({_id:req.params.id}).lean().then(function(cliente){
+        res.render("usersResponsaveis/clientes/editarCliente", {cliente:cliente})
+    }).catch(function(erro){
+        req.flash("error_msg", "Cliente não encontrado.")
+        res.redirect("/clientes");
+    })
+})
+
+router.post('/cliente/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){
+    
+    Cliente.findOne({_id:req.params.id}).lean().then(function(cliente){
+        var erros = new Object();
+
+        if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+            erros.nome = "Nome inválido.";
+        }
+        else{
+            if(req.body.nome.trim().length < 2){   
+                erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
+            }
+            else{
+                cliente.nome = req.body.nome;
+            }
+        }
+
+        if(!req.body.nif || typeof req.body.nif == undefined || req.body.nif == null){
+            erros.nif = "Número de identidade fiscal inválido.";
+        }else{
+            cliente.nif = req.body.nif;
+        }
+
+        if(!req.body.email || typeof req.body.email == undefined || req.body.email == null){
+            erros.email = "E-mail inválido.";
+        }else{
+            cliente.email = req.body.email;
+        }
+
+        if(!req.body.morada || typeof req.body.morada == undefined || req.body.morada == null){
+            erros.morada = "Morada inválido.";
+        }
+        else{
+            cliente.morada = req.body.morada;
+        }
+         
+        if(Object.keys(erros).length != 0){
+            res.render("usersResponsaveis/clientes/editarCliente", {erros:erros, cliente:cliente})
+        }
+        else{
+            Cliente.findOneAndUpdate({_id:req.params.id},
+                {"$set": {
+                    "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                    "nif": req.body.nif,
+                    "morada": req.body.morada,
+                    "email": req.body.email
+                    }}, {useFindAndModify: false}).then(function(){
+                    req.flash("success_msg", "Cliente editado com sucesso.")
+                    res.redirect("/cliente/"+req.params.id);
+            }).catch(function(error){
+                req.flash("error_msg", "Cliente não encontrado.")
+                res.redirect("/clientes");
+            })
+        }
+    }).catch(function(error){
+        req.flash("error_msg", "Cliente não encontrado.")
+        res.redirect("/clientes")
+    })
 })
 
 async function getFuncionarios(funcionarios, f){

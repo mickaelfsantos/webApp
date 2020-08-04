@@ -1,0 +1,74 @@
+<div class="container-fluid pl-4 pr-4">
+    
+    {{#each erros}}
+        <div class="alert alert-danger">{{texto}}</div>
+    {{else}}
+
+    {{/each}}
+    
+    <h2 id="nomeCliente">Editar cliente</h2>
+    
+    <div class="card mt-4">
+        <div class="card-body">
+            <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
+            <form action="" name="getCliente" method="POST">
+                <input type="hidden" id="id" value="{{cliente._id}}">
+                <label for="nome">Nome*</label>
+                {{#if erros.nome}}
+                    <input type="text" id="nome" name="nome" value="{{cliente.nome}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nome}}
+                    </div>
+                {{else}}
+                    <input type="text" id="nome" name="nome" value="{{cliente.nome}}" class="form-control mb-4">
+                {{/if}}
+
+                <label for="nif">Número de identidade fiscal (nif)*</label>
+                {{#if erros.nif}}
+                    <input type="text" id="nif" name="nif" value="{{cliente.nif}}" placeholder="Nif" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.nif}}
+                    </div>
+                {{else}}
+                    <input type="text" id="nif" name="nif" value="{{cliente.nif}}" placeholder="Nif" class="form-control mb-4">
+                {{/if}}
+
+                <label for="email">E-mail*</label>
+                {{#if erros.email}}
+                    <input type="text" id="email" name="email" value="{{cliente.email}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.email}}
+                    </div>
+                {{else}}
+                    <input type="text" id="email" name="email" value="{{cliente.email}}" class="form-control mb-4">
+                {{/if}}
+
+                <label for="morada">Morada*</label>
+                {{#if erros.morada}}
+                    <input type="text" id="morada" name="morada" value="{{cliente.morada}}" class="form-control is-invalid">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.morada}}
+                    </div>
+                {{else}}
+                    <input type="text" id="morada" name="morada" value="{{cliente.morada}}" class="form-control mb-4">
+                {{/if}}
+
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaCliente()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+                    
+ <script>
+    var cliente = document.getElementById('id').getAttribute("value");
+    document.getCliente.action = "/cliente/"+cliente+"/edit";
+
+    function saltaParaCliente(){
+        var cliente = document.getElementById('id').getAttribute("value");
+        window.location = "/cliente/"+cliente;
+    }
+
+ </script>

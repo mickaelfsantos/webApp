@@ -8,7 +8,7 @@
         {{#ifUR}}
         <div class="col-8 text-right">
             <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
-            <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaRemover()" style="cursor: pointer;"><i class="fa fa-remove"></i> Remover</button>
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaRemover()" style="cursor: pointer;"><i class="fa fa-remove"></i> Remover</button>
         </div>
         {{/ifUR}}
     </div>
@@ -16,7 +16,7 @@
 
         
     <input type="hidden" id="id" name="id" value="{{maquina._id}}">
-    <div class="row mt-4 col-12" id="infoHover">
+    <div class="row col-12" id="infoHover">
         <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Nome</h6>
         </div>
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div class="row mt-4 col-12" id="infoHover">
+    <div class="row col-12" id="infoHover">
         <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Função</h6>
         </div>
@@ -34,7 +34,7 @@
         </div>
     </div>
 
-    <div class="row mt-4 col-12" id="infoHover">
+    <div class="row col-12" id="infoHover">
         <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Departamento</h6>
         </div>
@@ -45,7 +45,7 @@
     </div>
 
     {{#ifImAdmin}}
-    <div class="row mt-4 col-12" id="infoHover">
+    <div class="row col-12" id="infoHover">
         <div class="col-md-3 p-3 text-left">
             <h6 class="blockquote m-0">Custo</h6>
         </div>

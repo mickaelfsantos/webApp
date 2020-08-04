@@ -1,0 +1,104 @@
+<div class="container-fluid pl-4 pr-4">
+
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Cliente</h2>
+        </div>
+
+        {{#ifUR}}
+        <div class="col-8 text-right">
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEditar()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
+        </div>
+        {{/ifUR}}
+    </div>
+    <hr>
+
+        
+    <input type="hidden" id="id" name="id" value="{{cliente._id}}">
+    <div class="row col-12" id="infoHover">
+        <div class="col-md-3 p-3 text-left">
+            <h6 class="blockquote m-0">Nome</h6>
+        </div>
+        <div class="col-md-9 p-3">
+            <label for="nome" id="nome" class="m-0">{{cliente.nome}}</label>
+        </div>
+    </div>
+
+    <div class="row col-12" id="infoHover">
+        <div class="col-md-3 p-3 text-left">
+            <h6 class="blockquote m-0">Número de identidade fiscal (nif)</h6>
+        </div>
+        <div class="col-md-9 p-3">
+            <label for="nif" id="nif" class="m-0">{{cliente.nif}}</label>
+        </div>
+    </div>
+
+    <div class="row col-12" id="infoHover">
+        <div class="col-md-3 p-3 text-left">
+            <h6 class="blockquote m-0">E-mail</h6>
+        </div>
+
+        <div class="col-md-9 p-3">
+            <label for="email" id="email" class="m-0">{{cliente.email}}</label>
+        </div>
+    </div>
+
+    <div class="row col-12" id="infoHover">
+        <div class="col-md-3 p-3 text-left">
+            <h6 class="blockquote m-0">Morada</h6>
+        </div>
+
+        <div class="col-md-9 p-3">
+            <label for="morada" id="morada" class="m-0">{{cliente.morada}}</label>
+        </div>
+    </div>
+
+    <div class="row text-center">
+        <div class="col-md-12">
+            <h6 class="blockquote">Obras</h6>
+        </div>
+    </div>
+
+    {{#if obras}}
+        <div id="lista">
+            <table class="mt-5 mb-5 table" id="myTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)" scope="col">Nome <i class="fa fa-angle-down"> </i></th>
+                    <th onclick="sortTableDatas(1)" scope="col">Datas previstas <i class="fa fa-angle-down"> </i></th>
+                    <th onclick="sortTableDatas(2)" scope="col">Datas <i class="fa fa-angle-down"> </i></th>
+                    <th onclick="sortTable(3)" scope="col">Estado <i class="fa fa-angle-down"> </i></th>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="filtro">
+            {{#each obras}}
+                <tr id="row" data-name="{{_id}}" onclick="saltaParaObra(this)">
+                    <td scope="row">{{nome}}</td>
+                    <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                    <td>{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                    <td>{{estadoToString estado}}</td>
+                </tr>
+                {{else}}
+
+            {{/each}}
+            </tbody>
+            </table>
+    {{else}}
+            <div class="row text-center mt-4 mb-5">
+                <div class="col-12 font-weight-bold">O cliente ainda não efectou pedido de obras.</div>
+            </div>
+        </div>
+    {{/if}}
+
+    
+</div>
+
+<script>
+
+    function saltaParaEditar() {
+        cliente = document.getElementById('id').getAttribute("value");
+        window.location.href = "/cliente/"+cliente+"/edit";
+    }
+</script>
+ 

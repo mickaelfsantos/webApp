@@ -37,14 +37,14 @@
                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadTarefaReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
             {{/ifImAdmin}}
             {{#ifSubmeteu tarefa.estado}}
-                <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaRequisitar()" style="cursor: pointer;"><i class="fa fa-calendar-plus-o"></i> Requisitar Máquina</button>
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaRequisitar()" style="cursor: pointer;"><i class="fa fa-calendar-plus-o"></i> Requisitar Máquina</button>
             {{/ifSubmeteu}}
         </div>
 
     </div>
     <hr>
 
-        <div class="row col-12 mt-4" id="infoHover">
+        <div class="row col-12" id="infoHover">
             <div class="col-md-3 p-3 text-left">
                 <h6 class="blockquote m-0">Obra</h6>
             </div>
@@ -53,7 +53,7 @@
             </div>
         </div>
             <input type="hidden" id="id" name="id" value="{{tarefa._id}}">
-            <div class="row col-12 mt-4" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Nome</h6>
                 </div>
@@ -62,7 +62,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Descrição</h6>
                 </div>
@@ -73,7 +73,7 @@
             </div>
 
             {{#ifImAdmin}}
-                <div class="row mt-4 col-12" id="infoHover">
+                <div class="row col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Despesa prevista (mão de obra)</h6>
                     </div>
@@ -84,7 +84,7 @@
                 </div>
 
                 {{#if requisicoes}}
-                    <div class="row mt-4 col-12" id="infoHover">
+                    <div class="row col-12" id="infoHover">
                         <div class="col-md-3 p-3 text-left">
                             <h6 class="blockquote m-0">Despesa prevista (requisições)</h6>
                         </div>
@@ -95,7 +95,7 @@
                     </div>
                 {{/if}}
 
-                <div class="row mt-4 col-12" id="infoHover">
+                <div class="row col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Orçamento</h6>
                     </div>
@@ -106,7 +106,7 @@
                 </div>
                 
                 {{#ifTerminou tarefa.estado}}
-                    <div class="row mt-4 col-12" id="infoHover">
+                    <div class="row col-12" id="infoHover">
                         <div class="col-md-3 p-3 text-left">
                             <h6 class="blockquote m-0">Despesa</h6>
                         </div>
@@ -116,7 +116,7 @@
                         </div>
                     </div>
 
-                    <div class="row mt-4 col-12" id="infoHover">
+                    <div class="row col-12" id="infoHover">
                         <div class="col-md-3 p-3 text-left">
                             <h6 class="blockquote m-0">Preço final</h6>
                         </div>
@@ -128,7 +128,7 @@
                 {{/ifTerminou}}
             {{/ifImAdmin}}
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Importância</h6>
                 </div>
@@ -139,7 +139,7 @@
             </div>
 
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Estado</h6>
                 </div>
@@ -150,7 +150,7 @@
             </div>
 
             {{#ifRecusada tarefa.estado}}
-                <div class="row mt-4 col-12" id="infoHover">
+                <div class="row col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Justificação</h6>
                     </div>
@@ -161,7 +161,7 @@
                 </div>
             {{/ifRecusada}}
             
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Funcionários</h6>
                 </div>
@@ -170,14 +170,13 @@
                     {{#each funcionarios}}
                         <img src="{{foto}}" class="avatar">
                         <label for="funcionarios" id="funcionarios">{{nome}}</label><br>
-                        <br>
                     {{else}}
                     {{/each}}    
                 </div>
             </div>
 
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
@@ -187,7 +186,7 @@
                 </div>            
             </div>
 
-            <div class="row mt-4 mb-5 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>

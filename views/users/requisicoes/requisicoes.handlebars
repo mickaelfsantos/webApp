@@ -7,139 +7,12 @@
 <link href='fullcalendar-4.4.2/packages/core/main.css' rel='stylesheet' />
 <link href='fullcalendar-4.4.2/packages/daygrid/main.css' rel='stylesheet' />
 <link href='fullcalendar-4.4.2/packages/bootstrap/main.css' rel='stylesheet' />
-<!--<link href='lib/main.css' rel='stylesheet' />-->
-
+<link rel="stylesheet" href="frappe-gantt.css">
 
 <script src='fullcalendar-4.4.2/packages/core/main.js'></script>
 <script src='fullcalendar-4.4.2/packages/daygrid/main.js'></script>
 <script src='fullcalendar-4.4.2/packages/bootstrap/main.js'></script>
-<!-- <script src='lib/main.js'></script>-->
-
-<script>
-  /*document.addEventListener('DOMContentLoaded', function() {
-  var calendarEl = document.getElementById('gantt');
-
-  var e = {{{obrasS}}};
-    var resources = [];
-    for(var i=0; i<e.length; i++){
-      resources[i] = e[i];
-    }
-    for(var i=0; i<e.length; i++){
-      resources[i].tittle = resources[i].nome;
-    }
-
-var calendar = new FullCalendar.Calendar(calendarEl, {
-  now: '2020-06-07',
-  scrollTime: '00:00', // undo default 6am scrollTime
-  selectable: true,
-  aspectRatio: 1.8,
-  headerToolbar: {
-    left: 'today prev,next',
-    center: 'title',
-    right: 'resourceTimelineDay,resourceTimelineThreeDays,timeGridWeek'
-  },
-  initialView: 'resourceTimelineDay',
-  views: {
-    resourceTimelineThreeDays: {
-      type: 'resourceTimeline',
-      duration: { days: 3 },
-      buttonText: '3 days'
-    }
-  },
-  resourceAreaHeaderContent: 'Rooms',
-  resources: [
-    { id: 'a', title: 'Auditorium A' },
-    { id: 'b', title: 'Auditorium B', eventColor: 'green' },
-    { id: 'c', title: 'Auditorium C', eventColor: 'orange' },
-    { id: 'd', title: 'Auditorium D', children: [
-      { id: 'd1', title: 'Room D1' },
-      { id: 'd2', title: 'Room D2' }
-    ] },
-    { id: 'e', title: 'Auditorium E' },
-    { id: 'f', title: 'Auditorium F', eventColor: 'red' },
-    { id: 'g', title: 'Auditorium G' },
-    { id: 'h', title: 'Auditorium H' },
-    { id: 'i', title: 'Auditorium I' },
-    { id: 'j', title: 'Auditorium J' },
-    { id: 'k', title: 'Auditorium K' },
-    { id: 'l', title: 'Auditorium L' },
-    { id: 'm', title: 'Auditorium M' },
-    { id: 'n', title: 'Auditorium N' },
-    { id: 'o', title: 'Auditorium O' },
-    { id: 'p', title: 'Auditorium P' },
-    { id: 'q', title: 'Auditorium Q' },
-    { id: 'r', title: 'Auditorium R' },
-    { id: 's', title: 'Auditorium S' },
-    { id: 't', title: 'Auditorium T' },
-    { id: 'u', title: 'Auditorium U' },
-    { id: 'v', title: 'Auditorium V' },
-    { id: 'w', title: 'Auditorium W' },
-    { id: 'x', title: 'Auditorium X' },
-    { id: 'y', title: 'Auditorium Y' },
-    { id: 'z', title: 'Auditorium Z' }
-  ],
-  events: [
-    { id: '1', resourceId: 'b', start: '2020-06-07T02:00:00', end: '2020-06-07T07:00:00', title: 'event 1' },
-    { id: '2', resourceId: 'c', start: '2020-06-07T05:00:00', end: '2020-06-07T22:00:00', title: 'event 2' },
-    { id: '3', resourceId: 'd', start: '2020-06-06', end: '2020-06-08', title: 'event 3' },
-    { id: '4', resourceId: 'e', start: '2020-06-07T03:00:00', end: '2020-06-07T08:00:00', title: 'event 4' },
-    { id: '5', resourceId: 'f', start: '2020-06-07T00:30:00', end: '2020-06-07T02:30:00', title: 'event 5' }
-  ]
-});
-
-calendar.render();
-calendarEl.style.display = "none";
-});*/
-
-
-
-  {{!-- document.addEventListener('DOMContentLoaded', function () {
-    var calendarEl = document.getElementById('calendar');
-    var e = {{{ requisicoesS }}};
-    var eventos = [];
-    for (var i = 0; i < e.length; i++) {
-      eventos[i] = e[i];
-    }
-    for (var i = 0; i < e.length; i++) {
-      eventos[i].title = eventos[i].tarefaNome;
-      eventos[i].start = eventos[i].dataPrevistaInicio;
-      eventos[i].end = eventos[i].dataPrevistaFim;
-      if (eventos[i].estado == "preProducao")
-        eventos[i].color = '#D2691E';
-      else {
-          if(eventos[i].estado == "emExecucao"){
-            if(moment(eventos[i].dataPrevistaFim).isAfter(moment())){
-              eventos[i].color = '#008000';
-            }
-            else{
-              eventos[i].color = '#FF0000';
-            }
-          }
-          else{
-              eventos[i].color = '#778899';
-          }
-      }
-    }
-
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      plugins: ['dayGrid'],
-      locale: 'pt',
-      header: { // layout header
-        left: '',
-        center: 'title',
-        right: 'prev, next'
-      },
-      displayEventTime:true,
-      displayEventEnd: true,
-      events: eventos
-    });
-
-
-    calendar.render();
-    calendarEl.style.display = "none";
-  }); --}}
-</script>
-</style>
+<script src="frappe-gantt.min.js"></script>
 
 <div class="container-fluid pl-4 pr-4">
   
@@ -222,7 +95,7 @@ calendarEl.style.display = "none";
       <i class="fa fa-circle" style="color: #778899;"></i> Datas - obras concluídas <br>
   </div>
   <div id='calendar' style="display: none;"></div>
-  <div id='gantt'></div>
+  <svg id='gantt' class="m-5" style="display: none;"></svg>
 </div>
 
 <script>
@@ -233,6 +106,7 @@ calendarEl.style.display = "none";
         $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
       });
       calendar();
+      criaGantt();
     });
   });
 
@@ -346,6 +220,51 @@ function calendar(){
     navbar.getElementsByTagName("a")[0].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[1].setAttribute("class", "nav-link")
     navbar.getElementsByTagName("a")[2].setAttribute("class", "nav-link active")
+    criaGantt();
+  }
+
+  function criaGantt(){
+   var calendarEl = document.getElementById('gantt');
+    var eventos = {{{ requisicoesS }}};
+    calendarEl.innerHTML = "";
+    var e = [];
+    var value = $($("#inputFiltro")).val().toLowerCase();
+    $("#filtro tr").filter(function () {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+    for (var i = 0; i < eventos.length; i++) {
+      if(eventos[i].maquinaNome.includes(value))
+        e.push(eventos[i]);
+    }
+
+    var tasks = [];
+    for(var i=0; i<e.length; i++){
+      if(moment(e[i].dataPrevistaFim).isValid()){
+        var task = {
+          id: e[i]._id,
+          name: e[i].maquinaNome,
+          start: moment(e[i].dataPrevistaInicio).format("YYYY-MM-DD"),
+          end: moment(e[i].dataPrevistaFim).format("YYYY-MM-DD")
+        }
+      }
+      else{
+        var task = {
+          id: e[i]._id,
+          name: e[i].maquinaNome,
+          start: moment(e[i].dataPrevistaInicio).format("YYYY-MM-DD"),
+          end: moment(e[i].dataPrevistaInicio).format("YYYY-MM-DD")
+        }
+      }
+      tasks.push(task);
+    }
+    
+
+  var gantt = new Gantt(document.getElementById("gantt"), tasks, {
+    on_click: function (task) {
+      window.location = "/requisicao/"+task.id
+    }
+  });
+  document.getElementById("gantt").style.display = "block";
   }
 
   function sortTable(n) {

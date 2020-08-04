@@ -247,8 +247,8 @@
                 return options.inverse(this);
             },
 
-            ifComecarRequest: function(tarefaEstado, requisicaoEstado, obraEstado, options){
-                if((tarefaEstado === "aceite" || tarefaEstado === "emExecucao") && requisicaoEstado == "preProducao" && (obraEstado == "preProducao" || obraEstado == "producao")){
+            ifComecarRequest: function(requisicaoEstado, obraEstado, options){
+                if(requisicaoEstado == "preProducao" && (obraEstado == "preProducao" || obraEstado == "producao")){
                     return options.fn(this)
                 }
                 return options.inverse(this);

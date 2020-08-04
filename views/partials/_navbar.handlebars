@@ -58,6 +58,15 @@
       </ul>
       {{else}}
       {{/ifImAdmin}}
+
+      {{#ifUR}}
+      <ul class="sidebar-nav" id="sidebar">
+        <li class="sub-sidebar-brand">
+          <a class="list-group-item list-group-item-action bg-dark" href="/clientes">Clientes</a>
+        </li>
+      </ul>
+      {{else}}
+      {{/ifUR}}
     </div>
   </div>
   <div id="page-content-wrapper">
@@ -75,91 +84,3 @@
       })
 
     </script>
-
-
-    {{!-- {{#if user}}
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-end">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="/dashboard">Dashboard</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Obras
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="/obras">Obras</a>
-          {{#ifUR}}
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/obras/add">Nova obra</a>
-          {{else}}
-          {{/ifUR}}
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Tarefas
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="/tarefas">Tarefas</a>
-        </div>
-      </li>
-      {{#ifUR}}
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Máquinas
-          </a>
-          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="/maquinas">Máquinas</a>
-              
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="/maquinas/add">Nova máquina</a>
-                  
-          </div>
-        </li>
-      {{else}}
-      {{/ifUR}}
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Requisições
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Requisições</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Nova requisição</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Fornecedores
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Fornecedores</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Novo fornecedor</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Clientes
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <a class="dropdown-item" href="#">Clientes</a>
-          <div class="dropdown-divider"></div>
-          <a class="dropdown-item" href="#">Novo cliente</a>
-        </div>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-      </li>      
-    </ul>
-  </div>
-
-  {{>_profile}}
-  
-</nav>
-{{/if}} --}}

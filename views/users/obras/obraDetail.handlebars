@@ -25,7 +25,7 @@
                     <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaObraAceite()" style="cursor: pointer;"><i class="	fa fa-thumbs-up"></i> Cliente Aceitou</button>
                     <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaObraRecusada()" style="cursor: pointer;"><i class="	fa fa-thumbs-down"></i> Cliente Recusou</button>
                 {{/ifWaitForClient}}
-                <button type="button" class="btn btn-light btn-outline-info" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Relatório</button>
             {{/ifImAdmin}}
         </div>
         {{/ifUR}}
@@ -33,7 +33,7 @@
     <hr>
 
             <input type="hidden" id="id" name="id" value="{{obra._id}}">
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0" id="texto">Nome</h6>
                 </div>
@@ -42,7 +42,7 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Descrição</h6>
                 </div>
@@ -51,7 +51,18 @@
                 </div>
             </div>
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
+                <div class="col-md-3 p-3 text-left">
+                    <h6 class="blockquote m-0">Cliente</h6>
+                </div>
+    
+                <div class="col-md-9 p-3">
+                        <label for="nome" id="nome">Nome: {{cliente.nome}}</label><br>
+                        <label for="nome" id="nome">Nif: {{cliente.nif}}</label><br>
+                </div>
+            </div>
+
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left" id="texto">
                     <h6 class="blockquote m-0">Estado</h6>
                 </div>
@@ -61,7 +72,7 @@
             </div>
 
             {{#ifImAdmin}}
-                <div class="row mt-4 col-12" id="infoHover">
+                <div class="row col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Despesa prevista</h6>
                     </div>
@@ -71,7 +82,7 @@
                     </div>
                 </div>
 
-                <div class="row mt-4 col-12" id="infoHover">
+                <div class="row col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Percentagem de lucro</h6>
                     </div>
@@ -81,7 +92,7 @@
                     </div>
                 </div>
 
-                <div class="row mt-4 col-12" id="infoHover">
+                <div class="row col-12" id="infoHover">
                     <div class="col-md-3 p-3 text-left">
                         <h6 class="blockquote m-0">Orçamento</h6>
                     </div>
@@ -92,7 +103,7 @@
                 </div>
 
                 {{#ifTerminou obra.estado}}
-                    <div class="row mt-4 col-12" id="infoHover">
+                    <div class="row col-12" id="infoHover">
                         <div class="col-md-3 p-3 text-left">
                             <h6 class="blockquote m-0">Despesa</h6>
                         </div>
@@ -102,7 +113,7 @@
                         </div>
                     </div>
 
-                    <div class="row mt-4 col-12" id="infoHover">
+                    <div class="row col-12" id="infoHover">
                         <div class="col-md-3 p-3 text-left">
                             <h6 class="blockquote m-0">Preço final</h6>
                         </div>
@@ -115,7 +126,7 @@
             {{else}}
             {{/ifImAdmin}}
             
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas previstas</h6>
@@ -127,7 +138,7 @@
             </div>
 
 
-            <div class="row mt-4 col-12" id="infoHover">
+            <div class="row col-12" id="infoHover">
                 <div class="col-md-3 p-3 text-left">
                     <h6 class="blockquote m-0">Datas</h6>
                 </div>
@@ -150,7 +161,43 @@
                 </div>
             {{/ifTerminou}}
 
-            <div class="row mt-5 text-center">
+            {{#if compras}}
+            <div class="row text-center">
+                <div class="col-md-12">
+                    <h6 class="blockquote">Compras</h6>
+                </div>
+            </div>
+            <div id="lista">
+                <table class="mt-5 mb-5 table" id="myTable">
+                    <thead>
+                    <tr>
+                        <th onclick="sortTable(0)" scope="col">Material </th>
+                        <th onclick="sortTable(1)" scope="col">Descrição </th>
+                        <th onclick="sortTable(2)" scope="col">Quantidade </th>
+                        <th onclick="sortTable2(3)" scope="col">Custo </th>
+                        <th onclick="sortTable(4)" scope="col">Fornecedor </th>
+                    </tr>
+                    </thead>
+            
+                    <tbody id="filtro">
+                        {{#each compras}}
+                            <tr id="row" data-name="{{_id}}">
+                                <td scope="row">{{material}}</td>
+                                <td>{{descricao}}</td>
+                                <td>{{quantidade}}</td>
+                                <td>{{custo}} €</td>
+                                <td>{{fornecedor}}</td>
+                            </tr>
+                        {{else}}
+
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            {{/if}}
+
+            <div class="row text-center">
                 <div class="col-md-12">
                     <h6 class="blockquote">Tarefas</h6>
                 </div>

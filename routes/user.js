@@ -12,8 +12,8 @@ const {authenticated} = require('../helpers/userRole');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const formidable = require('formidable');
-const multer = require("multer");
 const path = require('path');
+const multer = require("multer");
 
 const targetPath = path.resolve('public/img');
 const upload = multer({
@@ -27,11 +27,15 @@ const upload = multer({
     require("../models/Funcionario")
     require("../models/Requisicao")
     require("../models/Maquina")
+    require("../models/Cliente")
+    require("../models/Compra")
     const Obra = mongoose.model("obras")
     const Tarefa = mongoose.model("tarefas")
     const Funcionario = mongoose.model("funcionarios")
     const Requisicao = mongoose.model("requisicoes")
     const Maquina = mongoose.model("maquinas")
+    const Cliente = mongoose.model("clientes")
+    const Compra = mongoose.model("compras")
 
 
 router.get('/login', function(req, res){
@@ -44,126 +48,6 @@ router.post('/login', function asyncFunction(req, res, next){
         failureRedirect: "/login",
         failureFlash: true
     })(req, res, next)
-})
-
-router.get('/registo', function(req, res){
-    res.render("users/registo")
-})
-
-router.post('/registo', upload.single("file"), function asyncFunction(req, res){
-    var erros = new Object();
-    var nomeF;
-    var funcao;
-    var departamento;
-    var equipa;
-
-    if(!req.body.nome || typeof req.body.nome === undefined || req.body.nome === null){
-        erros.nome = "Nome obrigatório.";
-    }
-    else{
-        nomeF = req.body.nome;
-    }
-
-    if(!req.body.email || typeof req.body.email === undefined || req.body.email === null){
-        erros.email = "Email obrigatório.";
-        email=""
-    }
-    else{
-        email = req.body.email;
-    }
-
-    if(!req.body.funcao || typeof req.body.funcao === undefined || req.body.funcao === null){
-        erros.funcao = "Função na empresa obrigatório.";
-    }
-    else{
-        funcao = req.body.funcao;
-    }
-    
-    if(!req.body.departamento || typeof req.body.departamento === undefined || req.body.departamento === null){
-        erros.departamento = "Departamento obrigatório.";
-    }
-    else{
-        departamento = req.body.departamento;
-    }
-    
-    if(!req.body.equipa || typeof req.body.equipa === undefined || req.body.equipa === null){
-        erros.equipa = "Equipa obrigatório.";
-    }
-    else{
-        equipa = req.body.equipa;
-    }
-
-    if(!req.body.password || typeof req.body.password === undefined || req.body.password === null){
-        erros.password = "Password obrigatório.";
-    }
-    else{
-        if(req.body.password.length < 5){
-            erros.password = "Password curta. Mínimo 5 caracteres.";
-        }
-        
-        if(!req.body.password2 || typeof req.body.password2 === undefined || req.body.password2 === null){
-            erros.password2 = "Confirmação obrigatório.";
-        }
-        else{
-            if(req.body.password != req.body.password2){
-                erros.password = "As passwords não correspondem.";
-            }
-        }        
-    } 
-
-    if(Object.keys(erros).length != 0){
-        res.render("users/registo", {erros: erros, nomeF:nomeF, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
-    }
-    else{
-        Funcionario.findOne({email:req.body.email}).then(function(funcionario){
-            if(funcionario){
-                erros.email = "Já existe uma conta com este email.";
-                res.render("users/registo", {erros: erros, nomeF:nomeF, funcao:funcao, equipa:equipa, departamento:departamento, email:email})
-            }
-            else{
-                const novoFunc = new Funcionario({
-                    nome: req.body.nome,
-                    funcao: req.body.funcao,
-                    departamento: req.body.departamento,
-                    equipa: req.body.equipa,
-                    email: req.body.email,
-                    password: req.body.password
-                })
-
-                bcrypt.genSalt(10, function(erro, salt){
-                    bcrypt.hash(novoFunc.password, salt, function(erro, hash){
-                        if(erro){
-                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
-                            res.redirect("/registo");
-                        }
-
-                        novoFunc.password = hash
-                        novoFunc.save().then(function(funcionario){
-                            if(req.file){
-                                const tempPath = req.file.path;
-        
-                                fs.rename(tempPath, targetPath+"/"+funcionario._id + path.extname(req.file.originalname).toLowerCase(), function(err) {
-                                    if (err) 
-                                    Funcionario.findOneAndUpdate({_id:funcionario._id}, 
-                                        {"$set": {"foto":  "/img/"+funcionario._id+path.extname(req.file.originalname).toLowerCase()}}, 
-                                        {useFindAndModify: false}).then()
-                                });
-                            }
-                            req.flash("success_msg", "Registo concluído com sucesso.")
-                            res.redirect("/login");
-                        }).catch(function(erro){
-                            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
-                            res.redirect("/registo");
-                        })
-                    })
-                })
-            }
-        }).catch(function(erro){
-            req.flash("error_msg", "Erro interno ao registar. Tente novamente.")
-            res.redirect("/registo");
-        })
-    }
-
 })
 
 router.get("/logout", authenticated, function(req, res){
@@ -226,21 +110,31 @@ router.get('/obra/:id', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Obra.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.obras}]}).lean().then(function(obra){
             Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-                async function obtemRequisicoes(){
-                    var t = [];
-                    for(var i=0; i<tarefas.length; i++){
-                        t.push(tarefas[i]);
-                        t[i].requisicoes = [];
-                        await Requisicao.find({tarefa:tarefas[i]._id}).then(function(requisicoes){
-                            for(var j=0; j<requisicoes.length; j++){
-                                t[i].requisicoes.push(requisicoes[j])
+                Cliente.findOne({obras:obra}).lean().then(function(cliente){
+                    Compra.find({obra:obra}).lean().then(function(compras){
+                        async function obtemRequisicoes(){
+                            var t = [];
+                            for(var i=0; i<tarefas.length; i++){
+                                t.push(tarefas[i]);
+                                t[i].requisicoes = [];
+                                await Requisicao.find({tarefa:tarefas[i]._id}).then(function(requisicoes){
+                                    for(var j=0; j<requisicoes.length; j++){
+                                        t[i].requisicoes.push(requisicoes[j])
+                                    }
+                                })
                             }
-                        })
-                    }
-                    var tarefasS = JSON.stringify(t);
-                    res.render("users/obras/obraDetail", {obra:obra, tarefasS:tarefasS, tarefas:t, user:req.user})
-                }
-                obtemRequisicoes();
+                            var tarefasS = JSON.stringify(t);
+                            res.render("users/obras/obraDetail", {obra:obra, cliente:cliente, compras:compras, tarefasS:tarefasS, tarefas:t, user:req.user})
+                        }
+                        obtemRequisicoes();
+                    }).catch(function(error){
+                        req.flash("error_msg", "Compras não encontradas.")
+                        res.redirect("/obras")
+                    })
+                }).catch(function(error){
+                    req.flash("error_msg", "Cliente não encontrado.")
+                    res.redirect("/obras")
+                })
             }).catch(function(error){
                 req.flash("error_msg", "Tarefas não encontradas")
                 res.redirect("/obras")
@@ -711,81 +605,74 @@ router.get('/tarefa/:id/terminar', authenticated, function asyncFunction(req, re
                                                 }}, {useFindAndModify: false}).then()
             
            
-                                            Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
-                                                if(tarefas.length > 0){
-                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
-                                                        "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
-                                                        if(obra == null){  
-                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                            res.redirect("/tarefa/"+req.params.id);
-                                                        }
-                                                        else{
-                                                            req.flash("success_msg", "Tarefa terminada com sucesso")
-                                                            res.redirect("/tarefa/"+req.params.id);
-                                                        }
-                                                                        
-                                                    }).catch(function(error){
-                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                        res.redirect("/tarefa/"+req.params.id);
-                                                    })
-                                                }
-                                                else{
-                                                    Tarefa.find({obra:obra._id}).then(function(tarefas){
-                                                        async function obtemRequisicoes(){
-                                                            var sai = false;
-                                                            for(var i=0; i<tarefas.length; i++){
-                                                                await Requisicao.find({$and: [{estado :"emExecucao"}, {tarefa: tarefas[i]._id}]}).then(function(requisicoes){
-                                                                    
-                                                                    console.log("cheguei");
-                                                                    if(requisicoes.length > 0){
-                                                                        sai = true;
-                                                                        break;
-                                                                    }
-                                                                })
-                                                            }
-                                                            console.log("cheguei2");
-                                                            if(!sai){
-                                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
-                                                                "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
-                                                                {useFindAndModify: false}).lean().then(function(obra){
-                                                                    if(obra == null){  
-                                                                        req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                    else{
-                                                                        req.flash("success_msg", "Tarefa validada com sucesso")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                }).catch(function(error){
-                                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                                    res.redirect("/tarefa/"+req.params.id);
-                                                                })
+                                                Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
+                                                    if(tarefas.length > 0){
+                                                        Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
+                                                            "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
+                                                            if(obra == null){  
+                                                                req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                res.redirect("/tarefa/"+req.params.id);
                                                             }
                                                             else{
-                                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
-                                                                    "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
-                                                                    if(obra == null){  
-                                                                        req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                    else{
-                                                                        req.flash("success_msg", "Tarefa terminada com sucesso")
-                                                                        res.redirect("/tarefa/"+req.params.id);
-                                                                    }
-                                                                                    
-                                                                }).catch(function(error){
-                                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                                    res.redirect("/tarefa/"+req.params.id);
-                                                                })
+                                                                req.flash("success_msg", "Tarefa terminada com sucesso")
+                                                                res.redirect("/tarefa/"+req.params.id);
                                                             }
-                                                        }
-                                                        obtemRequisicoes();
-                                                    })
-                                                }
-                                            }).catch(function(error){
-                                                req.flash("error_msg", "Tarefas não encontradas.")
-                                                res.redirect("/tarefa/"+req.params.id)
-                                            })
+                                                                            
+                                                        }).catch(function(error){
+                                                            req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        })
+                                                    }
+                                                    else{
+                                                        Tarefa.find({obra:obra._id}).then(function(tarefas){
+                                                            Requisicao.find({$and : [{tarefa:tarefas}, {estado: { $ne: "finalizada"}}]}).then(function(requisicoes){
+                                                                if(requisicoes.length > 0){
+                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
+                                                                        "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
+                                                                        if(obra == null){  
+                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                            res.redirect("/tarefa/"+req.params.id);
+                                                                        }
+                                                                        else{
+                                                                            req.flash("success_msg", "Tarefa terminada com sucesso")
+                                                                            res.redirect("/tarefa/"+req.params.id);
+                                                                        }
+                                                                                        
+                                                                    }).catch(function(error){
+                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    })
+                                                                }
+                                                                else{
+                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": tarefa.dataFim, 
+                                                                        "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                                        {useFindAndModify: false}).lean().then(function(obra){
+                                                                        if(obra == null){  
+                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                            res.redirect("/tarefa/"+req.params.id);
+                                                                        }
+                                                                        else{
+                                                                            req.flash("success_msg", "Tarefa validada com sucesso")
+                                                                            res.redirect("/tarefa/"+req.params.id);
+                                                                        }
+                                                                    }).catch(function(error){
+                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                        res.redirect("/tarefa/"+req.params.id);
+                                                                    })
+                                                                }
+                                                            }).catch(function(error){
+                                                                req.flash("error_msg", "Requisições não encontradas.")
+                                                                res.redirect("/tarefa/"+req.params.id)
+                                                            })
+                                                        }).catch(function(error){
+                                                            req.flash("error_msg", "Tarefas não encontradas.")
+                                                            res.redirect("/tarefa/"+req.params.id);
+                                                        })
+                                                    }
+                                                }).catch(function(error){
+                                                    req.flash("error_msg", "Tarefas não encontradas.")
+                                                    res.redirect("/tarefa/"+req.params.id)
+                                                })
                                         }
                                         else{
                                             req.flash("error_msg", "Datas da tarefa inválidas.")
@@ -1106,7 +993,12 @@ router.post('/perfil/edit', upload.single("file"), authenticated, function async
                 erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
             }
             else{
-                funcionario.nome = req.body.nome;
+                if(req.body.nome.length < 50){
+                    erros.nome = "Nome demasiado longo. São permitidos apenas 50 caracteres.";
+                }
+                else{
+                    funcionario.nome = req.body.nome;
+                }
             }
         }
     
@@ -1536,8 +1428,8 @@ router.get('/requisicao/:id/comecar', authenticated, function asyncFunction(req,
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Requisicao.findOne({ $and: [{_id:req.params.id}, {funcionario : funcionario._id}]}).lean().then(function(requisicao){
             Tarefa.findOne({_id:requisicao.tarefa}).lean().then(function(tarefa){
-                if(tarefa.estado != "aceite" && tarefa.estado != "emExecucao"){
-                    req.flash("error_msg", "Não pode começar a utilizar a máquina. Verifique que a tarefa está aceite ou em execução.")
+                if(tarefa.estado == "preProducao" || tarefa.estado == "recusada" || tarefa.estado == "porAceitar"){
+                    req.flash("error_msg", "Não pode começar a utilizar a máquina. Verifique que a tarefa está aceite, em execução ou finalizada.")
                     res.redirect("/requisicao/"+req.params.id)
                 }
                 else{
@@ -1637,18 +1529,6 @@ router.get('/requisicao/:id/terminar', authenticated, function asyncFunction(req
                                                     requestCost = 0.01;
                                                 }
                 
-                                                var finishDate;
-                                                if(moment(obra.dataFim).isValid()){
-                                                    if(moment(requisicao.dataFim).isAfter(obra.dataFim)){
-                                                        finishDate = requisicao.dataFim;
-                                                    }
-                                                    else{
-                                                        finishDate = obra.dataFim;
-                                                    }
-                                                }
-                                                else{
-                                                    finishDate = requisicao.dataFim;
-                                                }
     
                                                 Requisicao.findOneAndUpdate({_id:req.params.id},
                                                     {"$set": {
@@ -1657,20 +1537,74 @@ router.get('/requisicao/:id/terminar', authenticated, function asyncFunction(req
                                                     }}, {useFindAndModify: false}).then()
                 
                
-                                                Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": finishDate, 
-                                                    "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
-                                                        {useFindAndModify: false}).lean().then(function(obra){
-                                                        if(obra == null){  
-                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                Tarefa.find({$and : [{obra:obra._id}, {estado: { $ne: "finalizada"}}]}).then(function(tarefas){
+                                                    if(tarefas.length > 0){
+                                                        Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": requisicao.dataFim, 
+                                                            "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                                {useFindAndModify: false}).lean().then(function(obra){
+                                                                if(obra == null){  
+                                                                    req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                    res.redirect("/requisicao/"+req.params.id);
+                                                                }
+                                                                else{
+                                                                    req.flash("success_msg", "Utilização terminada com sucesso.")
+                                                                    res.redirect("/requisicao/"+req.params.id);
+                                                                }
+                                                        }).catch(function(error){
+                                                            req.flash("error_msg", "Erro ao atualizar a obra.")
                                                             res.redirect("/requisicao/"+req.params.id);
-                                                        }
-                                                        else{
-                                                            req.flash("success_msg", "Utilização terminada com sucesso.")
+                                                        })
+                                                    }
+                                                    else{
+                                                        Tarefa.find({obra:obra._id}).then(function(tarefas){
+                                                            Requisicao.find({$and : [{tarefa:tarefas}, {estado: { $ne: "finalizada"}}]}).then(function(requisicoes){
+                                                                if(requisicoes.length > 0){
+                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": requisicao.dataFim, 
+                                                                        "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, {useFindAndModify: false}).lean().then(function(obra){
+                                                                        if(obra == null){  
+                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                            res.redirect("/requisicao/"+req.params.id);
+                                                                        }
+                                                                        else{
+                                                                            req.flash("success_msg", "Tarefa terminada com sucesso")
+                                                                            res.redirect("/requisicao/"+req.params.id);
+                                                                        }
+                                                                                        
+                                                                    }).catch(function(error){
+                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                        res.redirect("/requisicao/"+req.params.id);
+                                                                    })
+                                                                }
+                                                                else{
+                                                                    Obra.findOneAndUpdate({_id:obra._id}, {"$set": {"despesaFinal": cost, "dataFim": requisicao.dataFim, 
+                                                                        "estado": "finalizada", "custoFinal" : cost + cost * (obra.percentagemLucro / 100)}}, 
+                                                                        {useFindAndModify: false}).lean().then(function(obra){
+                                                                            
+                                                                        if(obra == null){  
+                                                                            req.flash("error_msg", "Obra não atualizada visto que não foi encontrada.")
+                                                                            res.redirect("/requisicao/"+req.params.id);
+                                                                        }
+                                                                        else{
+                                                                            req.flash("success_msg", "Tarefa validada com sucesso")
+                                                                            res.redirect("/requisicao/"+req.params.id);
+                                                                        }
+                                                                    }).catch(function(error){
+                                                                        req.flash("error_msg", "Erro ao atualizar a obra.")
+                                                                        res.redirect("/requisicao/"+req.params.id);
+                                                                    })
+                                                                }
+                                                            }).catch(function(error){
+                                                                req.flash("error_msg", "Requisições não encontradas.")
+                                                                res.redirect("/requisicao/"+req.params.id)
+                                                            })
+                                                        }).catch(function(error){
+                                                            req.flash("error_msg", "Tarefas não encontradas.")
                                                             res.redirect("/requisicao/"+req.params.id);
-                                                        }
+                                                        })
+                                                    }
                                                 }).catch(function(error){
-                                                    req.flash("error_msg", "Erro ao atualizar a obra.")
-                                                    res.redirect("/requisicao/"+req.params.id);
+                                                    req.flash("error_msg", "Tarefas não encontradas.")
+                                                    res.redirect("/requisicao/"+req.params.id)
                                                 })
                                             }
                                         };

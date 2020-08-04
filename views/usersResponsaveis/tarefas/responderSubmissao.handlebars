@@ -22,11 +22,61 @@
                 <label for="descricao" class="mt-3">Descrição da tarefa: {{tarefa.descricao}}</label>
                 <br>
                     
-                <label class="mt-3" for="datasPrevistas">Datas previstas: {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}</label>
+                <label class="mt-3" for="datasPrevistas">Datas previstas: {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString2 tarefa.dataPrevistaFim requisicoes}}</label>
                 <br>
 
                 <label class="mt-3" for="importancia">Importancia: {{tarefa.importancia}}</label>
-                <br>     
+                <br>
+
+                <div class="row mt-3">
+                    <div class="col-md-1">
+                        <label for="funcionarios">Funcionários: </label>
+                    </div>
+                    <div class="col-md-11">
+                        {{#each funcionarios}}
+                            <img src="{{foto}}" class="avatar">
+                            <label for="funcionarios" id="funcionarios">{{nome}}</label><br>
+                        {{/each}}
+                    </div>
+                </div>
+
+                {{#if requisicoes}}
+                <div class="row text-center">
+                    <div class="col-md-12">
+                        <label for="requisicoes">Requisições:</label>
+                    </div>
+                </div>
+                <div id="lista">
+                    <table class="mt-5 mr-5 table" id="myTable">
+                        <thead>
+                        <tr>
+                            <th style="width: 15%;">Máquina</th>
+                            <th style="width: 15%;">Requisitante</th>
+                            <th style="width: 30%;">Datas previstas</th>
+                            <th style="width: 30%;">Descrição</th>
+                            </th>
+                        </tr>
+                        </thead>
+                
+                        <tbody id="filtro">
+                            {{#each requisicoes}}
+                                <tr id="row" data-name="{{_id}}">
+                                    <td scope="row">{{maquinaNome}}</td>
+                                    <td>{{funcionarioNome}}</td>
+                                    <td>{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                                    <td>{{descricao}}</td>
+                                </tr>
+                            {{else}}
+
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+                    {{else}}
+                    <label class="mt-3" for="importancia">Requisições: sem requisições.</label>
+                    <br>
+                {{/if}}  
+                   
 
                 <div class="modal fade" id="rejeitar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -53,7 +103,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-end">
+                <div class="row mb-5 justify-content-end">
                     <button type="button" onclick="submitForm('aceitar')" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Aceitar</button>
                     <button type="button" class="btn btn-danger mt-3 mr-3" data-toggle="modal" data-target="#rejeitar" ><i class="fa fa-close"></i> Rejeitar</button>
                 </div>

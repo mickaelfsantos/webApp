@@ -1,12 +1,9 @@
-<div class="container mt-4">
-
-    <div class="text-center mt-5">
-        <h2>Registo</h2>
-    </div>
-    <div class="card mt-5 mb-5">
+<div class="container-fluid pl-4 pr-4">    
+    <h2>Novo funcionário</h2>
+    <div class="card mt-4 mb-5">
         <div class="card-body">
             <label for="nome" style="opacity: 0.5;">*Campos de preenchimento obrigatório</label>
-            <form action="/registo" enctype="multipart/form-data" method="POST">
+            <form action="/funcionarios/addFuncionario" method="POST">
                 <label for="nome">Nome*</label>
                 {{#if erros.nome}}
                     <input type="nome" name="nome" value="{{nomeF}}" class="form-control is-invalid">
@@ -14,7 +11,7 @@
                         {{erros.nome}}
                     </div>
                 {{else}}
-                    <input type="nome" name="nome" value="{{nomeF}}" class="form-control mb-4">
+                    <input type="nome" name="nome" value="{{nomeF}}" class="form-control mb-4" placeholder="Nome">
                 {{/if}}
 
 
@@ -25,7 +22,7 @@
                         {{erros.funcao}}
                     </div>
                 {{else}}
-                    <input type="funcao" class="form-control mb-4" value="{{funcao}}" name="funcao">
+                    <input type="funcao" class="form-control mb-4" value="{{funcao}}" name="funcao" placeholder="Função">
                 {{/if}}
 
 
@@ -36,7 +33,7 @@
                         {{erros.departamento}}
                     </div>
                 {{else}}
-                    <input type="departamento" class="form-control mb-4" value="{{departamento}}" name="departamento">
+                    <input type="departamento" class="form-control mb-4" value="{{departamento}}" name="departamento" placeholder="Departamento">
                 {{/if}}
                 
                 
@@ -47,7 +44,7 @@
                         {{erros.equipa}}
                     </div>
                 {{else}}
-                    <input type="equipa" class="form-control mb-4" value="{{equipa}}" name="equipa">
+                    <input type="equipa" class="form-control mb-4" value="{{equipa}}" name="equipa" placeholder="Equipa">
                 {{/if}}
 
                 <label for="email">Email*</label>
@@ -57,12 +54,19 @@
                         {{erros.email}}
                     </div>
                 {{else}}
-                    <input type="email" class="form-control mb-4" value="{{email}}" name="email">
+                    <input type="email" class="form-control mb-4" value="{{email}}" name="email" placeholder="E-mail">
                 {{/if}}
 
-                <label for="foto">Foto de perfil</label>
-                <input type="file" class="form-control-file mb-4" name="file" id="file" placeholder="Foto">                
-                
+                <label for="custo">Custo por hora (€)*</label>
+                {{#if erros.custo}}
+                    <input type="custo" class="form-control is-invalid" value="{{custo}}" name="custo">
+                    <div class="invalid-feedback mb-4">
+                        {{erros.custo}}
+                    </div>
+                {{else}}
+                    <input type="custo" class="form-control mb-4" value="{{custo}}" name="custo" placeholder="Custo por hora">
+                {{/if}}
+
                 <label for="password">Password*</label>
                 {{#if erros.password}}
                     <input type="password" class="form-control is-invalid" name="password">
@@ -70,7 +74,7 @@
                         {{erros.password}}
                     </div>
                 {{else}}
-                    <input type="password" class="form-control mb-4" name="password">
+                    <input type="password" class="form-control mb-4" name="password" placeholder="Password">
                 {{/if}}
 
 
@@ -81,23 +85,21 @@
                         {{erros.password2}}
                     </div>  
                 {{else}}
-                    <input type="password" class="form-control mb-4" name="password2">
+                    <input type="password" class="form-control mb-4" name="password2" placeholder="Confirmação da password">
                 {{/if}}
                 
                 
-                <div class="mt-5 mb-5 col-12 text-center">
-                    <button class="btn btn-info col-5" type="submit">Criar conta</button>
+                <div class="row justify-content-end">
+                    <button type="submit" class="btn btn-success mt-3 mr-4"><i class="fa fa-check"></i> Concluir</button>
+                    <button type="button" onclick="saltaParaFuncionarios()" class="btn btn-danger mt-3 mr-3"><i class="fa fa-close"></i> Cancelar</button>
                 </div>
             </form>
         </div>
     </div>
-
 </div>
+
 <script>
-    function saltaParaRegisto(){
-        window.location.href = "/registo";
-    }
-    window.onload = function(){
-        history.replaceState({}, null, '/registo')
+    function saltaParaFuncionarios(){
+        window.location.href = "/funcionarios";
     }
 </script>

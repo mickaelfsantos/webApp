@@ -17,18 +17,6 @@ const Requisicao = new Schema({
         ref: "Funcionario"
     },
 
-    tarefaNome: {
-        type:String
-    },
-
-    maquinaNome: {
-        type:String
-    },
-
-    funcionarioNome: {
-        type:String
-    },
-
     descricao: {
         type:String,
         required: true

@@ -74,6 +74,7 @@
     }; 
 
     function saltaParaObras(){
-        window.location = "/obras";
+        var obra = document.getElementById('id').getAttribute("value");
+        window.location = "/obra/"+obra;
     }
 </script>

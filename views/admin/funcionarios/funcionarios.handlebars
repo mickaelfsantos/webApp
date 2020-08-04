@@ -6,8 +6,19 @@
 
     {{/each}}
 
-    <h2>Lista de funcionários</h2>
+    <div class="row">
+        <div class="col-md-4">
+        <h2>Lista de Funcionários</h2>
+        </div>
+
+        {{#ifUR}}
+        <div class="col-md-8 text-right">
+            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddFuncionario()"style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Novo Funcionário</button>  
+        </div>
+        {{/ifUR}}
+    </div>
     <hr>
+    <br>
 
     <div class="row">
         <div class="col-md-6 mt-4" style="float:none;margin:auto;">
@@ -57,9 +68,9 @@
         window.location.href = "/funcionario/"+handle.dataset.name;
     } 
 
-    window.onload = function() {
-        history.replaceState({}, null, "/funcionarios")
-    };
+    function saltaParaAddFuncionario() {
+        window.location.href = "/funcionarios/addFuncionario";
+    } 
 
     function sortTable(n) {
         var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;

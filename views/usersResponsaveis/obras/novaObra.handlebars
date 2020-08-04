@@ -1,3 +1,11 @@
+<style>
+    li:hover{
+        cursor: pointer;
+    }
+    .dropdown-menu > li{
+        margin: 10px;
+    }
+</style>
 <div class="container-fluid pl-4 pr-4">    
     <h2>Nova obra</h2>
     <div class="card mt-4">
@@ -14,7 +22,45 @@
                 {{else}}
                     <input type="text" id="nome" name="nome" value="{{nomeO}}" placeholder="Nome da obra" class="form-control mb-4">
                 {{/if}}
+
                 
+                
+                <div class="dropdown mb-4 form-group">
+                    {{#if erros.cliente}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-info dropdown-toggle is-invalid" id="btn" type="button" data-toggle="dropdown" name="cliente">Cliente</button>
+                                <ul class="dropdown-menu" style="width: 50%;">
+                                    {{#if clientes}}
+                                        <input class="form-control" id="myInput" type="text" placeholder="Filtro">
+                                        {{#each clientes}}
+                                            <li>{{nome}} - nif: {{nif}}</li>
+                                        {{/each}}
+                                    {{/if}}
+                                </ul>
+                                <div class="invalid-feedback">
+                                    {{erros.cliente}}
+                                </div>
+                            </div>
+                        </div>
+                    {{else}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-info dropdown-toggle" id="btn" type="button" data-toggle="dropdown">Cliente</button>
+                                <input type="hidden" name="cliente" id="cliente" value="nome">
+                                <ul class="dropdown-menu" style="width: 50%;">
+                                    {{#if clientes}}
+                                        <input class="form-control" id="myInput" type="text" placeholder="Filtro">
+                                        {{#each clientes}}
+                                            <li>{{nome}} - nif: {{nif}}</li>
+                                        {{/each}}
+                                    {{/if}}
+                                </ul>
+                            </div>
+                        </div>
+                    {{/if}}
+                </div>
+
 
                 <label for="descricao">Descrição*</label>
                 {{#if erros.descricao}}
@@ -58,4 +104,19 @@
     function saltaParaObras(){
         window.location = "/obras";
     }
+    
+    $(document).ready(function(){
+        $("#myInput").on("keyup", function() {
+            var value = $(this).val().toLowerCase();
+            $(".dropdown-menu li").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+
+        $("li").on("click", function() {
+            $("#btn").html($(this).text());
+            document.getElementById("cliente").setAttribute("value", $(this).text());
+        });
+    });
+ 
 </script>
