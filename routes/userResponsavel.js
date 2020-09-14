@@ -39,7 +39,8 @@ const upload = multer({
 
 router.get('/obras/add', authenticated, userResponsavel, function(req, res){
     Cliente.find().lean().then(function(clientes){
-        res.render("usersResponsaveis/obras/novaObra", {clientes:clientes})
+        var cliente = JSON.stringify(null);
+        res.render("usersResponsaveis/obras/novaObra", {clientes:clientes, cliente:cliente})
     })
 })
 
@@ -55,7 +56,7 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
         erros.nome = "Nome inválido";
     }
     else{
-        if(req.body.nome.trim().length < 2){
+        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){
             erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }else{
             nomeO = req.body.nome;
@@ -66,7 +67,7 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
         erros.descricao = "Descrição inválida";
     } else{
-        if(req.body.descricao.trim().length < 3){
+        if(req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 4){
             erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
@@ -77,9 +78,10 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
     
     if(!req.body.cliente || typeof req.body.cliente == undefined || req.body.cliente == null || req.body.cliente == "nome"){
         erros.cliente = "Cliente obrigatório.";
+        cliente = JSON.stringify(null);
     } 
     else{
-        cliente = req.body.cliente;
+        cliente = JSON.stringify(req.body.cliente);
     }
 
     var today = moment().format("YYYY-MM-DD HH:mm");
@@ -102,13 +104,25 @@ router.post('/obras/add', authenticated, userResponsavel, function asyncFunction
             }
         }
     }
+    else{
+        var hours = moment().format("HH");
+        var minutes = moment().format("HH");
+        if(hours >= 18 && minutes > 00)
+            erros.datas = "Data invalida. A hora limite são 18:00h.";
+        else{
+            if(hours < 9 && minutes <= 59)
+                erros.datas = "Data invalida. A hora limite são 9:00h.";
+        }
+    }
 
     if(Object.keys(erros).length != 0){
-        res.render("usersResponsaveis/obras/novaObra", {erros: erros, cliente:cliente, nomeO:nomeO, descricao:descricao, data:data})
+        Cliente.find().lean().then(function(clientes){
+            res.render("usersResponsaveis/obras/novaObra", {erros: erros, cliente:cliente, clientes:clientes, nomeO:nomeO, descricao:descricao, data:data})
+        })
     }
     else{
         var novaObra;
-        cliente = cliente.split(" ").splice(-1);
+        cliente = req.body.cliente.split(" ").splice(-1);
         cliente = cliente[0];
         Cliente.findOne({nif: cliente}).lean().then(function(cliente){
             if(req.body.dataPrevistaInicio){
@@ -198,7 +212,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
         erros.nome = "Nome inválido.";
     }
     else{
-        if(req.body.nome.trim().length < 2){   
+        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){   
             erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }
         else{
@@ -209,7 +223,7 @@ router.post('/obra/:id/addTarefa', authenticated, userResponsavel, function asyn
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
         erros.descricao = "Descrição inválida.";
     } else{
-        if(req.body.descricao.trim().length < 3){
+        if(req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 4){
             erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
@@ -399,7 +413,7 @@ router.post('/obra/:id/addCompra', authenticated, userResponsavel, function asyn
         erros.material = "Nome inválido.";
     }
     else{
-        if(req.body.material.trim().length < 2){   
+        if(req.body.material.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){   
             erros.material = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }
         else{
@@ -410,7 +424,7 @@ router.post('/obra/:id/addCompra', authenticated, userResponsavel, function asyn
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
         erros.descricao = "Descrição inválida.";
     } else{
-        if(req.body.descricao.trim().length < 3){
+        if(req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 4){
             erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
@@ -424,7 +438,7 @@ router.post('/obra/:id/addCompra', authenticated, userResponsavel, function asyn
         quantidade = req.body.quantidade;
     }
 
-    if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null){
+    if(!req.body.custo || typeof req.body.custo == undefined || req.body.custo == null || req.body.custo < 0){
         erros.custo = "Custo inválido.";
     }else{
         custo = req.body.custo;
@@ -438,7 +452,7 @@ router.post('/obra/:id/addCompra', authenticated, userResponsavel, function asyn
 
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         if(Object.keys(erros).length != 0){ 
-            res.render("usersResponsaveis/compras/novaCompra", {obra:obra, material:material, descricao:descricao, 
+            res.render("usersResponsaveis/compras/novaCompra", {obra:obra, material:material, erros:erros, descricao:descricao, 
                 quantidade:quantidade, custo:custo, fornecedor:fornecedor});
         }
         else{
@@ -521,8 +535,13 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
         }
     }
 
-    if(req.body.percentagemLucro < 0){
-        erros.percentagemLucro = "Percentagem de lucro inválida";
+    if(!req.body.percentagemLucro || typeof req.body.percentagemLucro == undefined || req.body.percentagemLucro == null){
+        req.body.percentagemLucro = 0;
+    }
+    else{
+        if(req.body.percentagemLucro < 0){
+            erros.percentagemLucro = "Percentagem de lucro inválida";
+        }
     }
 
 
@@ -564,17 +583,36 @@ router.post('/obra/:id/edit', authenticated, userResponsavel, function asyncFunc
                                 })
                             }
                         }
-    
-                    Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
-                        for(var i=0; i<tarefas.length; i++){
-                            Tarefa.findOneAndUpdate({_id:req.params.id}, 
-                                {"$set": {
-                                    "orcamento": tarefas[i].despesa + tarefas[i].despesa*(req.body.percentagemLucro / 100)
-                                  }}, {useFindAndModify: false}).then()
-                        }
-                    })
-                    req.flash("success_msg", "Obra editada com sucesso.");
-                    res.redirect("/obra/"+req.params.id);
+                    
+                        Obra.findOne({_id:req.params.id}).then(function(obra){
+                            Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
+                                async function one(){
+                                    for(var i=0; i<tarefas.length; i++){
+                                        await Requisicao.find({tarefa:tarefas[i]._id}).then(function(requisicoes){
+                                            for(var j=0; j<requisicoes.length; j++){
+                                                Requisicao.findOneAndUpdate({_id:requisicoes[i]._id}, 
+                                                    {"$set": {
+                                                        "orcamento": requisicoes[i].despesa + requisicoes[i].despesa*(obra.percentagemLucro / 100)
+                                                    }}, {useFindAndModify: false}).then()
+                                            }
+                                        })
+                                        await Tarefa.findOneAndUpdate({_id:tarefas[i]._id}, 
+                                            {"$set": {
+                                                "orcamento": tarefas[i].despesa + tarefas[i].despesa*(obra.percentagemLucro / 100)
+                                            }}, {useFindAndModify: false}).then()
+                                    }
+                                    req.flash("success_msg", "Obra editada com sucesso.");
+                                    res.redirect("/obra/"+req.params.id);
+                                }
+                                one();
+                            }).catch(function (error){
+                                req.flash("error_msg", "Erro ao editar as tarefas")
+                                res.redirect("/obra/"+req.params.id)
+                            })
+                        }).catch(function (error){
+                            req.flash("error_msg", "Obra não encontrada")
+                            res.redirect("/obra/"+req.params.id)
+                        })
                 }).catch(function (error){
                     req.flash("error_msg", "Já existe uma obra com esse nome.")
                     res.redirect("/obra/"+req.params.id+"/edit")
@@ -692,10 +730,8 @@ router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyn
         Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
             Compra.find({obra:obra._id}).lean().then(function(compras){
                 async function obtemDados(){
-                    var t = [];
+                    var reques = [];
                     for(var i=0; i<tarefas.length; i++){
-                        t.push(tarefas[i]);
-                        t[i].requisicoes = [];
                         await Requisicao.find({tarefa:tarefas[i]._id}).lean().then(function(requisicoes){
                             var req;
                             for(var j=0; j<requisicoes.length; j++){
@@ -703,8 +739,8 @@ router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyn
                                 Maquina.findOne({_id:req.maquina}).lean().then(function(maquina){
                                     req.maquinaNome = maquina.nome;
                                 })
-                                req.tarefaNome = t[i].nome
-                                t[i].requisicoes.push(req);
+                                req.tarefaNome = tarefas[i].nome
+                                reques.push(req);
                             }
                         })
                     }
@@ -715,7 +751,7 @@ router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyn
                         compras[i] = compra;
                     }
     
-                    res.render("admin/obras/obraClientReport", {obra:obra, tarefas:t, compras:compras}, function(err, html){
+                    res.render("admin/obras/obraClientReport", {obra:obra, tarefas:tarefas, requisicoes:reques, compras:compras}, function(err, html){
                         var mySubString = html.substring(
                             html.lastIndexOf("<div id=\"comeca\""),
                             html.lastIndexOf("<br id=\"finish\">")
@@ -941,7 +977,9 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                                                     }
                                                     
                                                 }
-                                                var daysAux = days;
+                                                var di = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD");
+                                                var df = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD");
+                                                var daysAux = moment(df).diff(di, 'days');
                                                 var hours = momentBD(tarefa.dataPrevistaFim).diff(moment(tarefa.dataPrevistaInicio), 'days', true) % 1;
                                                 if(hours != 0 && days != 0){
                                                     days = days - 1;
@@ -1156,18 +1194,22 @@ router.post('/tarefa/:id/responderSubmissao/:state', authenticated, userResponsa
                 })
             }
             else{
-                var erros= new Object();
+                var erros= [];
                 if(!req.body.justificacao || typeof req.body.justificacao == undefined || req.body.justificacao == null){
                     erros.push({texto: "Justificação obrigatória."});
                 }
                 else{
-                    if(req.body.justificacao.trim().length < 2){
+                    if(req.body.justificacao.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){
                         erros.push({texto: "Justificação com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço."});
                     }
                 }
-    
                 if(erros.length > 0){
-                    res.render("usersResponsaveis/tarefas/responderSubmissao", {tarefa:tarefa, erros:erros})
+                    Requisicao.find({tarefa:tarefa._id}).lean().then(function(requisicoes){
+                        res.render("usersResponsaveis/tarefas/responderSubmissao", {tarefa:tarefa, erros:erros, requisicoes:requisicoes})
+                    }).catch(function(error){
+                        req.flash("error_msg", "Requisições não encontradas.")
+                        res.redirect("/tarefa/"+req.params.id);
+                    })
                 }
                 else{
                     Tarefa.findOneAndUpdate({_id:req.params.id},
@@ -1215,6 +1257,15 @@ router.get('/tarefa/:id/downloadReport', authenticated, admin, function asyncFun
                             })
                             requisicoes[i] = request;
                         }
+
+                        var custo = tarefa.despesa;
+                        var orcamento = tarefa.orcamento;
+                        for(var i=0; i<requisicoes.length; i++){
+                            custo += requisicoes[i].despesa;
+                            orcamento += requisicoes[i].orcamento;
+                        }
+                        tarefa.despesa = custo;
+                        tarefa.orcamento = orcamento;
                         res.render("admin/tarefas/tarefaReport", {tarefa:tarefa, funcionarios:funcionarios, requisicoes:requisicoes, obra:obra}, function(err, html){
                             var mySubString = html.substring(
                                 html.lastIndexOf("<div id=\"comeca\""),
@@ -1274,7 +1325,7 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
         erros.nome = "Nome inválido.";
     }
     else{
-        if(req.body.nome.trim().length < 2){   
+        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){   
             erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }
         else{
@@ -1286,7 +1337,7 @@ router.post('/tarefas/addTarefa', authenticated, userResponsavel, function async
     if(!req.body.descricao || typeof req.body.descricao == undefined || req.body.descricao == null){
         erros.descricao = "Descrição inválida.";
     } else{
-        if(req.body.descricao.trim().length < 3){
+        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 4){
             erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
         }
         else{
@@ -1475,7 +1526,7 @@ router.get('/funcionario/:id/edit', authenticated, admin, function(req, res){
     })
 })
 
-router.post('/funcionario/:id/edit', authenticated, userResponsavel, function asyncFunction(req, res){ 
+router.post('/funcionario/:id/edit', authenticated, admin, function asyncFunction(req, res){ 
     
     var erros = new Object();
 
@@ -1691,6 +1742,7 @@ router.get('/maquinas/add', authenticated, userResponsavel, function(req, res){
 router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunction(req, res){
     
     var erros = new Object();
+    var funcao;
     var nomeO;
     var departamento;
 
@@ -1698,7 +1750,7 @@ router.post('/maquinas/add', authenticated, userResponsavel, function asyncFunct
         erros.nome = "Nome inválido";
     }
     else{
-        if(req.body.nome.trim().length < 2){
+        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){
             erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }else{
             nomeO = req.body.nome;
@@ -1777,7 +1829,7 @@ router.post('/maquina/:id/edit', authenticated, userResponsavel, function asyncF
             erros.nome = "Nome inválido.";
         }
         else{
-            if(req.body.nome.trim().length < 2){   
+            if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){   
                 erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
             }
             else{
@@ -1884,7 +1936,7 @@ router.post('/clientes/add', authenticated, userResponsavel, function asyncFunct
         erros.nome = "Nome inválido.";
     }
     else{
-        if(req.body.nome.trim().length < 2){
+        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){
             erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
         }else{
             nomeC = req.body.nome;
@@ -1921,14 +1973,26 @@ router.post('/clientes/add', authenticated, userResponsavel, function asyncFunct
                 nome: req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
                 nif: req.body.nif,
                 email: req.body.email,
-                morada: req.body.morada }
+                morada: req.body.morada 
+            }
         
         new Cliente(novoCliente).save().then(function(){       
             req.flash("success_msg", "Cliente registado com sucesso.")
             res.redirect("/clientes");
         }).catch(function(erro){
-            erros.nome = "Já existe um cliente com o mesmo nome/nif ou houve um erro ao adicionar o cliente. Tente novamente.";
-            res.render("usersResponsaveis/clientes/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
+            Cliente.find({nif:req.body.nif}).lean().then(function(cliente){
+                if(cliente.length == 0){
+                    erros.email = "Já existe um cliente com o mesmo email ou houve um erro ao adicionar o cliente. Tente novamente.";
+                    res.render("usersResponsaveis/clientes/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
+                }
+                else{
+                    erros.nif = "Já existe um cliente com o mesmo nif ou houve um erro ao adicionar o cliente. Tente novamente.";
+                    res.render("usersResponsaveis/clientes/novoCliente", {erros: erros, nomeC:nomeC, nif:nif, email:email, morada:morada})
+                }
+            }).catch(function(error){
+                req.flash("error_msg", "Erro ao encontrar cliente")
+                res.redirect("/clientes");
+            })
         })
     }
 })
@@ -1965,7 +2029,7 @@ router.post('/cliente/:id/edit', authenticated, userResponsavel, function asyncF
             erros.nome = "Nome inválido.";
         }
         else{
-            if(req.body.nome.trim().length < 2){   
+            if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){   
                 erros.nome = "Nome inválido. Mínimo de 3 caracteres, sendo que pode possuir apenas 1 espaço.";
             }
             else{
@@ -1996,18 +2060,38 @@ router.post('/cliente/:id/edit', authenticated, userResponsavel, function asyncF
             res.render("usersResponsaveis/clientes/editarCliente", {erros:erros, cliente:cliente})
         }
         else{
-            Cliente.findOneAndUpdate({_id:req.params.id},
-                {"$set": {
-                    "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                    "nif": req.body.nif,
-                    "morada": req.body.morada,
-                    "email": req.body.email
-                    }}, {useFindAndModify: false}).then(function(){
-                    req.flash("success_msg", "Cliente editado com sucesso.")
-                    res.redirect("/cliente/"+req.params.id);
+            Cliente.findOne({$and: [{nif:req.body.nif}, {_id: {$ne:req.params.id}}]}).lean().then(function(clientes){
+                if(clientes == null){
+                    Cliente.findOne({$and: [{email:req.body.email}, {_id: {$ne:req.params.id}}]}).lean().then(function(clientes){
+                        if(clientes == null){
+                            Cliente.findOneAndUpdate({_id:req.params.id},
+                                {"$set": {
+                                    "nome": req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                                    "nif": req.body.nif,
+                                    "morada": req.body.morada,
+                                    "email": req.body.email
+                                    }}, {useFindAndModify: false}).then(function(){
+                                    req.flash("success_msg", "Cliente editado com sucesso.")
+                                    res.redirect("/cliente/"+req.params.id);
+                            }).catch(function(error){
+                                req.flash("error_msg", "Cliente não encontrado.")
+                                res.redirect("/clientes");
+                            })
+                        }
+                        else{
+                            erros.email = "E-mail já existente.";
+                            res.render("usersResponsaveis/clientes/editarCliente", {erros:erros, cliente:cliente})
+                        }
+                    }).catch(function(error){
+                        
+                    })
+                }
+                else{
+                    erros.nif = "Número de identidade fiscal já existente.";
+                    res.render("usersResponsaveis/clientes/editarCliente", {erros:erros, cliente:cliente})
+                }
             }).catch(function(error){
-                req.flash("error_msg", "Cliente não encontrado.")
-                res.redirect("/clientes");
+                
             })
         }
     }).catch(function(error){

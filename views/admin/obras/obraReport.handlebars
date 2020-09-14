@@ -4,11 +4,11 @@
 
 <div class="container-fluid">
     <div id="comeca" style="font-family: Palatino Linotype; padding: 0% 5%">
-        <div class="row">
-            <div class="col">
-                <img style="height: 20%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
-            </div>
-        </div>
+        <table style="width: 75%; margin-left: auto; margin-right: auto;">
+            <thead>
+                <th style="text-align: center;"><img style="height: 25%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+            </thead>
+        </table>
 
         <br>
         <h2>Obra {{obra.nome}}</h2>
@@ -19,9 +19,10 @@
         <label for="descricao">Nome do cliente: {{cliente.nome}}</label><br>
         <label for="descricao">Nif do cliente: {{cliente.nif}}</label><br>
         <label for="estado">Estado: {{estadoToString obra.estado}}</label><br>
-        <label for="estado">Despesa: {{precoToString obra.despesa}}</label><br>
         <label for="estado">Percentagem de lucro: {{obra.percentagemLucro}}%</label><br>
+        <label for="estado">Despesa prevista: {{precoToString obra.despesa}}</label><br>
         <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br>
+        <label for="estado">Despesa final: {{precoToString obra.despesaFinal}}</label><br>
         <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br>
         <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br>
         <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br>
@@ -67,20 +68,20 @@
                 <thead>
                     <tr>
                         <th style="width: 15%; text-align:left">Máquina</th>
-                        <th style="width: 15%; text-align:left">Tarefa</th>
-                        <th style="width: 30%; text-align:left">Datas previstas</th>
-                        <th style="width: 30%; text-align:left">Datas</th>
-                        <th style="width: 10%; text-align:left">Custo</th>
+                        <th style="width: 32,5%; text-align:left">Datas previstas</th>
+                        <th style="width: 32,5%; text-align:left">Datas</th>
+                        <th style="width: 10%; text-align:left">Despesa Prevista</th>
+                        <th style="width: 10%; text-align:left">Despesa Real</th>
                     </tr>
                 </thead>
             <tbody>
                 {{#each requisicoes}}
                     <tr>
                         <td style="width: 15%;">{{maquinaNome}}</td>
-                        <td style="width: 15%;">{{tarefaNome}}</td>
-                        <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                        <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                        <td style="width: 32,5%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                        <td style="width: 32,5%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
                         <td style="width: 10%;">{{precoToString despesa}}</td>
+                        <td style="width: 10%;">{{precoToString despesaFinal}}</td>
                     </tr>
                 {{/each}}
             </tbody>
@@ -96,20 +97,20 @@
                 <thead>
                 <tr>
                     <th style="width: 15%; text-align:left">Nome</th>
-                    <th style="width: 15%; text-align:left">Estado</th>
-                    <th style="width: 30%; text-align:left">Datas previstas</th>
-                    <th style="width: 30%; text-align:left">Datas</th>
-                    <th style="width: 10%; text-align:left">Custo</th>
+                    <th style="width: 32,5%; text-align:left">Datas previstas</th>
+                    <th style="width: 32,5%; text-align:left">Datas</th>
+                    <th style="width: 10%; text-align:left">Despesa prevista</th>
+                    <th style="width: 10%; text-align:left">Despesa real</th>
                 </tr>
                 </thead>
                 <tbody>
                     {{#each tarefas}}
                         <tr>
                             <td style="width: 15%;">{{nome}}</td>
-                            <td style="width: 15%;">{{estadoToStringOD estado}}</td>
-                            <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                            <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                            <td style="width: 32,5%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 32,5%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
                             <td style="width: 10%;">{{precoToString despesa}}</td>
+                            <td style="width: 10%;">{{precoToString despesaFinal}}</td>
                         </tr>
                     {{else}}
 
@@ -122,8 +123,9 @@
                 <thead>
                     <tr>
                         <th style="width: 15%; text-align:left">Total</td>
-                        <th style="width: 75%; text-align:left"></td>
+                        <th style="width: 65%; text-align:left"></td>
                         <td style="width: 10%;">{{precoToString obra.despesa}}</td>
+                        <td style="width: 10%;">{{precoToString obra.despesaFinal}}</td>
                     </tr>
                 </thead>
             </table>
@@ -132,7 +134,25 @@
             <br>
             <br>
         {{/if}}
+
         
+        <div id="pageFooter">
+            <div class="row">
+                <table style="width: 75%; margin-left: auto; margin-right:auto;">
+                    <tbody>
+                        <td style="width: 34%; text-align: left;">Rua Pedro Nunes <br>
+                        Quinta da Nora <br>
+                        3030-199 COIMBRA</td>
+                        <td style="width: 33%; text-align: center;">ISEC - Coimbra <br>
+                            www.isec.pt</td>
+                        <td style="width: 33%; text-align: right;">
+                            Telefone: +351 239 790 200 <br>
+                            Fax: + 351 239 790 201
+                        </td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    <br id="finish">
 </div>
-<br id="finish">

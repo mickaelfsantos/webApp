@@ -11,9 +11,9 @@
 
         {{#ifUR}}
         <div class="col-md-8 text-right">
-            <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
             {{#ifTerminou obra.estado}}
             {{else}}
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddCompra()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Compra</button>
             {{/ifTerminou}}
@@ -149,7 +149,7 @@
 
             {{#ifTerminou obra.estado}}
                 <div class="row justify-content-center">
-                    <div class="col-md-6 mt-5">
+                    <div class="col-md-6 mt-5 mb-5">
                         <div class="card card-danger">
                             <div class="collapse show" id="grafic">
                                 <div class="card card-body">

@@ -29,7 +29,8 @@
                     {{#if erros.cliente}}
                         <div class="row">
                             <div class="col-md-6">
-                                <button class="btn btn-info dropdown-toggle is-invalid" id="btn" type="button" data-toggle="dropdown" name="cliente">Cliente</button>
+                                <button class="btn btn-info dropdown-toggle is-invalid" id="btn" type="button" data-toggle="dropdown" >Cliente</button>
+                                <input type="hidden" name="cliente" id="cliente" value="nome">
                                 <ul class="dropdown-menu" style="width: 50%;">
                                     {{#if clientes}}
                                         <input class="form-control" id="myInput" type="text" placeholder="Filtro">
@@ -117,6 +118,12 @@
             $("#btn").html($(this).text());
             document.getElementById("cliente").setAttribute("value", $(this).text());
         });
+
+        var cliente = {{{cliente}}};
+        if(cliente != undefined){
+            $("#btn").html(cliente);
+            document.getElementById("cliente").setAttribute("value", cliente);
+        }
     });
  
 </script>

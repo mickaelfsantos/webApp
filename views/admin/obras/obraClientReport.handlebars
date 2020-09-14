@@ -1,29 +1,54 @@
 <div class="container-fluid mt-4">
     <div id="comeca" style="font-family: Palatino Linotype; padding:5%">
-        <div class="row">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="text-align: left;"><img style="height: 20%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
+        <table style="width: 75%; margin-left: auto; margin-right: auto;">
+            <thead>
+                <th style="text-align: center;"><img style="height: 25%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+            </thead>
+        </table>
 
 
         <br>
         <h2>Obra {{obra.nome}}</h2>
         <br>
 
-        <label for="descricao">Descrição: {{obra.descricao}}</label><br><br>
-        <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br><br>
-        <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br><br>
+        <label for="descricao">Descrição: {{obra.descricao}}</label><br>
+        <label for="orcamento">Orçamento: {{precoToString obra.orcamento}}</label><br>
+        <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br>
 
         <br>
         <br>
         <br>
+        {{#if requisicoes}}
+        <br>
+        <br>
+        <br>
+            <h3>Máquinas a utilizar</h3>
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <th style="width: 20%; text-align:left">Máquina</th>
+                        <th style="width: 20%; text-align:left">Tarefa</th>
+                        <th style="width: 50%; text-align:left">Datas previstas</th>
+                        <th style="width: 10%; text-align:left">Custo</th>
+                    </tr>
+                </thead>
+            <tbody>
+                {{#each requisicoes}}
+                    <tr>
+                        <td style="width: 20%;">{{maquinaNome}}</td>
+                        <td style="width: 20%;">{{tarefaNome}}</td>
+                        <td style="width: 50%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                        <td style="width: 10%;">{{precoToString orcamento}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{/if}}
+        <br>
+        <br>
+        <br>
         {{#if tarefas}}
-            <h4>Tarefas</h4>
+            <h3>Tarefas a realizar</h3>
             <table style="width: 100%">
                 <thead>
                 <tr>
@@ -46,34 +71,6 @@
             </table>
         {{/if}}
 
-        {{#if requisicoes}}
-        <br>
-        <br>
-        <br>
-            <h4>Máquinas</h4>
-            <table style="width: 100%">
-                <thead>
-                    <tr>
-                        <th style="width: 20%; text-align:left">Máquina</th>
-                        <th style="width: 20%; text-align:left">Tarefa</th>
-                        <th style="width: 50%; text-align:left">Datas previstas</th>
-                        <th style="width: 10%; text-align:left">Custo</th>
-                    </tr>
-                </thead>
-            <tbody>
-                {{#each tarefas}}
-                    {{#each requisicoes}}
-                        <tr>
-                            <td style="width: 20%;">{{maquinaNome}}</td>
-                            <td style="width: 20%;">{{tarefaNome}}</td>
-                            <td style="width: 50%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                            <td style="width: 10%;">{{precoToString orcamento}}</td>
-                        </tr>
-                    {{/each}}
-                {{/each}}
-            </tbody>
-        </table>
-        {{/if}}
 
         {{#if compras}}
         <br>
@@ -115,6 +112,23 @@
         <br>
         <br>
         <br>
+        <div id="pageFooter">
+            <div class="row">
+                <table style="width: 75%; margin-left: auto; margin-right:auto;">
+                    <tbody>
+                        <td style="width: 34%; text-align: left;">Rua Pedro Nunes <br>
+                        Quinta da Nora <br>
+                        3030-199 COIMBRA</td>
+                        <td style="width: 33%; text-align: center;">ISEC - Coimbra <br>
+                            www.isec.pt</td>
+                        <td style="width: 33%; text-align: right;">
+                            Telefone: +351 239 790 200 <br>
+                            Fax: + 351 239 790 201
+                        </td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <br id="finish">

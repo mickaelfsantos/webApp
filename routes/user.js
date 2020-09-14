@@ -233,13 +233,19 @@ router.get('/tarefa/:id/edit', authenticated, function(req, res){
     Funcionario.findOne({_id:req.user.id}).lean().then(function(funcionario){
         Tarefa.findOne({ $and: [{_id:req.params.id}, {_id:funcionario.tarefas}]}).lean().then(function(tarefa){
             Funcionario.find( { tarefas: { $ne: tarefa._id}}).lean().then(function(f){ 
-                var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
-                var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
-                var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
-                var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
-                var funcionariosSelecionados = JSON.stringify(null);
-                res.render("users/tarefas/editarTarefa", {tarefa:tarefa, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
-                    funcionarios : f})
+                if(tarefa.estado == "finalizada"){
+                    req.flash("error_msg", "Tarefa terminada.")
+                    res.redirect("/tarefa/"+req.params.id)
+                }
+                else{
+                    var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                    var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
+                    var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
+                    var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
+                    var funcionariosSelecionados = JSON.stringify(null);
+                    res.render("users/tarefas/editarTarefa", {tarefa:tarefa, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                        funcionarios : f})
+                }
             }).catch(function(erro){
                 req.flash("error_msg", "Tarefa não encontrada.")
                 res.redirect("/tarefas");
@@ -265,7 +271,7 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
                         erros.nome = "Nome inválido.";
                     }else{
-                        if(req.body.nome.trim().length < 2){
+                        if(req.body.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 2){
                             erros.nome = "Nome com tamanho inválido. Mínimo de 3 caracteres.";
                         }
                         else{
@@ -277,7 +283,7 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                         erros.descricao = "Descrição inválida.";
                     }
                     else{
-                        if(req.body.descricao.trim().length < 3){
+                        if(req.body.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,'').length < 4){
                             erros.descricao = "Descrição com tamanho inválido. Mínimo de 5 caracteres, sendo que pode possuir apenas 2 espaços.";
                         }
                         else{
@@ -379,39 +385,68 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     if(moment(tarefa.dataPrevistaInicio).isBefore(moment())){
                         tarefa.dataPrevistaInicio = moment();
                     }
-                    
-                    Tarefa.findOneAndUpdate({_id:req.params.id}, 
-                        {"$set": {
-                            "nome": tarefa.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                            "descricao": tarefa.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
-                            "dataPrevistaInicio": tarefa.dataPrevistaInicio,
-                            "dataPrevistaFim": tarefa.dataPrevistaFim,
-                            "importancia": tarefa.importancia,
-                            "progresso": tarefa.progresso
-                          }}, {useFindAndModify: false}).then(function(tarefa){
-                        
-                        if(f != undefined){
-                            for(var i=0; i<funcs.length; i++){
-                                Funcionario.updateOne(
-                                    {"nome":funcs[i].nome},
-                                    {$push: {tarefas : tarefa._id}}
-                                ).then()
-                                Funcionario.findOne({$and: [{_id:funcs[i]._id}, { obras : { $ne: obra._id}}]}).lean().then(function(funcionario){
-                                    if(funcionario != null){
-                                        Funcionario.updateOne(
-                                            {"nome":funcionario.nome},
-                                            {$push: {obras : obra._id}}
-                                        ).then()
+                    Tarefa.find({obra:obra._id}).then(function(tarefas){
+                        async function getTarefas(){
+                            await Tarefa.findOne({$and: [{nome:tarefa.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,'')}, {_id:tarefas}, {_id : {$ne:tarefa._id}}]}).lean().then(function(tarefas){
+                                if(tarefas != null){
+                                    erros.nome = "Já existe uma tarefa com este nome dentro da obra.";
+                                    if(Object.keys(erros).length != 0){
+                                        Funcionario.find({ tarefas: { $ne: tarefa._id}}).lean().then(function(f){
+                                            var dataPrevistaInicio = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DDTHH:mm")
+                                            var dataPrevistaFim = moment(tarefa.dataPrevistaFim).format("YYYY-MM-DDTHH:mm")
+                                            var dataInicio = moment(tarefa.dataInicio).format("YYYY-MM-DDTHH:mm")
+                                            var dataFim = moment(tarefa.dataFim).format("YYYY-MM-DDTHH:mm")
+                                            if(req.body.funcionarios)
+                                                var funcionariosSelecionados = JSON.stringify(req.body.funcionarios); 
+                                            else
+                                                var funcionariosSelecionados = JSON.stringify(null);
+                                            var importancia = req.body.importancia;
+                                            res.render("users/tarefas/editarTarefa", {tarefa:tarefa, erros:erros, importancia:importancia, funcionariosSelecionados:funcionariosSelecionados, dataPrevistaInicio:dataPrevistaInicio, dataPrevistaFim:dataPrevistaFim, dataInicio:dataInicio, dataFim:dataFim,
+                                                    funcionarios : f})
+                                        }).catch(function(error){
+                                            req.flash("error_msg", "Funcionários não encontrados.")
+                                            res.redirect("/tarefa/"+req.params.id)
+                                        })
                                     }
-                                })
-                            }
+                                }
+                                else{
+                                    Tarefa.findOneAndUpdate({_id:req.params.id}, 
+                                        {"$set": {
+                                            "nome": tarefa.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                                            "descricao": tarefa.descricao.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
+                                            "dataPrevistaInicio": tarefa.dataPrevistaInicio,
+                                            "dataPrevistaFim": tarefa.dataPrevistaFim,
+                                            "importancia": tarefa.importancia,
+                                            "progresso": tarefa.progresso
+                                        }}, {useFindAndModify: false}).then(function(tarefa){
+                                        
+                                        if(f != undefined){
+                                            for(var i=0; i<funcs.length; i++){
+                                                Funcionario.updateOne(
+                                                    {"nome":funcs[i].nome},
+                                                    {$push: {tarefas : tarefa._id}}
+                                                ).then()
+                                                Funcionario.findOne({$and: [{_id:funcs[i]._id}, { obras : { $ne: obra._id}}]}).lean().then(function(funcionario){
+                                                    if(funcionario != null){
+                                                        Funcionario.updateOne(
+                                                            {"nome":funcionario.nome},
+                                                            {$push: {obras : obra._id}}
+                                                        ).then()
+                                                    }
+                                                })
+                                            }
+                                        }
+        
+                                        req.flash("success_msg", "Tarefa editada com sucesso.");
+                                        res.redirect("/tarefa/"+req.params.id);
+                                    }).catch(function (error){
+                                        req.flash("error_msg", "Já existe uma tarefa com esse nome.")
+                                        res.redirect("/tarefa/"+req.params.id+"/edit")
+                                    })
+                                }
+                            })
                         }
-
-                        req.flash("success_msg", "Tarefa editada com sucesso.");
-                        res.redirect("/tarefa/"+req.params.id);
-                    }).catch(function (error){
-                        req.flash("error_msg", "Já existe uma tarefa com esse nome.")
-                        res.redirect("/tarefa/"+req.params.id+"/edit")
+                        getTarefas();
                     })
                 }
                 secondFunction()

@@ -1,29 +1,27 @@
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <div class="container-fluid mt-4">
     <div id="comeca" style="font-family: Palatino Linotype; padding:5%">
-        <div class="row">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="text-align: left;"><img style="height: 20%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
+        <table style="width: 75%; margin-left: auto; margin-right: auto;">
+            <thead>
+                <th style="text-align: center;"><img style="height: 25%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+            </thead>
+        </table>
 
 
         <br>
         <h2>Tarefa {{tarefa.nome}}</h2>
         <br>
 
-        <label for="obra">Obra: {{obra.nome}}</label><br><br>
-        <label for="descricao">Descrição: {{tarefa.descricao}}</label><br><br>
-        <label for="despesa">Despesa: {{precoToString tarefa.despesa}}</label><br><br>
-        <label for="orcamento">Orçamento: {{precoToString tarefa.orcamento}}</label><br><br>
-        <label for="importancia">Importância: {{tarefa.importancia}}</label><br><br>
-        <label for="estado">Estado: {{tarefa.estado}}</label><br><br>
-        <label for="datasPrevistas">Datas previstas: {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}</label><br><br>
-        <label for="datas">Datas: {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}</label><br><br>
+        <label for="obra">Obra: {{obra.nome}}</label><br>
+        <label for="descricao">Descrição: {{tarefa.descricao}}</label><br>
+        <label for="despesa">Despesa: {{precoToString tarefa.despesa}}</label><br>
+        <label for="orcamento">Orçamento: {{precoToString tarefa.orcamento}}</label><br>
+        <label for="despesa">Despesa final: {{precoToString tarefa.despesaFinal}}</label><br>
+        <label for="orcamento">Preço final: {{precoToString tarefa.custoFinal}}</label><br>
+        <label for="importancia">Importância: {{tarefa.importancia}}</label><br>
+        <label for="estado">Estado: {{estadoToString tarefa.estado}}</label><br>
+        <label for="datasPrevistas">Datas previstas: {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}</label><br>
+        <label for="datas">Datas: {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}</label><br>
 
         <br>
         <br>
@@ -62,27 +60,24 @@
             <br>
         {{/if}}
 
-        <br>
-        <br>
-        <br>
         {{#if requisicoes}}
         <h3>Requisições</h3>
             <table style="width: 100%">
                 <thead>
                 <tr>
-                    <th style="width: 15%; text-align:left">Máquina</th>
+                    <th style="width: 11%; text-align:left">Máquina</th>
                     <th style="width: 15%; text-align:left">Requisitante</th>
-                    <th style="width: 30%; text-align:left">Datas previstas</th>
-                    <th style="width: 30%; text-align:left">Datas</th>
+                    <th style="width: 32%; text-align:left">Datas previstas</th>
+                    <th style="width: 32%; text-align:left">Datas</th>
                 </tr>
                 </thead>
                 <tbody>
                     {{#each requisicoes}}
                         <tr>
-                            <td style="width: 15%;">{{maquinaNome}}</td>
+                            <td style="width: 11%;">{{maquinaNome}}</td>
                             <td style="width: 15%;">{{funcionarioNome}}</td>
-                            <td style="width: 30%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
-                            <td style="width: 30%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                            <td style="width: 32%;">{{dateToString dataPrevistaInicio}} - {{dateToString dataPrevistaFim}}</td>
+                            <td style="width: 32%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
                         </tr>
                     {{else}}
 
@@ -95,7 +90,23 @@
             <br>
         {{/if}}
 
-        <div id='myDiv'></div>
+        <div id="pageFooter">
+            <div class="row">
+                <table style="width: 75%; margin-left: auto; margin-right:auto;">
+                    <tbody>
+                        <td style="width: 34%; text-align: left;">Rua Pedro Nunes <br>
+                        Quinta da Nora <br>
+                        3030-199 COIMBRA</td>
+                        <td style="width: 33%; text-align: center;">ISEC - Coimbra <br>
+                            www.isec.pt</td>
+                        <td style="width: 33%; text-align: right;">
+                            Telefone: +351 239 790 200 <br>
+                            Fax: + 351 239 790 201
+                        </td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <br id="finish">
 </div>
