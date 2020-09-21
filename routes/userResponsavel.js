@@ -725,6 +725,79 @@ router.get('/obra/:id/downloadReport', authenticated, admin, function asyncFunct
     })    
 })
 
+router.get('/obra/:id/downloadFaturaReport', authenticated, admin, function asyncFunction(req, res){
+    Obra.findOne({_id:req.params.id}).lean().then(function(obra){
+        Tarefa.find({obra:obra._id}).lean().then(function(tarefas){
+            Requisicao.find({tarefa:tarefas}).lean().then(function(requisicoes){
+                Cliente.findOne({obras:obra._id}).lean().then(function(cliente){
+                    Compra.find({obra:obra._id}).lean().then(function(compras){
+                        async function obtemDados(){
+                            var valor = 0;
+                            for(var i=0; i<compras.length; i++){
+                                valor = valor + compras[i].custo;
+                            }
+
+                            for(var i=0; i<requisicoes.length; i++){
+                                var reques = requisicoes[i];
+                                await Maquina.findOne({_id:reques.maquina}).lean().then(async function(maquina){
+                                    await Tarefa.findOne({_id:reques.tarefa}).lean().then(function(tarefa){
+                                        reques.maquinaNome=maquina.nome;
+                                        reques.tarefaNome=tarefa.nome;
+                                        
+                                        requisicoes[i] = reques;
+                                    })
+                                })
+                            }
+                            var tarefasS = JSON.stringify(tarefas);
+                            res.render("admin/obras/obraFaturaReport", {obra:obra, tarefas:tarefas, cliente:cliente, requisicoes:requisicoes,
+                                compras:compras, valor:valor, tarefasS:tarefasS}, function(err, html){
+                                var mySubString = html.substring(
+                                    html.lastIndexOf("<div id=\"comeca\""),
+                                    html.lastIndexOf("<br id=\"finish\">")
+                                );
+                                config = {
+                                    paginationOffset: 1,
+                                    "border": {
+                                    "top": "40px",
+                                    "bottom": "40px"
+                                    }
+                                }
+                                pdf.create(mySubString, config).toFile("./reports/obra"+req.params.id+"FaturaReport.pdf", function(err, reposta){
+                                    if(err){
+                                        req.flash("error_msg", "Erro ao criar fatura de obra.")
+                                        res.redirect("/obra/"+req.params.id)
+                                    }
+                                    else{
+                                        const file = path.resolve('reports/obra'+req.params.id+'FaturaReport.pdf');
+                                        res.download(file);
+                                    }
+                                })
+                            })
+                        }
+                        obtemDados();
+                    }).catch(function(erro){
+                        req.flash("error_msg", "Compras não encontradas.")
+                        res.redirect("/compras");
+                    })
+                }).catch(function(erro){
+                    req.flash("error_msg", "Cliente não encontrado.")
+                    res.redirect("/obras");
+                })
+            }).catch(function(erro){
+                req.flash("error_msg", "Requisições não encontradas.")
+                res.redirect("/obras");
+            })
+        }).catch(function(erro){
+            req.flash("error_msg", "Tarefas não encontradas.")
+            res.redirect("/obras");
+        })
+    }).catch(function(erro){
+        req.flash("error_msg", "Obra não encontrada.")
+        res.redirect("/obras");
+    })    
+})
+
+
 router.get('/obra/:id/downloadClientReport', authenticated, admin, function asyncFunction(req, res){
     Obra.findOne({_id:req.params.id}).lean().then(function(obra){
         Tarefa.find({obra:obra._id}).lean().then(function(tarefas){

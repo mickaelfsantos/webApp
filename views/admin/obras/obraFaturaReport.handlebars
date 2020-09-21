@@ -1,0 +1,145 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.min.js"></script>
+
+<div class="container-fluid">
+    <div id="comeca" style="font-family: Palatino Linotype; padding: 0% 5%">
+        <table style="width: 75%; margin-left: auto; margin-right: auto;">
+            <thead>
+                <th style="text-align: center;"><img style="height: 25%; width:20%"src="https://www.isec.pt/assets_isec/logo-isec-transparente.png"></th>
+            </thead>
+        </table>
+
+        <br>
+        <h2>Obra {{obra.nome}}</h2>
+        <br>
+        
+
+        <label for="descricao">Descrição: {{obra.descricao}}</label><br>
+        <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br>
+        <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br>
+
+        <br>
+        <br>
+        <br>
+        {{#if requisicoes}}
+            <h4>Máquinas</h4>
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <th style="width: 15%; text-align:left">Máquina</th>
+                        <th style="width: 15%; text-align:left">Tarefa</th>
+                        <th style="width: 60%; text-align:left">Datas</th>
+                        <th style="width: 10%; text-align:left">Custo</th>
+                    </tr>
+                </thead>
+            <tbody>
+                {{#each requisicoes}}
+                    <tr>
+                        <td style="width: 15%;">{{maquinaNome}}</td>
+                        <td style="width: 15%;">{{tarefaNome}}</td>
+                        <td style="width: 60%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                        <td style="width: 10%;">{{precoToString custoFinal}}</td>
+                    </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        
+        <br>
+        <br>
+        <br>
+        {{/if}}
+        <h3>Tarefas</h3>
+        {{#if tarefas}}
+            <table style="width: 100%">
+                <thead>
+                <tr>
+                    <th style="width: 30%; text-align:left">Nome</th>
+                    <th style="width: 60%; text-align:left">Datas</th>
+                    <th style="width: 10%; text-align:left">Custo</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{#each tarefas}}
+                        <tr>
+                            <td style="width: 30%;">{{nome}}</td>
+                            <td style="width: 60%;">{{dateToString dataInicio}} - {{dateToString dataFim}}</td>
+                            <td style="width: 10%;">{{precoToString custoFinal}}</td>
+                        </tr>
+                    {{else}}
+
+                    {{/each}}
+                
+                </tbody>
+            </table>
+            <hr>
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <th style="width: 30%; text-align:left">Total a pagar</td>
+                        <th style="width: 60%; text-align:left"></td>
+                        <td style="width: 10%;">{{precoToString obra.custoFinal}}</td>
+                    </tr>
+                </thead>
+            </table>
+
+            <br>
+            <br>
+            <br>
+        {{/if}}
+
+        
+        {{#if compras}}
+        <h3>Compras </h3>
+            <table style="width: 100%">
+                <thead>
+                <tr>
+                    <th style="width: 15%; text-align:left">Material</th>
+                    <th style="width: 45%; text-align:left">Descrição</th>
+                    <th style="width: 15%; text-align:left">Quantidade</th>
+                    <th style="width: 15%; text-align:left">Fornecedor</th>
+                    <th style="width: 10%; text-align:left">Custo</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {{#each compras}}
+                        <tr>
+                            <td style="width: 15%;">{{material}}</td>
+                            <td style="width: 45%;">{{descricao}}</td>
+                            <td style="width: 15%;">{{quantidade}}</td>
+                            <td style="width: 15%;">{{fornecedor}}</td>
+                            <td style="width: 10%;">{{precoToString custo}}</td>
+                        </tr>
+                    {{else}}
+
+                    {{/each}}
+                
+                </tbody>
+            </table>
+
+            <br>
+            <br>
+            <br>
+        {{/if}}
+
+        
+        <div id="pageFooter">
+            <div class="row">
+                <table style="width: 75%; margin-left: auto; margin-right:auto;">
+                    <tbody>
+                        <td style="width: 34%; text-align: left;">Rua Pedro Nunes <br>
+                        Quinta da Nora <br>
+                        3030-199 COIMBRA</td>
+                        <td style="width: 33%; text-align: center;">ISEC - Coimbra <br>
+                            www.isec.pt</td>
+                        <td style="width: 33%; text-align: right;">
+                            Telefone: +351 239 790 200 <br>
+                            Fax: + 351 239 790 201
+                        </td>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br id="finish">
+</div>

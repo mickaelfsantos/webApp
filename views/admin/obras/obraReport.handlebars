@@ -25,9 +25,8 @@
         <label for="estado">Despesa final: {{precoToString obra.despesaFinal}}</label><br>
         <label for="custo">Custo final: {{precoToString obra.custoFinal}}</label><br>
         <label for="datasPrevistas">Datas previstas: {{dateToString obra.dataPrevistaInicio}} - {{dateToString obra.dataPrevistaFim}}</label><br>
-        <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label><br>
+        <label for="datas">Datas: {{dateToString obra.dataInicio}} - {{dateToString obra.dataFim}}</label>
 
-        <br>
         <br>
         <br>
         {{#if compras}}
@@ -63,15 +62,15 @@
             <br>
         {{/if}}
         {{#if requisicoes}}
-            <h4>Máquinas</h4>
+            <h3>Máquinas</h3>
             <table style="width: 100%">
                 <thead>
                     <tr>
                         <th style="width: 15%; text-align:left">Máquina</th>
                         <th style="width: 32,5%; text-align:left">Datas previstas</th>
                         <th style="width: 32,5%; text-align:left">Datas</th>
-                        <th style="width: 10%; text-align:left">Despesa Prevista</th>
-                        <th style="width: 10%; text-align:left">Despesa Real</th>
+                        <th style="width: 10%; text-align:left">Despesa prevista</th>
+                        <th style="width: 10%; text-align:left">Despesa real</th>
                     </tr>
                 </thead>
             <tbody>
@@ -87,8 +86,6 @@
             </tbody>
         </table>
         
-        <br>
-        <br>
         <br>
         {{/if}}
         <h3>Tarefas</h3>

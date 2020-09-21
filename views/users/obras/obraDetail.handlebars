@@ -12,6 +12,7 @@
         {{#ifUR}}
         <div class="col-md-8 text-right">
             {{#ifTerminou obra.estado}}
+                <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaDownloadFaturaReport()" style="cursor: pointer;"><i class="fa fa-download"></i> Download Fatura</button>
             {{else}}
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaEdit()" style="cursor: pointer;"><i class="fa fa-edit"></i> Editar</button>
                 <button type="button" class="btn btn-light btn-outline-info mr-2" onclick="saltaParaAddTarefa()" style="cursor: pointer;"><i class="fa fa-plus-circle"></i> Nova Tarefa</button>
@@ -263,6 +264,10 @@
             window.location.href = "/obra/"+obra+"/edit";
         }
 
+        function saltaParaDownloadFaturaReport() {
+            obra = document.getElementById('id').getAttribute("value");
+            window.location.href = "/obra/"+obra+"/downloadFaturaReport";
+        }
 
         function saltaParaDownloadReport() {
             obra = document.getElementById('id').getAttribute("value");

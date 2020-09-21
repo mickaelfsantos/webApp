@@ -20,7 +20,11 @@
                     <label for="descricao" class="mt-3 mb-4">Descrição: {{tarefa.descricao}}</label>
                     <br>
 
-                    <label for="dataInicio">Data prevista para inicio: {{dateToString tarefa.dataInicio}}</label>
+                    <label for="dataInicio">Datas previstas: {{dateToString tarefa.dataPrevistaInicio}} - {{dateToString tarefa.dataPrevistaFim}}</label>
+                    <br>
+                    <br>
+                    
+                    <label for="dataInicio">Datas: {{dateToString tarefa.dataInicio}} - {{dateToString tarefa.dataFim}}</label>
                     <br>
                     <br>
 

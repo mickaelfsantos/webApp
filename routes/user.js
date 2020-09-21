@@ -292,59 +292,59 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     }
                         
                     tarefa.importancia = req.body.importancia.toLowerCase();
-                }
-                else{
-                    tarefa.progresso = req.body.progresso;
-                }
-                
+                }                
             }
             
 
-            var dataT =  moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-            var dataForm =  moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-            if(dataT != dataForm){
-                var today = moment().format("YYYY-MM-DD HH:mm");
-                var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                dataTarefa = moment(dataTarefa).add(1, "minutes");
-                if(moment(dataTarefa).isValid()){
-                    if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
-                        erros.dataInicio = "Data inválida. Data de início tem que ser superior ou igual à data atual e à data de inicio da obra.";
-                    }
-                    else{
-                        if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
-                            erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
-                        else{
-                            if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
-                                erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+            if(req.body.dataPrevistaInicio){
+                var dataT =  moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                var dataForm =  moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                if(dataT != dataForm){
+                    var today = moment().format("YYYY-MM-DD HH:mm");
+                    var dataTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                    var dataObra = moment(obra.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                    dataTarefa = moment(dataTarefa).add(1, "minutes");
+                    if(moment(dataTarefa).isValid()){
+                        if(moment(today).isAfter(dataTarefa) == true || moment(dataObra).isAfter(dataTarefa) == true){
+                            erros.dataInicio = "Data inválida. Data de início tem que ser superior ou igual à data atual e à data de inicio da obra.";
                         }
+                        else{
+                            if(moment(req.body.dataPrevistaInicio).format("HH") >= 18 && moment(req.body.dataPrevistaInicio).format("mm") > 00)
+                                erros.dataInicio = "Data invalida. A hora limite são 18:00h.";
+                            else{
+                                if(moment(req.body.dataPrevistaInicio).format("HH") < 9 && moment(req.body.dataPrevistaInicio).format("mm") <= 59)
+                                    erros.dataInicio = "Data invalida. A hora limite são 9:00h.";
+                            }
+                        }
+                        
                     }
-                    
                 }
             }
 
-            var dataTF =  moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
-            var dataFormF =  moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
-            if(dataTF != dataFormF){
-                var today = moment().format("YYYY-MM-DD HH:mm");
-                var dataInicioTarefa;
-                if(req.body.dataPrevistaInicio){
-                    dataInicioTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                }else{
-                    dataInicioTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
-                }
-                var dataFimTarefa = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
-                dataFimTarefa = moment(dataFimTarefa).add(1, "minutes");
-                if(moment(dataFimTarefa).isValid()){
-                    if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
-                        erros.dataFinal = "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data de inicio da tarefa.";
+            if(req.body.dataPrevistaFim){
+                var dataTF =  moment(tarefa.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                var dataFormF =  moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                if(dataTF != dataFormF){
+                    var today = moment().format("YYYY-MM-DD HH:mm");
+                    var dataInicioTarefa;
+                    if(req.body.dataPrevistaInicio){
+                        dataInicioTarefa = moment(req.body.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
+                    }else{
+                        dataInicioTarefa = moment(tarefa.dataPrevistaInicio).format("YYYY-MM-DD HH:mm")
                     }
-                    else{
-                        if(moment(req.body.dataPrevistaFim).format("HH") >= 18 && moment(req.body.dataPrevistaFim).format("mm") > 00)
-                            erros.dataFinal = "Data invalida. A hora limite são 18:00h.";
+                    var dataFimTarefa = moment(req.body.dataPrevistaFim).format("YYYY-MM-DD HH:mm")
+                    dataFimTarefa = moment(dataFimTarefa).add(1, "minutes");
+                    if(moment(dataFimTarefa).isValid()){
+                        if(moment(dataInicioTarefa).isAfter(dataFimTarefa) == true || moment(today).isAfter(dataFimTarefa) == true){
+                            erros.dataFinal = "Data inválida. Data de fim tem que ser superior ou igual à data atual e à data de inicio da tarefa.";
+                        }
                         else{
-                            if(moment(req.body.dataPrevistaFim).format("HH") < 9 && moment(req.body.dataPrevistaFim).format("mm") <= 59)
-                                erros.dataFinal = "Data invalida. A hora limite são 9:00h.";
+                            if(moment(req.body.dataPrevistaFim).format("HH") >= 18 && moment(req.body.dataPrevistaFim).format("mm") > 00)
+                                erros.dataFinal = "Data invalida. A hora limite são 18:00h.";
+                            else{
+                                if(moment(req.body.dataPrevistaFim).format("HH") < 9 && moment(req.body.dataPrevistaFim).format("mm") <= 59)
+                                    erros.dataFinal = "Data invalida. A hora limite são 9:00h.";
+                            }
                         }
                     }
                 }
@@ -380,8 +380,12 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                     if(f != undefined){
                         var funcs = await getFuncionarios(f)
                     }
-                    tarefa.dataPrevistaInicio = req.body.dataPrevistaInicio;
-                    tarefa.dataPrevistaFim = req.body.dataPrevistaFim;
+                    if(req.body.dataPrevistaInicio){
+                        tarefa.dataPrevistaInicio = req.body.dataPrevistaInicio;
+                    }
+                    if(req.body.dataPrevistaFim){
+                        tarefa.dataPrevistaFim = req.body.dataPrevistaFim;
+                    }
                     if(moment(tarefa.dataPrevistaInicio).isBefore(moment())){
                         tarefa.dataPrevistaInicio = moment();
                     }
@@ -410,6 +414,12 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                                     }
                                 }
                                 else{
+                                    var progresso = tarefa.progresso;
+                                    if(req.body.progresso){
+                                        progresso = req.body.progresso;
+                                    }else{
+                                        progresso = 0;
+                                    }
                                     Tarefa.findOneAndUpdate({_id:req.params.id}, 
                                         {"$set": {
                                             "nome": tarefa.nome.replace(/\s\s+/g, ' ').replace(/\s*$/,''),
@@ -417,7 +427,7 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                                             "dataPrevistaInicio": tarefa.dataPrevistaInicio,
                                             "dataPrevistaFim": tarefa.dataPrevistaFim,
                                             "importancia": tarefa.importancia,
-                                            "progresso": tarefa.progresso
+                                            "progresso": progresso
                                         }}, {useFindAndModify: false}).then(function(tarefa){
                                         
                                         if(f != undefined){
@@ -436,7 +446,6 @@ router.post('/tarefa/:id/edit', authenticated, function asyncFunction(req, res){
                                                 })
                                             }
                                         }
-        
                                         req.flash("success_msg", "Tarefa editada com sucesso.");
                                         res.redirect("/tarefa/"+req.params.id);
                                     }).catch(function (error){
